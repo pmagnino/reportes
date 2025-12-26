@@ -2,84 +2,58 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Consulta de Facturas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Control | BI</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+    .hero { background: #1e3a8a; color: white; padding: 40px 0; border-bottom: 5px solid #fbbf24; }
+    .card-menu { border: none; border-radius: 16px; transition: 0.3s; cursor: pointer; height: 100%; }
+    .card-menu:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+    .icon-box { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; font-size: 1.5rem; }
+    .bg-blue { background: #e0e7ff; color: #4338ca; }
+    .bg-green { background: #d1fae5; color: #065f46; }
+    .bg-orange { background: #ffedd5; color: #9a3412; }
+  </style>
 </head>
+<body>
 
-<body class="p-4 bg-light">
-
-<div class="container">
-
-  <h3 class="mb-4">Consulta de Facturas</h3>
-
-  <div class="row g-3">
-    <div class="col-md-3">
-      <label class="form-label">Sucursal</label>
-      <input type="number" id="sucursal" class="form-control" value="101">
+  <header class="hero text-center mb-5">
+    <div class="container px-4">
+      <h1 class="fw-bold h2 mb-2">Panel de Control de Reportes</h1>
+      <p class="lead opacity-75 d-none d-sm-block">Gestion operativa y analisis en tiempo real</p>
     </div>
+  </header>
 
-    <div class="col-md-3">
-      <label class="form-label">Desde</label>
-      <input type="date" id="desde" class="form-control">
-    </div>
-
-    <div class="col-md-3">
-      <label class="form-label">Hasta</label>
-      <input type="date" id="hasta" class="form-control">
-    </div>
-
-    <div class="col-md-3 d-flex align-items-end">
-      <button class="btn btn-primary w-100" onclick="buscar()">Buscar</button>
-    </div>
-  </div>
-
-  <hr>
-
-  <div id="resultado"></div>
-
-</div>
-
-<script>
-async function buscar() {
-  const sucursal = document.getElementById('sucursal').value
-  const desde = document.getElementById('desde').value
-  const hasta = document.getElementById('hasta').value
-
-  let url = `/api/facturas?sucursal=${sucursal}`
-
-  if (desde) url += `&desde=${desde}`
-  if (hasta) url += `&hasta=${hasta}`
-
-  const res = await fetch(url)
-  const data = await res.json()
-
-  let html = ''
-
-  if (data.length === 0) {
-    html = `<div class="alert alert-warning">No hay resultados</div>`
-  }
-
-  data.forEach(f => {
-    html += `
-      <div class="card mb-3">
-        <div class="card-header">
-          Factura ${f.prefijo}-${f.numero} | ${new Date(f.fecha).toLocaleDateString()}
+  <main class="container px-4">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      
+      <div class="col">
+        <div class="card card-menu shadow-sm p-4" onclick="location.href='reporte_ventas.html'">
+          <div class="icon-box bg-blue"><i class="bi bi-receipt"></i></div>
+          <h5 class="fw-bold">Comprobantes Detallados</h5>
+          <p class="text-muted small">Grilla con colores, AJUCEN oculto y totales por medio de pago.</p>
         </div>
-        <ul class="list-group list-group-flush">
-          ${f.items.map(i =>
-            `<li class="list-group-item d-flex justify-content-between">
-              <span>${i.codigo}</span>
-              <strong>${i.cantidad}</strong>
-            </li>`
-          ).join('')}
-        </ul>
       </div>
-    `
-  })
 
-  document.getElementById('resultado').innerHTML = html
-}
-</script>
+      <div class="col">
+        <div class="card card-menu shadow-sm p-4" onclick="location.href='reporte_vendedores.html'">
+          <div class="icon-box bg-green"><i class="bi bi-person-vcard"></i></div>
+          <h5 class="fw-bold">Ventas por Vendedor</h5>
+          <p class="text-muted small">Rendimiento por agente y recaudacion por codigo de vendedor.</p>
+        </div>
+      </div>
 
+      <div class="col">
+        <div class="card card-menu shadow-sm p-4" onclick="location.href='reporte_stock.html'">
+          <div class="icon-box bg-orange"><i class="bi bi-box-seam"></i></div>
+          <h5 class="fw-bold">Listado de Stock</h5>
+          <p class="text-muted small">Consulta de existencias actuales y unidades totales por sucursal.</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
 </body>
 </html>
