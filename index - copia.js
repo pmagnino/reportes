@@ -59,12 +59,12 @@ app.get('/api/facturas', async (req, res) => {
         P.DESCRIPCION AS PLAN_DESC,
         P.CUOTAS
 
-      FROM QRMVS A
+      FROM dbo.QRMVS A
 
-      INNER JOIN QRLINEASITEMS B
+      INNER JOIN dbo.QRLINEASITEMS B
         ON A.IdRouter = B.IdRouter
 
-      INNER JOIN QRLineasPago C
+      INNER JOIN dbo.QRLineasPago C
         ON A.IdRouter = C.IdRouter
 
       LEFT JOIN QRCUPONES D
