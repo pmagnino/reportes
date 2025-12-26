@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Administrar Usuarios | Mimo & Co</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- AUTH -->
+    <script src="auth.js"></script>
+
+    <style>
+        body {
+            background: #f4f7f6;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .card {
+            border-radius: 12px;
+        }
+        .badge-admin { background: #1d4ed8; }
+        .badge-user { background: #64748b; }
+    </style>
+</head>
+
+<body onload="init()">
+
+<nav class="navbar bg-white shadow-sm px-4">
+    <span class="navbar-brand fw-bold">Administración de Usuarios</span>
+    <div>
+        <button class="btn btn-outline-danger btn-sm" onclick="logout()">
+            <i class="bi bi-box-arrow-right"></i> Salir
+        </button>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between mb-3">
+        <h5>Usuarios del sistema</h5>
+        <button class="btn btn-primary" onclick="openModal()">➕ Nuevo usuario</button>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                        <th>Sucursal</th>
+                        <th>Activo</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaUsuarios">
+                    <tr>
+                        <td colspan="5" class="text-center py-4">Cargando...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal fade" id="modalUsuario" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form onsubmit="event.preventDefault(); guardarUsuario();">
+                <div class="modal-header">
+                    <h5 class="modal-title">Usuario</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" id="userId">
+
+                    <div class="mb-2">
+                        <label>Usuario</label>
+                        <input id="usuario" class="form-control" required>
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Contraseña</label>
+                        <input id="password" type="password" class="form-control">
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Rol</label>
+                        <select id="rol" class="form-select">
+                            <option value="admin">Admin</option>
+                            <option value="usuario">Usuario</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Sucursal</label>
+                        <input id="sucursal" type="number" class="form-control">
+                    </div>
+
+                    <div class="form-check mt-2">
+                        <input type="checkbox" class="form-check-input" id="activo" checked>
+                        <label class="form-check-label">Activo</label>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+let modal;
+
+function init() {
+    protectPage();
+
+    const user = getUser();
+    if (user.rol !== 'admin') {
+        alert('Acceso restringido');
+        window.location.href = '/index.html';
+        return;
+    }
+
+    modal = new bootstrap.Modal(document.getElementById('modalUsuario'));
+    cargarUsuarios();
+}
+
+async function cargarUsuarios() {
+    const res = await authFetch('/api/usuarios');
+    const data = await res.json();
+
+    const tbody = document.getElementById('tablaUsuarios');
+    tbody.innerHTML = data.map(u => `
+        <tr>
+            <td>${u.usuario}</td>
+            <td><span class="badge ${u.rol === 'admin' ? 'badge-admin' : 'badge-user'}">${u.rol}</span></td>
+            <td>${u.sucursal ?? '-'}</td>
+            <td>${u.activo ? '✅' : '❌'}</td>
+            <td class="text-end">
+                <button class="btn btn-sm btn-outline-primary" onclick='editar(${JSON.stringify(u)})'>✏️</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function openModal() {
+    document.getElementById('userId').value = '';
+    document.getElementById('usuario').value = '';
+    document.getElementById('password').value = '';
+    document.getElementById('rol').value = 'usuario';
+    document.getElementById('sucursal').value = '';
+    document.getElementById('activo').checked = true;
+    modal.show();
+}
+
+function editar(user) {
+    document.getElementById('userId').value = user.id;
+    document.getElementById('usuario').value = user.usuario;
+    document.getElementById('rol').value = user.rol;
+    document.getElementById('sucursal').value = user.sucursal || '';
+    document.getElementById('activo').checked = user.activo;
+    document.getElementById('password').value = '';
+    modal.show();
+}
+
+async function guardarUsuario() {
+    const id = document.getElementById('userId').value;
+
+    const payload = {
+        usuario: document.getElementById('usuario').value,
+        password: document.getElementById('password').value,
+        rol: document.getElementById('rol').value,
+        sucursal: document.getElementById('sucursal').value,
+        activo: document.getElementById('activo').checked
+    };
+
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `/api/usuarios/${id}` : '/api/usuarios';
+
+    const res = await authFetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+        modal.hide();
+        cargarUsuarios();
+    } else {
+        alert('Error al guardar usuario');
+    }
+}
+</script>
+
+</body>
+</html>

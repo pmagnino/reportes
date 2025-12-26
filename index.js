@@ -1,160 +1,218 @@
-require('dotenv').config();
 const express = require('express');
+const sql = require('mssql');
+const path = require('path');
 const cors = require('cors');
-const { poolPromise, sql } = require('./db');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 const app = express();
-
-// --- CONFIGURACIONES ---
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
-// --- RUTA: SUCURSALES (Filtro CODEMP <> 1) ---
-app.get('/api/sucursales', async (req, res) => {
-    try {
-        const pool = await poolPromise;
-        const result = await pool.request().query(`
-            SELECT CODSUC, NOMBRE 
-            FROM QRSUCURSALES 
-            WHERE CODEMP <> 1 
-            ORDER BY NOMBRE ASC
-        `);
-        res.json(result.recordset);
-    } catch (err) {
-        res.status(500).json({ error: "Error al obtener sucursales" });
+/* =====================================================
+   BASES DE DATOS
+===================================================== */
+
+const poolMain = new sql.ConnectionPool({
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    server: process.env.DB_SERVER,
+    database: process.env.DB_DATABASE, // BASROUTER
+    options: {
+        encrypt: false,
+        trustServerCertificate: true
     }
 });
 
-// --- REPORTE 1: COMPROBANTES DETALLADOS ---
-app.get('/api/facturas', async (req, res) => {
+const poolAuth = new sql.ConnectionPool({
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    server: process.env.DB_SERVER,
+    database: process.env.AUTH_DB_DATABASE, // ControlTiendas
+    options: {
+        encrypt: false,
+        trustServerCertificate: true
+    }
+});
+
+const poolMainPromise = poolMain.connect();
+const poolAuthPromise = poolAuth.connect();
+
+/* =====================================================
+   AUTH MIDDLEWARE
+===================================================== */
+
+function auth(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) return res.status(401).json({ error: 'Token requerido' });
+
+    const token = authHeader.split(' ')[1];
+
     try {
-        const { sucursal, desde, hasta } = req.query;
-        const pool = await poolPromise;
-        const request = pool.request();
-        request.input('desde', sql.Date, desde);
-        request.input('hasta', sql.Date, hasta);
+        req.user = jwt.verify(token, process.env.JWT_SECRET);
+        next();
+    } catch {
+        return res.status(403).json({ error: 'Token inválido' });
+    }
+}
 
-        let querySQL = `
-            SELECT A.PREFIJO, A.NUMERO, A.FECHA, A.CODSUC, A.CODCMP, G.NOMBRE AS NOM_SUC,
-                   B.CODITM, B.CANTIDAD1, CAST(B.PRECIO AS MONEY) AS PRECIO,
-                   CASE 
-                     WHEN C.CODPAG = '001' THEN 'EFECTIVO' 
-                     WHEN C.CODPAG = '100' THEN 'TARJETA' 
-                     WHEN C.CODPAG = '125' THEN 'MERCADOPAGO' 
-                     WHEN C.CODPAG = '225' THEN 'MERCADOPAGO (DEV)' 
-                     ELSE 'OTRO' 
-                   END AS PAGO_DESC
-            FROM QRMVS A
-            INNER JOIN QRLINEASITEMS B ON A.IdRouter = B.IdRouter
-            INNER JOIN QRLineasPago C ON A.IdRouter = C.IdRouter
-            INNER JOIN QRSUCURSALES G ON A.CODSUC = G.CODSUC
-            WHERE G.CODEMP <> 1
-              AND A.CODCMP IN ('FB','FA','CB','CA')
-              AND B.CODITM <> 'AJUCEN'
-              AND A.FECHA >= @desde AND A.FECHA < DATEADD(day, 1, @hasta)
-        `;
+/* =====================================================
+   LOGIN
+===================================================== */
 
-        if (sucursal && sucursal !== '0') {
-            request.input('sucursal', sql.Int, sucursal);
-            querySQL += ' AND A.CODSUC = @sucursal';
-        }
+app.post('/api/login', async (req, res) => {
+    const { usuario, password } = req.body;
 
-        const result = await request.query(querySQL + ' ORDER BY A.FECHA, A.NUMERO');
-        
+    try {
+        const pool = await poolAuthPromise;
+
+        const result = await pool.request()
+            .input('usuario', sql.VarChar, usuario)
+            .query(`
+                SELECT id, usuario, password_hash, rol, sucursal, activo
+                FROM dbo.usuarios_reportes
+                WHERE usuario = @usuario
+            `);
+
+        if (!result.recordset.length)
+            return res.status(401).json({ error: 'Usuario inválido' });
+
+        const user = result.recordset[0];
+
+        if (!user.activo)
+            return res.status(403).json({ error: 'Usuario inactivo' });
+
+        const ok = await bcrypt.compare(password, user.password_hash);
+        if (!ok) return res.status(401).json({ error: 'Contraseña incorrecta' });
+
+        const token = jwt.sign(
+            {
+                id: user.id,
+                usuario: user.usuario,
+                rol: user.rol,
+                sucursal: user.sucursal
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES }
+        );
+
+        res.json({ token });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+/* =====================================================
+   ENDPOINTS PROTEGIDOS
+===================================================== */
+
+// ✅ SUCURSALES (BASROUTER)
+app.get('/api/sucursales', auth, async (req, res) => {
+    try {
+        const pool = await poolMainPromise;
+
+        const result = await pool.request().query(`
+            SELECT CODSUC, NOMBRE
+            FROM dbo.QRSUCURSALES
+            WHERE CODEMP <> 1 AND CODSUC NOT IN (996, 997)
+            ORDER BY NOMBRE
+        `);
+
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ✅ FACTURAS
+app.get('/api/facturas', auth, async (req, res) => {
+    const { sucursal, desde, hasta } = req.query;
+
+    try {
+        const pool = await poolMainPromise;
+
+        const result = await pool.request().query(`
+            SELECT 
+                A.PREFIJO,
+                A.NUMERO,
+                B.CODITM,
+                B.CANTIDAD1 AS cant,
+                CAST(B.PRECIO AS MONEY) AS pre,
+                CASE 
+                    WHEN C.CODPAG = '001' THEN 'EFECTIVO'
+                    WHEN C.CODPAG = '100' THEN 'TARJETA'
+                    WHEN C.CODPAG IN ('125','225') THEN 'MERCADOPAGO'
+                    ELSE 'OTRO'
+                END AS pago_desc
+            FROM dbo.QRMVS A
+            INNER JOIN dbo.QRLINEASITEMS B ON A.IdRouter = B.IdRouter
+            INNER JOIN dbo.QRLineasPago C ON A.IdRouter = C.IdRouter
+            WHERE A.CODSUC = '${sucursal}'
+              AND A.FECHA BETWEEN '${desde}' AND '${hasta}'
+              AND A.CODCMP IN ('FA','FB','CA','CB')
+        `);
+
         const facturas = {};
         const totales = { efectivo: 0, tarjeta: 0, mp: 0, general: 0 };
 
         result.recordset.forEach(r => {
             const key = `${r.PREFIJO}-${r.NUMERO}`;
-            const subtotalItem = (r.CANTIDAD1 || 0) * (r.PRECIO || 0);
-            if (!facturas[key]) {
-                facturas[key] = { prefijo: r.PREFIJO, numero: r.NUMERO, fecha: r.FECHA, nom_suc: r.NOM_SUC, pago: r.PAGO_DESC, tipo: r.CODCMP, items: [] };
-            }
-            facturas[key].items.push({ cod: r.CODITM, cant: r.CANTIDAD1, pre: r.PRECIO });
+            if (!facturas[key]) facturas[key] = { ...r, items: [] };
 
-            if (r.PAGO_DESC === 'EFECTIVO') totales.efectivo += subtotalItem;
-            else if (r.PAGO_DESC === 'TARJETA') totales.tarjeta += subtotalItem;
-            else if (r.PAGO_DESC.includes('MERCADOPAGO')) totales.mp += subtotalItem;
-            totales.general += subtotalItem;
+            const subtotal = r.cant * r.pre;
+            facturas[key].items.push({ cod: r.CODITM, cant: r.cant, pre: r.pre });
+
+            totales.general += subtotal;
+            if (r.pago_desc === 'EFECTIVO') totales.efectivo += subtotal;
+            else if (r.pago_desc === 'TARJETA') totales.tarjeta += subtotal;
+            else if (r.pago_desc === 'MERCADOPAGO') totales.mp += subtotal;
         });
 
         res.json({ datos: Object.values(facturas), totales });
+
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// --- REPORTE 2: RANKING DE VENDEDORES ---
-app.get('/api/reporte/vendedores', async (req, res) => {
+// ✅ STOCK
+app.get('/api/reporte/stock', auth, async (req, res) => {
+    const { sucursal } = req.query;
+
     try {
-        const { sucursal, desde, hasta } = req.query;
-        const pool = await poolPromise;
-        const request = pool.request();
-        request.input('FHD', sql.Date, desde);
-        request.input('FHH', sql.Date, hasta);
-        request.input('SUC', sql.Int, sucursal);
+        const pool = await poolMainPromise;
 
-        const result = await request.query(`
-            SELECT b.CODVENDEDOR,
-                SUM(CASE WHEN a.codcmp = 'fa' THEN 1 ELSE 0 END) AS CANTIDAD_FACTURAS_A,
-                SUM(CASE WHEN a.codcmp = 'fb' THEN 1 ELSE 0 END) AS CANTIDAD_FACTURAS_B,
-                SUM(CASE WHEN a.codcmp = 'ca' THEN 1 ELSE 0 END) AS CANTIDAD_NOTAS_CREDITO_A,
-                SUM(CASE WHEN a.codcmp = 'cb' THEN 1 ELSE 0 END) AS CANTIDAD_NOTAS_CREDITO_B,
-                SUM(a.TOTAL) AS TOTAL_NUMERICO,
-                COUNT(DISTINCT a.IdRouter) AS TOTAL_OPERACIONES
-            FROM qrmvs a
-            INNER JOIN qrcomprobantes b ON a.IdRouter = b.IdRouter
-            INNER JOIN qrsucursales s ON a.codsuc = s.codsuc
-            WHERE s.codemp <> 1 AND a.codsuc = @SUC AND a.fecha BETWEEN @FHD AND @FHH
-              AND a.codcmp IN ('fa', 'fb', 'ca', 'cb')
-            GROUP BY b.CODVENDEDOR
-            ORDER BY SUM(a.TOTAL) DESC
-        `);
-        res.json(result.recordset);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// --- REPORTE 3: LISTADO DE STOCK (CON JOIN A QRITEMS PARA DESCRIPCION) ---
-app.get('/api/reporte/stock', async (req, res) => {
-    try {
-        const { sucursal } = req.query;
-        const pool = await poolPromise;
-        const request = pool.request();
-        request.input('SUC', sql.Int, sucursal);
-
-        const result = await request.query(`
+        const result = await pool.request().query(`
             SELECT 
-                A.CODITM, 
-                C.DESCRIPCION,
-                CAST(A.STKACTUAL AS INT) AS STOCK_LIMPIO, 
-                B.NOMBRE AS NOM_SUC
-            FROM QRITEMSACUM A
-            INNER JOIN QRSUCURSALES B ON A.CODSUC = B.CODSUC
-            INNER JOIN QRITEMS C ON C.CODITM = A.CODITM
-            WHERE B.CODEMP <> 1 
-              AND A.CODSUC = @SUC 
+                A.CODITM,
+                B.DESCRIPCION,
+                CAST(A.STKACTUAL AS INT) AS STOCK_LIMPIO
+            FROM dbo.QRItemsAcum A
+            INNER JOIN dbo.QRITEMS B ON A.CODITM = B.CODITM
+            WHERE A.CODSUC = '${sucursal}'
               AND A.STKACTUAL > 0
-            ORDER BY C.DESCRIPCION ASC
+            ORDER BY A.STKACTUAL DESC
         `);
 
-        const totalUnidades = result.recordset.reduce((sum, item) => sum + item.STOCK_LIMPIO, 0);
         res.json({
             detalles: result.recordset,
-            resumen: { 
-                totalUnidades, 
-                sucursalNombre: result.recordset.length > 0 ? result.recordset[0].NOM_SUC : 'Sin Datos' 
+            resumen: {
+                totalUnidades: result.recordset.reduce((a, b) => a + b.STOCK_LIMPIO, 0)
             }
         });
+
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// --- INICIO DEL SERVIDOR (PUERTO 3000) ---
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Servidor listo en puerto ${PORT}`);
+/* =====================================================
+   SERVER
+===================================================== */
+
+app.listen(3000, () => {
+    console.log('🚀 Servidor activo en http://localhost:3000');
 });
