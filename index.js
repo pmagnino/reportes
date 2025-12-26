@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 /* =====================================================
-   CONFIGURACIÓN BASES DE DATOS
+   BASES DE DATOS
 ===================================================== */
 
 const poolMain = new sql.ConnectionPool({
@@ -41,22 +41,20 @@ const poolMainPromise = poolMain.connect();
 const poolAuthPromise = poolAuth.connect();
 
 /* =====================================================
-   MIDDLEWARE AUTH
+   AUTH MIDDLEWARE
 ===================================================== */
 
 function auth(req, res, next) {
     const authHeader = req.headers['authorization'];
-    if (!authHeader)
-        return res.status(401).json({ error: 'Token requerido' });
+    if (!authHeader) return res.status(401).json({ error: 'Token requerido' });
 
     const token = authHeader.split(' ')[1];
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
+        req.user = jwt.verify(token, process.env.JWT_SECRET);
         next();
-    } catch (err) {
-        return res.status(403).json({ error: 'Token inválido o expirado' });
+    } catch {
+        return res.status(403).json({ error: 'Token inválido' });
     }
 }
 
@@ -66,9 +64,6 @@ function auth(req, res, next) {
 
 app.post('/api/login', async (req, res) => {
     const { usuario, password } = req.body;
-
-    if (!usuario || !password)
-        return res.status(400).json({ error: 'Usuario y contraseña requeridos' });
 
     try {
         const pool = await poolAuthPromise;
@@ -81,7 +76,7 @@ app.post('/api/login', async (req, res) => {
                 WHERE usuario = @usuario
             `);
 
-        if (result.recordset.length === 0)
+        if (!result.recordset.length)
             return res.status(401).json({ error: 'Usuario inválido' });
 
         const user = result.recordset[0];
@@ -90,8 +85,7 @@ app.post('/api/login', async (req, res) => {
             return res.status(403).json({ error: 'Usuario inactivo' });
 
         const ok = await bcrypt.compare(password, user.password_hash);
-        if (!ok)
-            return res.status(401).json({ error: 'Contraseña incorrecta' });
+        if (!ok) return res.status(401).json({ error: 'Contraseña incorrecta' });
 
         const token = jwt.sign(
             {
@@ -107,7 +101,6 @@ app.post('/api/login', async (req, res) => {
         res.json({ token });
 
     } catch (err) {
-        console.error(err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -116,7 +109,7 @@ app.post('/api/login', async (req, res) => {
    ENDPOINTS PROTEGIDOS
 ===================================================== */
 
-// SUCURSALES
+// ✅ SUCURSALES (BASROUTER)
 app.get('/api/sucursales', auth, async (req, res) => {
     try {
         const pool = await poolMainPromise;
@@ -134,7 +127,7 @@ app.get('/api/sucursales', auth, async (req, res) => {
     }
 });
 
-// FACTURAS
+// ✅ FACTURAS
 app.get('/api/facturas', auth, async (req, res) => {
     const { sucursal, desde, hasta } = req.query;
 
@@ -160,36 +153,22 @@ app.get('/api/facturas', auth, async (req, res) => {
             WHERE A.CODSUC = '${sucursal}'
               AND A.FECHA BETWEEN '${desde}' AND '${hasta}'
               AND A.CODCMP IN ('FA','FB','CA','CB')
-              AND B.CODITM <> 'AJUCEN'
         `);
 
         const facturas = {};
         const totales = { efectivo: 0, tarjeta: 0, mp: 0, general: 0 };
 
-        result.recordset.forEach(row => {
-            const key = `${row.PREFIJO}-${row.NUMERO}`;
+        result.recordset.forEach(r => {
+            const key = `${r.PREFIJO}-${r.NUMERO}`;
+            if (!facturas[key]) facturas[key] = { ...r, items: [] };
 
-            if (!facturas[key]) {
-                facturas[key] = {
-                    prefijo: row.PREFIJO,
-                    numero: row.NUMERO,
-                    pago: row.pago_desc,
-                    items: []
-                };
-            }
-
-            const subtotal = Number(row.cant) * Number(row.pre);
-
-            facturas[key].items.push({
-                cod: row.CODITM,
-                cant: row.cant,
-                pre: row.pre
-            });
+            const subtotal = r.cant * r.pre;
+            facturas[key].items.push({ cod: r.CODITM, cant: r.cant, pre: r.pre });
 
             totales.general += subtotal;
-            if (row.pago_desc === 'EFECTIVO') totales.efectivo += subtotal;
-            else if (row.pago_desc === 'TARJETA') totales.tarjeta += subtotal;
-            else if (row.pago_desc === 'MERCADOPAGO') totales.mp += subtotal;
+            if (r.pago_desc === 'EFECTIVO') totales.efectivo += subtotal;
+            else if (r.pago_desc === 'TARJETA') totales.tarjeta += subtotal;
+            else if (r.pago_desc === 'MERCADOPAGO') totales.mp += subtotal;
         });
 
         res.json({ datos: Object.values(facturas), totales });
@@ -199,7 +178,7 @@ app.get('/api/facturas', auth, async (req, res) => {
     }
 });
 
-// STOCK
+// ✅ STOCK
 app.get('/api/reporte/stock', auth, async (req, res) => {
     const { sucursal } = req.query;
 
@@ -218,13 +197,11 @@ app.get('/api/reporte/stock', auth, async (req, res) => {
             ORDER BY A.STKACTUAL DESC
         `);
 
-        const totalUnidades = result.recordset.reduce(
-            (acc, row) => acc + row.STOCK_LIMPIO, 0
-        );
-
         res.json({
             detalles: result.recordset,
-            resumen: { totalUnidades }
+            resumen: {
+                totalUnidades: result.recordset.reduce((a, b) => a + b.STOCK_LIMPIO, 0)
+            }
         });
 
     } catch (err) {
