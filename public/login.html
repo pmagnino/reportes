@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f4f4;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
+    .login-box {
+      background: white;
+      padding: 30px;
+      border-radius: 6px;
+      width: 300px;
+      box-shadow: 0 0 10px rgba(0,0,0,.2);
+    }
+    input, button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-box">
+  <h3>Iniciar sesión</h3>
+
+  <input id="user" placeholder="Usuario" />
+  <input id="pass" type="password" placeholder="Contraseña" />
+
+  <button onclick="login()">Entrar</button>
+
+  <p id="msg" style="color:red;"></p>
+</div>
+
+<script>
+async function login() {
+  const usuario = document.getElementById('user').value
+  const password = document.getElementById('pass').value
+
+  const res = await fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ usuario, password })
+  })
+
+  const data = await res.json()
+
+  if (!res.ok) {
+    document.getElementById('msg').innerText = data.error
+    return
+  }
+
+  localStorage.setItem('token', data.token)
+  window.location.href = '/'
+}
+</script>
+
+</body>
+</html>

@@ -1,85 +1,147 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ranking Vendedores | Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <style>
-    body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
-    .report-header { background: white; border-bottom: 2px solid #e9ecef; padding: 15px 0; }
-    .kpi-card { background: white; border-radius: 12px; padding: 1.5rem; border-left: 5px solid #4361ee; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .kpi-label { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
-    .kpi-value { font-size: 1.5rem; font-weight: 800; color: #1e293b; }
-    .total-main { background: #1e293b; color: white; border-left: none; }
-    .total-main .kpi-value, .total-main .kpi-label { color: #f8f9fa; }
-    .table-container { background: white; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Ranking Vendedores | Mimo & Co</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background-color: #f4f7f9; font-family: 'Segoe UI', sans-serif; color: #555; font-size: 0.75rem; }
+        .report-header { background: white; border-bottom: 1px solid #e0e0e0; padding: 12px 0; }
+        .brand-logo { height: 38px; }
+        
+        /* Contenedor Tabla */
+        .contenedor-ranking { background: white; border-radius: 8px; padding: 20px; border: 1px solid #eef2f7; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .table-ranking { width: 100%; border: 1px solid #dee2e6; border-collapse: collapse; }
+        .table-ranking th { background: #f8f9fa; border: 1px solid #dee2e6; padding: 8px; font-size: 0.65rem; color: #777; text-transform: uppercase; }
+        .table-ranking td { border: 1px solid #dee2e6; padding: 10px 8px; vertical-align: middle; }
+        
+        /* Medallas */
+        .medal { font-size: 1.1rem; margin-left: 5px; vertical-align: middle; }
+        .oro { color: #FFD700; } .plata { color: #C0C0C0; } .bronce { color: #CD7F32; }
+
+        /* Tarjeta Ganador Estrella (Lado Derecho) */
+        .winner-card {
+            background: linear-gradient(135deg, #1d3557 0%, #457b9d 100%);
+            color: white; border-radius: 12px; padding: 30px 20px; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 10px 20px rgba(29, 53, 87, 0.2); text-align: center;
+        }
+        .winner-label { text-transform: uppercase; font-size: 0.6rem; letter-spacing: 2px; opacity: 0.7; margin-bottom: 5px; }
+        .winner-id { font-size: 3.8rem; font-weight: 800; line-height: 1; margin-bottom: 5px; }
+        .winner-total { font-size: 1.2rem; font-weight: 300; opacity: 0.9; margin-bottom: 20px; }
+        
+        /* Estilo Ticket Promedio */
+        .avg-container { border-top: 1px solid rgba(255,255,255,0.2); padding-top: 15px; width: 80%; }
+        .avg-label { font-size: 0.6rem; text-transform: uppercase; opacity: 0.7; display: block; }
+        .avg-value { font-size: 1rem; font-weight: 600; }
+
+        .btn-home { color: #555; text-decoration: none; font-size: 1.2rem; }
+    </style>
 </head>
 <body class="pb-5">
 
-<header class="report-header sticky-top mb-4 shadow-sm">
-  <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-    <h4 class="fw-bold mb-0 text-primary">Ranking de Vendedores</h4>
-    <div class="d-flex flex-wrap justify-content-center gap-2">
-      <input type="date" id="desde" class="form-control form-control-sm w-auto border-2">
-      <input type="date" id="hasta" class="form-control form-control-sm w-auto border-2">
-      <select id="sucursal" class="form-select form-select-sm w-auto border-2"></select>
-      <button class="btn btn-primary btn-sm px-4 fw-bold" onclick="consultar()">CONSULTAR</button>
-      <a href="index.html" class="btn btn-outline-secondary btn-sm"><i class="bi bi-house"></i></a>
+<header class="report-header sticky-top mb-4">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <img src="Logo.png" class="brand-logo" alt="Mimo & Co">
+            <h6 class="fw-bold mb-0 ms-3 text-dark" style="font-size: 0.85rem;">RANKING VENDEDORES</h6>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <input type="date" id="desde" class="form-control form-control-sm" style="width: auto;">
+            <input type="date" id="hasta" class="form-control form-control-sm" style="width: auto;">
+            <select id="sucursal" class="form-select form-select-sm" style="width: auto;"></select>
+            <button class="btn btn-dark btn-sm px-4" onclick="consultar()">VER RANKING</button>
+            <div class="vr mx-2"></div>
+            <a href="index.html" class="btn-home"><i class="bi bi-house-door"></i></a>
+        </div>
     </div>
-  </div>
 </header>
 
 <div class="container">
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-4">
-    <div class="col"><div class="kpi-card"><div class="kpi-label">Ventas A</div><div id="t-fact-a" class="kpi-value">0</div></div></div>
-    <div class="col"><div class="kpi-card" style="border-left-color: #2ec4b6;"><div class="kpi-label">Ventas B</div><div id="t-fact-b" class="kpi-value">0</div></div></div>
-    <div class="col"><div class="kpi-card" style="border-left-color: #ff9f1c;"><div class="kpi-label">Operaciones</div><div id="t-ops" class="kpi-value">0</div></div></div>
-    <div class="col"><div class="kpi-card total-main shadow"><div class="kpi-label opacity-75">Neto Recaudado</div><div id="t-gen" class="kpi-value">$ 0</div></div></div>
-  </div>
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="contenedor-ranking">
+                <table class="table-ranking text-center">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">#</th>
+                            <th class="text-start ps-4">ID VENDEDOR</th>
+                            <th>OPERACIONES</th>
+                            <th class="text-end pe-4">NETO VENDIDO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-body">
+                        <tr><td colspan="4" class="py-5 text-muted">Aguardando consulta...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-  <div class="table-container table-responsive">
-    <table class="table table-hover align-middle mb-0">
-      <thead class="table-light">
-        <tr class="small text-muted">
-          <th class="ps-4">VENDEDOR</th>
-          <th class="text-center">FACT A</th>
-          <th class="text-center">FACT B</th>
-          <th class="text-center">OPS</th>
-          <th class="text-end pe-4">TOTAL RECAUDADO</th>
-        </tr>
-      </thead>
-      <tbody id="tabla-body">
-        <tr><td colspan="5" class="text-center py-5 text-muted">Configure los filtros para ver el ranking</td></tr>
-      </tbody>
-    </table>
-  </div>
+        <div class="col-md-4">
+            <div id="destacado-vendedor" style="display: none; height: 100%;">
+                <div class="winner-card">
+                    <i class="bi bi-trophy-fill mb-2" style="font-size: 2rem; color: #FFD700;"></i>
+                    <div class="winner-label">Vendedor Estrella</div>
+                    <div id="winner-id-display" class="winner-id">--</div>
+                    <div id="winner-monto" class="winner-total"></div>
+                    
+                    <div class="avg-container">
+                        <span class="avg-label">Ticket Promedio</span>
+                        <span id="winner-avg" class="avg-value"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    const h = new Date().toISOString().split('T')[0];
-    document.getElementById('desde').value = h;
-    document.getElementById('hasta').value = h;
-    const res = await fetch('/api/sucursales');
-    const sucs = await res.json();
-    document.getElementById('sucursal').innerHTML = sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-  });
+    document.addEventListener('DOMContentLoaded', async () => {
+        document.getElementById('desde').value = '2025-12-10';
+        document.getElementById('hasta').value = '2025-12-24';
+        const res = await fetch('/api/sucursales');
+        const sucs = await res.json();
+        document.getElementById('sucursal').innerHTML = sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+    });
 
-  async function consultar() {
-    const body = document.getElementById('tabla-body');
-    body.innerHTML = '<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>';
-    
-    const res = await fetch(`/api/reporte/vendedores?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
-    const data = await res.json();
-    
-    let sumaGral = 0, factA = 0, factB = 0, ops = 0;
-    const fmt = { style: 'currency', currency: 'ARS' };
+    async function consultar() {
+        const tbody = document.getElementById('tabla-body');
+        const fmt = { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 };
+        
+        tbody.innerHTML = '<tr><td colspan="4" class="py-5"><div class="spinner-border spinner-border-sm"></div></td></tr>';
 
-    body.innerHTML = data.map(r => {
-      sumaGral += r.TOTAL_NUMERICO; factA += r.CANTIDAD_FACTURAS_A; factB += r.CANTIDAD_FACTURAS_B; ops += r.TOTAL_OPERACIONES;
-      return `<tr>
-        <td class="ps-4 fw-bold">${r.CODVENDEDOR}</td>
-        <td class="text-center">${r.CANTIDAD_FACTURAS_A}</td>
+        try {
+            const res = await fetch(`/api/reporte/vendedores?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
+            const data = await res.json();
+
+            if (data.length > 0) {
+                // Lógica del Ganador (#1)
+                const top = data[0];
+                const ticketPromedio = top.TOTAL_NUMERICO / top.TOTAL_OPERACIONES;
+
+                document.getElementById('destacado-vendedor').style.display = 'block';
+                document.getElementById('winner-id-display').innerText = top.CODVENDEDOR;
+                document.getElementById('winner-monto').innerText = top.TOTAL_NUMERICO.toLocaleString('es-AR', fmt);
+                document.getElementById('winner-avg').innerText = ticketPromedio.toLocaleString('es-AR', fmt);
+
+                // Llenar tabla
+                tbody.innerHTML = data.map((v, i) => {
+                    let medal = '';
+                    if(i === 0) medal = '<i class="bi bi-award-fill medal oro"></i>';
+                    else if(i === 1) medal = '<i class="bi bi-award-fill medal plata"></i>';
+                    else if(i === 2) medal = '<i class="bi bi-award-fill medal bronce"></i>';
+
+                    return `<tr>
+                        <td class="fw-bold">${i + 1}${medal}</td>
+                        <td class="fw-bold text-dark text-start ps-4">${v.CODVENDEDOR}</td>
+                        <td>${v.TOTAL_OPERACIONES}</td>
+                        <td class="text-end fw-bold pe-4" style="font-size: 0.9rem;">${v.TOTAL_NUMERICO.toLocaleString('es-AR', fmt)}</td>
+                    </tr>`;
+                }).join('');
+            }
+        } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="py-5 text-danger">Error al cargar datos</td></tr>'; }
+    }
+</script>
+</body>
+</html>

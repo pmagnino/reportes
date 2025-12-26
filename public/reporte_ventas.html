@@ -1,92 +1,89 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ventas Detalladas</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <style>
-    body { background-color: #f4f7f6; font-family: sans-serif; }
-    .kpi-card { background: white; border-radius: 12px; padding: 1.2rem; border-left: 5px solid #4361ee; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .kpi-label { font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
-    .kpi-value { font-size: 1.3rem; font-weight: 800; color: #1e293b; }
-    .bg-total { background: #1e293b; color: white; border: none; }
-    .bg-total .kpi-label, .bg-total .kpi-value { color: #f8f9fa; }
-    .card-factura { border: none; border-radius: 15px; overflow: hidden; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Auditor&iacute;a de Ventas | Mimo & Co</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background-color: #f4f7f9; font-family: 'Segoe UI', sans-serif; color: #555; font-size: 0.75rem; }
+        .report-header { background: white; border-bottom: 1px solid #e0e0e0; padding: 12px 0; }
+        .brand-logo { height: 38px; }
+        .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .kpi-card { background: white; border-radius: 12px; padding: 15px; display: flex; border-bottom: 4px solid #ddd; align-items: center; }
+        .kpi-icon { font-size: 2rem; margin-right: 12px; opacity: 0.6; }
+        .kpi-value { font-size: 1.15rem; font-weight: 600; color: #111; margin-top: 5px; }
+        .color-efvo { border-color: #a7d7c5; } .color-tarj { border-color: #f9e8a5; } .color-mp { border-color: #caf0f8; }
+        .color-total { border-color: #1d3557; background: #1d3557; color: white; }
+        .contenedor-comprobante { background: white; border-radius: 8px; padding: 20px; margin-bottom: 25px; border: 1px solid #eef2f7; }
+        .table-cmp { width: 100%; border-collapse: collapse; margin-top: 10px; border: 1px solid #dee2e6; }
+        .table-cmp th { background: #f8f9fa; border: 1px solid #dee2e6; padding: 8px; font-size: 0.65rem; color: #777; text-transform: uppercase; }
+        .table-cmp td { border: 1px solid #dee2e6; padding: 8px; }
+        .row-dc { background-color: #f0f9ff !important; } .row-neg { background-color: #fffbeb !important; }
+    </style>
 </head>
 <body class="pb-5">
-
-<header class="bg-white border-bottom py-3 sticky-top shadow-sm mb-4">
-  <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-    <h4 class="fw-bold mb-0 text-primary">Detalle de Comprobantes</h4>
-    <div class="d-flex flex-wrap justify-content-center gap-2">
-      <input type="date" id="desde" class="form-control form-control-sm w-auto">
-      <input type="date" id="hasta" class="form-control form-control-sm w-auto">
-      <select id="sucursal" class="form-select form-select-sm w-auto"></select>
-      <button class="btn btn-primary btn-sm px-4 fw-bold" onclick="buscar()">CONSULTAR</button>
-      <a href="index.html" class="btn btn-outline-secondary btn-sm"><i class="bi bi-house"></i></a>
+<header class="report-header sticky-top mb-4">
+    <div class="container d-flex justify-content-between align-items-center">
+        <img src="Logo.png" class="brand-logo" alt="Mimo & Co">
+        <div class="d-flex gap-2">
+            <input type="date" id="desde" class="form-control form-control-sm">
+            <input type="date" id="hasta" class="form-control form-control-sm">
+            <select id="sucursal" class="form-select form-select-sm"></select>
+            <button class="btn btn-dark btn-sm px-4" onclick="buscar()">CONSULTAR</button>
+            <a href="index.html" class="btn btn-outline-secondary btn-sm"><i class="bi bi-house-door"></i></a>
+        </div>
     </div>
-  </div>
 </header>
-
-<div class="container px-3">
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-4">
-    <div class="col"><div class="kpi-card"><div class="kpi-label">Efectivo</div><div id="t-efvo" class="kpi-value">$ 0</div></div></div>
-    <div class="col"><div class="kpi-card" style="border-left-color: #2ec4b6;"><div class="kpi-label">Tarjetas</div><div id="t-tarj" class="kpi-value">$ 0</div></div></div>
-    <div class="col"><div class="kpi-card" style="border-left-color: #ff9f1c;"><div class="kpi-label">Mercado Pago</div><div id="t-mp" class="kpi-value">$ 0</div></div></div>
-    <div class="col"><div class="kpi-card bg-total shadow-lg"><div class="kpi-label opacity-75">Total Neto</div><div id="t-gen" class="kpi-value">$ 0</div></div></div>
-  </div>
-
-  <div id="resultado" class="row g-3">
-    <div class="text-center py-5 text-muted">Configure los filtros y presione consultar</div>
-  </div>
+<div class="container" style="max-width: 1000px;">
+    <div class="kpi-container">
+        <div class="kpi-card color-efvo"><i class="bi bi-cash kpi-icon"></i><div><small>EFECTIVO</small><div id="t-efvo" class="kpi-value">$ 0</div></div></div>
+        <div class="kpi-card color-tarj"><i class="bi bi-credit-card kpi-icon"></i><div><small>TARJETAS</small><div id="t-tarj" class="kpi-value">$ 0</div></div></div>
+        <div class="kpi-card color-mp"><i class="bi bi-qr-code kpi-icon"></i><div><small>MERCADO PAGO</small><div id="t-mp" class="kpi-value">$ 0</div></div></div>
+        <div class="kpi-card color-total"><i class="bi bi-calculator kpi-icon"></i><div><small>NETO RECAUDADO</small><div id="t-gen" class="kpi-value">$ 0</div></div></div>
+    </div>
+    <div id="resultado"></div>
 </div>
-
 <script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    const h = new Date().toISOString().split('T')[0];
-    document.getElementById('desde').value = h;
-    document.getElementById('hasta').value = h;
-    const res = await fetch('/api/sucursales');
-    const sucs = await res.json();
-    document.getElementById('sucursal').innerHTML = sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-  });
+    document.addEventListener('DOMContentLoaded', async () => {
+        const h = new Date().toISOString().split('T')[0];
+        document.getElementById('desde').value = h;
+        document.getElementById('hasta').value = h;
+        const res = await fetch('/api/sucursales');
+        const sucs = await res.json();
+        document.getElementById('sucursal').innerHTML = sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+    });
 
-  async function buscar() {
-    const div = document.getElementById('resultado');
-    div.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
-    
-    try {
-      const res = await fetch(`/api/facturas?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
-      const data = await res.json();
-      const fmt = { style: 'currency', currency: 'ARS' };
+    async function buscar() {
+        const div = document.getElementById('resultado');
+        const suc = document.getElementById('sucursal').value;
+        const d = document.getElementById('desde').value;
+        const h = document.getElementById('hasta').value;
+        
+        div.innerHTML = '<div class="text-center py-5"><div class="spinner-border spinner-border-sm"></div></div>';
+        const fmt = { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 };
 
-      document.getElementById('t-efvo').innerText = data.totales.efectivo.toLocaleString('es-AR', fmt);
-      document.getElementById('t-tarj').innerText = data.totales.tarjeta.toLocaleString('es-AR', fmt);
-      document.getElementById('t-mp').innerText = data.totales.mp.toLocaleString('es-AR', fmt);
-      document.getElementById('t-gen').innerText = data.totales.general.toLocaleString('es-AR', fmt);
-
-      div.innerHTML = data.datos.map(f => `
-        <div class="col-12 col-xl-6">
-          <div class="card card-factura shadow-sm">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-              <span class="fw-bold text-primary">${f.prefijo}-${f.numero}</span>
-              <span class="badge bg-light text-dark border font-monospace">${f.pago}</span>
-            </div>
-            <div class="table-responsive">
-              <table class="table table-sm mb-0 small">
-                <thead class="table-light"><tr><th class="ps-3">Articulo</th><th class="text-center">Cant</th><th class="text-end pe-3">Subtotal</th></tr></thead>
-                <tbody>
-                  ${f.items.map(i => `<tr><td class="ps-3">${i.cod}</td><td class="text-center">${i.cant}</td><td class="text-end pe-3">${(i.cant * i.pre).toLocaleString('es-AR', fmt)}</td></tr>`).join('')}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>`).join('');
-    } catch(e) { div.innerHTML = '<div class="alert alert-danger">Error al conectar con la API</div>'; }
-  }
+        try {
+            const res = await fetch(`/api/facturas?sucursal=${suc}&desde=${d}&hasta=${h}`);
+            const data = await res.json();
+            
+            document.getElementById('t-efvo').innerText = data.totales.efectivo.toLocaleString('es-AR', fmt);
+            document.getElementById('t-tarj').innerText = data.totales.tarjeta.toLocaleString('es-AR', fmt);
+            document.getElementById('t-mp').innerText = data.totales.mp.toLocaleString('es-AR', fmt);
+            document.getElementById('t-gen').innerText = data.totales.general.toLocaleString('es-AR', fmt);
+            
+            div.innerHTML = data.datos.map(f => {
+                const total = f.items.reduce((acc, i) => acc + (i.cant * i.pre), 0);
+                return `<div class="contenedor-comprobante">
+                    <div class="d-flex justify-content-between"><strong>COMPROBANTE: ${f.prefijo}-${f.numero}</strong><small>PAGO: ${f.pago}</small></div>
+                    <table class="table-cmp">
+                        <thead><tr><th>ART&Iacute;CULO</th><th class="text-center">CANT.</th><th class="text-end">SUBTOTAL</th></tr></thead>
+                        <tbody>${f.items.map(i => `<tr class="${i.cod.startsWith('DC')?'row-dc':(i.cant<0?'row-neg':'')}"><td>${i.cod}</td><td class="text-center">${i.cant}</td><td class="text-end">${(i.cant*i.pre).toLocaleString('es-AR', fmt)}</td></tr>`).join('')}
+                        <tr><td colspan="2" class="text-end py-2"><strong>TOTAL:</strong></td><td class="text-end py-2"><strong>${total.toLocaleString('es-AR', fmt)}</strong></td></tr></tbody>
+                    </table></div>`;
+            }).join('');
+        } catch(e) { div.innerHTML = 'Error al cargar datos'; }
+    }
 </script>
 </body>
 </html>
