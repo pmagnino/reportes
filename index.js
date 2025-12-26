@@ -12,32 +12,33 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 /* =====================================================
-   CONFIGURACIONES DE BASES
+   CONFIGURACIÓN BASES DE DATOS
 ===================================================== */
 
-const dbMain = {
+const poolMain = new sql.ConnectionPool({
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     server: process.env.DB_SERVER,
-    database: process.env.DB_DATABASE,
+    database: process.env.DB_DATABASE, // BASROUTER
     options: {
         encrypt: false,
-        trustServerCertificate: true,
-        connectTimeout: 30000
+        trustServerCertificate: true
     }
-};
+});
 
-const dbAuth = {
+const poolAuth = new sql.ConnectionPool({
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     server: process.env.DB_SERVER,
-    database: process.env.AUTH_DB_DATABASE,
+    database: process.env.AUTH_DB_DATABASE, // ControlTiendas
     options: {
         encrypt: false,
-        trustServerCertificate: true,
-        connectTimeout: 30000
+        trustServerCertificate: true
     }
-};
+});
+
+const poolMainPromise = poolMain.connect();
+const poolAuthPromise = poolAuth.connect();
 
 /* =====================================================
    MIDDLEWARE AUTH
@@ -70,13 +71,13 @@ app.post('/api/login', async (req, res) => {
         return res.status(400).json({ error: 'Usuario y contraseña requeridos' });
 
     try {
-        const pool = await sql.connect(dbAuth);
+        const pool = await poolAuthPromise;
 
         const result = await pool.request()
             .input('usuario', sql.VarChar, usuario)
             .query(`
                 SELECT id, usuario, password_hash, rol, sucursal, activo
-                FROM usuarios_reportes
+                FROM dbo.usuarios_reportes
                 WHERE usuario = @usuario
             `);
 
@@ -103,14 +104,10 @@ app.post('/api/login', async (req, res) => {
             { expiresIn: process.env.JWT_EXPIRES }
         );
 
-        res.json({
-            token,
-            usuario: user.usuario,
-            rol: user.rol,
-            sucursal: user.sucursal
-        });
+        res.json({ token });
 
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -119,15 +116,16 @@ app.post('/api/login', async (req, res) => {
    ENDPOINTS PROTEGIDOS
 ===================================================== */
 
-// --- SUCURSALES ---
+// SUCURSALES
 app.get('/api/sucursales', auth, async (req, res) => {
     try {
-        const pool = await sql.connect(dbMain);
+        const pool = await poolMainPromise;
+
         const result = await pool.request().query(`
-            SELECT CODSUC, NOMBRE 
+            SELECT CODSUC, NOMBRE
             FROM dbo.QRSUCURSALES
             WHERE CODEMP <> 1 AND CODSUC NOT IN (996, 997)
-            ORDER BY NOMBRE ASC
+            ORDER BY NOMBRE
         `);
 
         res.json(result.recordset);
@@ -136,12 +134,13 @@ app.get('/api/sucursales', auth, async (req, res) => {
     }
 });
 
-// --- FACTURAS ---
+// FACTURAS
 app.get('/api/facturas', auth, async (req, res) => {
     const { sucursal, desde, hasta } = req.query;
 
     try {
-        const pool = await sql.connect(dbMain);
+        const pool = await poolMainPromise;
+
         const result = await pool.request().query(`
             SELECT 
                 A.PREFIJO,
@@ -200,18 +199,19 @@ app.get('/api/facturas', auth, async (req, res) => {
     }
 });
 
-// --- STOCK ---
+// STOCK
 app.get('/api/reporte/stock', auth, async (req, res) => {
     const { sucursal } = req.query;
 
     try {
-        const pool = await sql.connect(dbMain);
+        const pool = await poolMainPromise;
+
         const result = await pool.request().query(`
             SELECT 
                 A.CODITM,
                 B.DESCRIPCION,
                 CAST(A.STKACTUAL AS INT) AS STOCK_LIMPIO
-            FROM dbo.dbo.QRItemsAcum A
+            FROM dbo.QRItemsAcum A
             INNER JOIN dbo.QRITEMS B ON A.CODITM = B.CODITM
             WHERE A.CODSUC = '${sucursal}'
               AND A.STKACTUAL > 0
@@ -237,5 +237,5 @@ app.get('/api/reporte/stock', auth, async (req, res) => {
 ===================================================== */
 
 app.listen(3000, () => {
-    console.log('🚀 Servidor activo en puerto 3000');
+    console.log('🚀 Servidor activo en http://localhost:3000');
 });
