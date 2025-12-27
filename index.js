@@ -41,12 +41,32 @@ const poolMainPromise = poolMain.connect();
 const poolAuthPromise = poolAuth.connect();
 
 /* =====================================================
+   HEALTH CHECK (SIN AUTH)
+===================================================== */
+app.get('/health', async (req, res) => {
+    try {
+        await poolMainPromise; // valida conexión
+        res.status(200).json({
+            status: 'ok',
+            service: 'reportes',
+            timestamp: new Date().toISOString()
+        });
+    } catch (e) {
+        res.status(500).json({
+            status: 'error',
+            message: 'DB not reachable'
+        });
+    }
+});
+
+/* =====================================================
    AUTH MIDDLEWARE
 ===================================================== */
 
 function auth(req, res, next) {
     const authHeader = req.headers['authorization'];
-    if (!authHeader) return res.status(401).json({ error: 'Token requerido' });
+    if (!authHeader)
+        return res.status(401).json({ error: 'Token requerido' });
 
     const token = authHeader.split(' ')[1];
 
@@ -85,7 +105,8 @@ app.post('/api/login', async (req, res) => {
             return res.status(403).json({ error: 'Usuario inactivo' });
 
         const ok = await bcrypt.compare(password, user.password_hash);
-        if (!ok) return res.status(401).json({ error: 'Contraseña incorrecta' });
+        if (!ok)
+            return res.status(401).json({ error: 'Contraseña incorrecta' });
 
         const token = jwt.sign(
             {
@@ -109,7 +130,7 @@ app.post('/api/login', async (req, res) => {
    ENDPOINTS PROTEGIDOS
 ===================================================== */
 
-// ✅ SUCURSALES (BASROUTER)
+// SUCURSALES
 app.get('/api/sucursales', auth, async (req, res) => {
     try {
         const pool = await poolMainPromise;
@@ -127,7 +148,7 @@ app.get('/api/sucursales', auth, async (req, res) => {
     }
 });
 
-// ✅ FACTURAS
+// FACTURAS
 app.get('/api/facturas', auth, async (req, res) => {
     const { sucursal, desde, hasta } = req.query;
 
@@ -178,7 +199,7 @@ app.get('/api/facturas', auth, async (req, res) => {
     }
 });
 
-// ✅ STOCK
+// STOCK
 app.get('/api/reporte/stock', auth, async (req, res) => {
     const { sucursal } = req.query;
 
