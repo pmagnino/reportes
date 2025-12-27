@@ -41,25 +41,6 @@ const poolMainPromise = poolMain.connect();
 const poolAuthPromise = poolAuth.connect();
 
 /* =====================================================
-   HEALTH CHECK (SIN AUTH)
-===================================================== */
-app.get('/health', async (req, res) => {
-    try {
-        await poolMainPromise; // valida conexión
-        res.status(200).json({
-            status: 'ok',
-            service: 'reportes',
-            timestamp: new Date().toISOString()
-        });
-    } catch (e) {
-        res.status(500).json({
-            status: 'error',
-            message: 'DB not reachable'
-        });
-    }
-});
-
-/* =====================================================
    AUTH MIDDLEWARE
 ===================================================== */
 
@@ -73,7 +54,7 @@ function auth(req, res, next) {
     try {
         req.user = jwt.verify(token, process.env.JWT_SECRET);
         next();
-    } catch {
+    } catch (err) {
         return res.status(403).json({ error: 'Token inválido' });
     }
 }
@@ -127,10 +108,34 @@ app.post('/api/login', async (req, res) => {
 });
 
 /* =====================================================
-   ENDPOINTS PROTEGIDOS
+   USUARIOS (ADMIN)
 ===================================================== */
 
-// SUCURSALES
+app.get('/api/usuarios', auth, async (req, res) => {
+    try {
+        const pool = await poolAuthPromise;
+
+        const result = await pool.request().query(`
+            SELECT 
+                id,
+                usuario,
+                rol,
+                sucursal,
+                activo
+            FROM dbo.usuarios_reportes
+            ORDER BY usuario
+        `);
+
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+/* =====================================================
+   SUCURSALES
+===================================================== */
+
 app.get('/api/sucursales', auth, async (req, res) => {
     try {
         const pool = await poolMainPromise;
@@ -148,7 +153,10 @@ app.get('/api/sucursales', auth, async (req, res) => {
     }
 });
 
-// FACTURAS
+/* =====================================================
+   FACTURAS
+===================================================== */
+
 app.get('/api/facturas', auth, async (req, res) => {
     const { sucursal, desde, hasta } = req.query;
 
@@ -184,7 +192,12 @@ app.get('/api/facturas', auth, async (req, res) => {
             if (!facturas[key]) facturas[key] = { ...r, items: [] };
 
             const subtotal = r.cant * r.pre;
-            facturas[key].items.push({ cod: r.CODITM, cant: r.cant, pre: r.pre });
+
+            facturas[key].items.push({
+                cod: r.CODITM,
+                cant: r.cant,
+                pre: r.pre
+            });
 
             totales.general += subtotal;
             if (r.pago_desc === 'EFECTIVO') totales.efectivo += subtotal;
@@ -199,7 +212,10 @@ app.get('/api/facturas', auth, async (req, res) => {
     }
 });
 
-// STOCK
+/* =====================================================
+   STOCK
+===================================================== */
+
 app.get('/api/reporte/stock', auth, async (req, res) => {
     const { sucursal } = req.query;
 
@@ -221,13 +237,23 @@ app.get('/api/reporte/stock', auth, async (req, res) => {
         res.json({
             detalles: result.recordset,
             resumen: {
-                totalUnidades: result.recordset.reduce((a, b) => a + b.STOCK_LIMPIO, 0)
+                totalUnidades: result.recordset.reduce(
+                    (acc, r) => acc + r.STOCK_LIMPIO, 0
+                )
             }
         });
 
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+});
+
+/* =====================================================
+   HEALTH CHECK (sin auth)
+===================================================== */
+
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
 });
 
 /* =====================================================
