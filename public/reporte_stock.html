@@ -2,132 +2,213 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Stock | Mimo & Co</title>
-
+    <title>Stock Físico | Mimo & Co Corporativo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-    <!-- 🔐 AUTH -->
     <script src="auth.js"></script>
-
     <style>
-        body { background-color: #f4f7f9; font-family: 'Segoe UI', sans-serif; color: #444; font-size: 0.85rem; }
-        .report-header { background: white; border-bottom: 1px solid #dee2e6; padding: 12px 0; }
-        .brand-logo { height: 38px; }
-        .kpi-stock { background: #1d3557; color: white; border-radius: 10px; padding: 20px; display: flex; justify-content: space-between; margin-bottom: 20px; }
-        #total-unidades { font-size: 2.5rem; font-weight: 700; }
-        .kpi-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
-        .contenedor-stock { background: white; border-radius: 8px; padding: 20px; border: 1px solid #dee2e6; }
-        .table-stock th, .table-stock td { border: 1px solid #dee2e6; padding: 10px; }
-        .stock-badge { background: #f1f5f9; color: #1d3557; padding: 5px 15px; border-radius: 6px; font-weight: 700; }
-        .btn-home { color: #666; font-size: 1.2rem; }
+        :root {
+            --navy-dark: #1e293b;
+            --navy-light: #334155;
+            --accent-blue: #0ea5e9;
+            --bg-gray: #f8fafc;
+        }
+
+        body { 
+            background-color: var(--bg-gray); 
+            font-family: 'Inter', 'Segoe UI', sans-serif; 
+            font-size: 0.88rem; 
+            color: var(--navy-light);
+        }
+
+        /* Header Sobrio */
+        .report-header { 
+            background: white; 
+            border-bottom: 1px solid #e2e8f0; 
+            padding: 15px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        /* KPI Card Profesional */
+        .kpi-stock-container {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-radius: 12px;
+            padding: 30px;
+            color: white;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        .kpi-stock-container::after {
+            content: "\F1B8"; /* Bootstrap Icon Box */
+            font-family: "bootstrap-icons";
+            position: absolute;
+            right: 20px;
+            bottom: -20px;
+            font-size: 8rem;
+            opacity: 0.1;
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            opacity: 0.8;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .kpi-value {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        /* Tabla de Directorio */
+        .data-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .table-corporate { width: 100%; border-collapse: collapse; margin: 0; }
+        
+        .table-corporate th {
+            background: #f1f5f9;
+            padding: 16px 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        .table-corporate td {
+            padding: 14px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .table-corporate tr:hover { background-color: #f8fafc; }
+
+        .item-code {
+            font-family: 'SF Mono', 'Cascadia Code', monospace;
+            font-weight: 600;
+            color: var(--navy-dark);
+            letter-spacing: -0.3px;
+        }
+
+        .stock-pill {
+            background: #f0f9ff;
+            color: #0369a1;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            border: 1px solid #bae6fd;
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .btn-home {
+            border: 1px solid #e2e8f0;
+            color: var(--navy-light);
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-home:hover {
+            background: var(--navy-dark);
+            color: white;
+        }
     </style>
 </head>
-
-<body onload="protectPage()">
+<body onload="init()">
 
 <header class="report-header sticky-top mb-4">
     <div class="container d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">
-            <img src="Logo.png" class="brand-logo" alt="Mimo & Co">
-            <h6 class="fw-bold mb-0 ms-3 text-dark">CONTROL DE STOCK</h6>
+            <img src="Logo.png" style="height: 32px;" alt="Mimo">
+            <span class="ms-3 fw-bold text-uppercase small tracking-widest" style="color: #64748b; letter-spacing: 2px;">Gestión de Inventarios</span>
         </div>
-
-        <div class="d-flex gap-2 align-items-center">
-            <select id="sucursal" class="form-select form-select-sm" style="width: 220px;"></select>
-            <button class="btn btn-dark btn-sm px-4" onclick="consultarStock()">CONSULTAR</button>
-            <div class="vr mx-2"></div>
-            <button class="btn btn-outline-danger btn-sm" onclick="logout()">Salir</button>
+        <div class="d-flex gap-2">
+            <select id="sucursal" class="form-select form-select-sm" style="min-width: 250px; border-radius: 8px;"></select>
+            <button class="btn btn-dark btn-sm px-4 shadow-sm" style="border-radius: 8px; font-weight: 600;" onclick="consultarStock()">EJECUTAR CONSULTA</button>
+            <a href="reporte_index.html" class="btn btn-home btn-sm px-3 shadow-sm" style="border-radius: 8px;"><i class="bi bi-house-door"></i></a>
         </div>
     </div>
 </header>
 
-<div class="container" style="max-width: 900px;">
-    <div class="kpi-stock">
-        <div>
-            <span class="kpi-label d-block">Unidades en Stock</span>
-            <div id="total-unidades">0</div>
+<div class="container" style="max-width: 1000px;">
+    <div id="summary-section" style="display: none;">
+        <div class="kpi-stock-container">
+            <span class="kpi-label">Unidades Totales en Existencia</span>
+            <h1 class="kpi-value" id="total-unidades">0</h1>
         </div>
-        <i class="bi bi-box-seam fs-1 opacity-25"></i>
     </div>
 
-    <div class="contenedor-stock">
-        <table class="table-stock">
+    <div class="data-card">
+        <table class="table-corporate">
             <thead>
                 <tr>
-                    <th>CÓDIGO</th>
-                    <th>DESCRIPCIÓN ARTÍCULO</th>
-                    <th class="text-end">CANT.</th>
+                    <th style="width: 20%;">Identificador</th>
+                    <th style="width: 60%;">Descripción Técnica del Artículo</th>
+                    <th class="text-center" style="width: 20%;">Disponibilidad</th>
                 </tr>
             </thead>
             <tbody id="tabla-body">
-                <tr>
-                    <td colspan="3" class="text-center py-4 text-muted">Seleccione una franquicia...</td>
-                </tr>
+                <tr><td colspan="3" class="py-5 text-center text-muted italic">Seleccione una entidad para procesar los datos...</td></tr>
             </tbody>
         </table>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
+    function init() { protectPage(); cargarSucursales(); }
+
+    async function cargarSucursales() {
         const res = await authFetch('/api/sucursales');
-        const sucs = await res.json();
-
-if (!Array.isArray(sucs)) {
-    console.error('Respuesta inválida:', sucs);
-    throw new Error('No se pudieron cargar las sucursales');
-}
-
-        document.getElementById('sucursal').innerHTML =
-            sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-    } catch (e) {
-        console.error(e);
-    }
-});
-
-async function consultarStock() {
-    const tbody = document.getElementById('tabla-body');
-    const totalDiv = document.getElementById('total-unidades');
-    const suc = document.getElementById('sucursal').value;
-
-    tbody.innerHTML = `
-        <tr>
-            <td colspan="3" class="text-center py-4">
-                <div class="spinner-border spinner-border-sm text-secondary"></div>
-            </td>
-        </tr>
-    `;
-
-    try {
-        const res = await authFetch(`/api/reporte/stock?sucursal=${suc}`);
         const data = await res.json();
-
-        totalDiv.innerText = data.resumen.totalUnidades.toLocaleString('es-AR');
-
-        tbody.innerHTML = data.detalles.map(i => `
-            <tr>
-                <td class="fw-bold">${i.CODITM}</td>
-                <td class="text-muted">${i.DESCRIPCION || '-'}</td>
-                <td class="text-end"><span class="stock-badge">${i.STOCK_LIMPIO}</span></td>
-            </tr>
-        `).join('');
-
-    } catch (e) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="3" class="text-center text-danger py-4">
-                    Error al cargar datos
-                </td>
-            </tr>`;
+        document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
     }
-}
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    protectPage();
-});
+
+    async function consultarStock() {
+        const tbody = document.getElementById('tabla-body');
+        const summary = document.getElementById('summary-section');
+        tbody.innerHTML = '<tr><td colspan="3" class="py-5 text-center"><div class="spinner-border spinner-border-sm text-dark"></div><span class="ms-2">Sincronizando base de datos...</span></td></tr>';
+        
+        try {
+            const res = await authFetch(`/api/reporte/stock?sucursal=${document.getElementById('sucursal').value}`);
+            const data = await res.json();
+            
+            if (!data.detalles || data.detalles.length === 0) {
+                summary.style.display = 'none';
+                tbody.innerHTML = '<tr><td colspan="3" class="py-5 text-center">No se detectaron movimientos de stock para esta entidad.</td></tr>';
+                return;
+            }
+
+            const total = data.detalles.reduce((acc, i) => acc + i.CANTIDAD, 0);
+            document.getElementById('total-unidades').innerText = total.toLocaleString('es-AR');
+            summary.style.display = 'block';
+
+            tbody.innerHTML = data.detalles.map(i => `
+                <tr>
+                    <td class="item-code">${i.CODITM}</td>
+                    <td style="color: #475569;">${i.DESCRIPCION || 'N/A'}</td>
+                    <td class="text-center"><span class="stock-pill">${i.CANTIDAD}</span></td>
+                </tr>`).join('');
+        } catch(e) { 
+            tbody.innerHTML = '<tr><td colspan="3" class="py-5 text-center text-danger">Falla crítica en la comunicación con el servidor.</td></tr>'; 
+        }
+    }
 </script>
 </body>
 </html>
