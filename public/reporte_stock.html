@@ -2,211 +2,105 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Stock Físico | Mimo & Co Corporativo</title>
+    <title>Mimo & Co | Stock en Tiempo Real</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="auth.js"></script>
     <style>
-        :root {
-            --navy-dark: #1e293b;
-            --navy-light: #334155;
-            --accent-blue: #0ea5e9;
-            --bg-gray: #f8fafc;
-        }
-
-        body { 
-            background-color: var(--bg-gray); 
-            font-family: 'Inter', 'Segoe UI', sans-serif; 
-            font-size: 0.88rem; 
-            color: var(--navy-light);
-        }
-
-        /* Header Sobrio */
-        .report-header { 
-            background: white; 
-            border-bottom: 1px solid #e2e8f0; 
-            padding: 15px 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-        }
-
-        /* KPI Card Profesional */
-        .kpi-stock-container {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            border-radius: 12px;
-            padding: 30px;
-            color: white;
-            margin-bottom: 30px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-        }
-
-        .kpi-stock-container::after {
-            content: "\F1B8"; /* Bootstrap Icon Box */
-            font-family: "bootstrap-icons";
-            position: absolute;
-            right: 20px;
-            bottom: -20px;
-            font-size: 8rem;
-            opacity: 0.1;
-        }
-
-        .kpi-label {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            opacity: 0.8;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .kpi-value {
-            font-size: 3rem;
-            font-weight: 800;
-            margin: 0;
-            letter-spacing: -1px;
-        }
-
-        /* Tabla de Directorio */
-        .data-card {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        }
-
-        .table-corporate { width: 100%; border-collapse: collapse; margin: 0; }
+        :root { --mimo-navy: #1e293b; --mimo-border: #e2e8f0; --mimo-bg: #f8fafc; }
+        body { background-color: var(--mimo-bg); font-family: 'Segoe UI', sans-serif; color: var(--mimo-navy); font-weight: 300; }
         
-        .table-corporate th {
-            background: #f1f5f9;
-            padding: 16px 20px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #64748b;
-            border-bottom: 1px solid #e2e8f0;
-            text-align: left;
-        }
+        /* Cabecera Estilo Imagen */
+        .report-header-dark { background: #1e293b; color: white; padding: 1rem 0; border-radius: 4px; margin-bottom: 20px; }
+        .logo-mimo-header { height: 35px; background: white; padding: 5px; border-radius: 4px; margin-right: 20px; }
+        .header-title-text { font-size: 1.2rem; font-weight: 400; vertical-align: middle; }
 
-        .table-corporate td {
-            padding: 14px 20px;
-            border-bottom: 1px solid #f1f5f9;
-            vertical-align: middle;
-        }
+        /* Barra de Filtros */
+        .filter-bar { background: white; border: 1px solid var(--mimo-border); border-radius: 4px; padding: 15px; margin-bottom: 30px; }
+        
+        /* Tarjeta Lateral de Unidades */
+        .kpi-card-stock { background: #1e293b; color: white; padding: 25px; border-radius: 4px; border-left: 6px solid #10b981; }
+        .kpi-card-stock small { font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 1px; }
+        .kpi-card-stock h2 { font-weight: 400; margin-top: 5px; }
 
-        .table-corporate tr:hover { background-color: #f8fafc; }
-
-        .item-code {
-            font-family: 'SF Mono', 'Cascadia Code', monospace;
-            font-weight: 600;
-            color: var(--navy-dark);
-            letter-spacing: -0.3px;
-        }
-
-        .stock-pill {
-            background: #f0f9ff;
-            color: #0369a1;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            border: 1px solid #bae6fd;
-            display: inline-block;
-            min-width: 60px;
-            text-align: center;
-        }
-
-        .btn-home {
-            border: 1px solid #e2e8f0;
-            color: var(--navy-light);
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .btn-home:hover {
-            background: var(--navy-dark);
-            color: white;
-        }
+        /* Tabla Estilo Imagen */
+        .table-executive { width: 100%; background: white; border-radius: 4px; border: 1px solid var(--mimo-border); }
+        .table-executive th { background: #fcfdfe; color: #94a3b8; font-size: 0.7rem; text-transform: uppercase; padding: 12px 20px; border-bottom: 1px solid var(--mimo-border); }
+        .table-executive td { padding: 12px 20px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        .btn-mimo-dark { background: #1e293b; color: white; border: none; font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body onload="init()">
 
-<header class="report-header sticky-top mb-4">
-    <div class="container d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center">
-            <img src="Logo.png" style="height: 32px;" alt="Mimo">
-            <span class="ms-3 fw-bold text-uppercase small tracking-widest" style="color: #64748b; letter-spacing: 2px;">Gestión de Inventarios</span>
+<div class="container mt-4">
+    <div class="report-header-dark px-4 shadow-sm d-flex align-items-center">
+        <a href="reporte_index.html"><img src="Logo.png" class="logo-mimo-header" alt="Mimo"></a>
+        <span class="header-title-text">Stock en Tiempo Real</span>
+    </div>
+
+    <div class="filter-bar shadow-sm d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-muted small fw-bold">SUCURSAL</span>
+            <select id="sucursal" class="form-select form-select-sm" style="width: 250px;"></select>
         </div>
         <div class="d-flex gap-2">
-            <select id="sucursal" class="form-select form-select-sm" style="min-width: 250px; border-radius: 8px;"></select>
-            <button class="btn btn-dark btn-sm px-4 shadow-sm" style="border-radius: 8px; font-weight: 600;" onclick="consultarStock()">EJECUTAR CONSULTA</button>
-            <a href="reporte_index.html" class="btn btn-home btn-sm px-3 shadow-sm" style="border-radius: 8px;"><i class="bi bi-house-door"></i></a>
-        </div>
-    </div>
-</header>
-
-<div class="container" style="max-width: 1000px;">
-    <div id="summary-section" style="display: none;">
-        <div class="kpi-stock-container">
-            <span class="kpi-label">Unidades Totales en Existencia</span>
-            <h1 class="kpi-value" id="total-unidades">0</h1>
+            <button class="btn btn-mimo-dark px-4 py-2 rounded-1" onclick="consultar()">EJECUTAR CONSULTA</button>
+            <a href="reporte_index.html" class="btn btn-outline-secondary btn-sm d-flex align-items-center px-3 shadow-sm rounded-1"><i class="bi bi-house-door"></i></a>
         </div>
     </div>
 
-    <div class="data-card">
-        <table class="table-corporate">
-            <thead>
-                <tr>
-                    <th style="width: 20%;">Identificador</th>
-                    <th style="width: 60%;">Descripción Técnica del Artículo</th>
-                    <th class="text-center" style="width: 20%;">Disponibilidad</th>
-                </tr>
-            </thead>
-            <tbody id="tabla-body">
-                <tr><td colspan="3" class="py-5 text-center text-muted italic">Seleccione una entidad para procesar los datos...</td></tr>
-            </tbody>
-        </table>
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="kpi-card-stock shadow-sm" id="pnl-total" style="display: none;">
+                <small>Unidades Totales en Stock</small>
+                <h2 id="total-unidades">0</h2>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="shadow-sm">
+                <table class="table-executive">
+                    <thead>
+                        <tr>
+                            <th>Identificador de Artículo</th>
+                            <th class="text-center">Existencia Física</th>
+                        </tr>
+                    </thead>
+                    <tbody id="res-body">
+                        <tr><td colspan="2" class="text-center py-5 text-muted">Aguardando parámetros de consulta...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    function init() { protectPage(); cargarSucursales(); }
-
-    async function cargarSucursales() {
-        const res = await authFetch('/api/sucursales');
+    async function init() {
+        const res = await fetch('/api/sucursales');
         const data = await res.json();
         document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
     }
 
-    async function consultarStock() {
-        const tbody = document.getElementById('tabla-body');
-        const summary = document.getElementById('summary-section');
-        tbody.innerHTML = '<tr><td colspan="3" class="py-5 text-center"><div class="spinner-border spinner-border-sm text-dark"></div><span class="ms-2">Sincronizando base de datos...</span></td></tr>';
+    async function consultar() {
+        const tbody = document.getElementById('res-body');
+        tbody.innerHTML = '<tr><td colspan="2" class="text-center py-5"><div class="spinner-border text-secondary spinner-border-sm"></div></td></tr>';
         
         try {
-            const res = await authFetch(`/api/reporte/stock?sucursal=${document.getElementById('sucursal').value}`);
+            const res = await fetch(`/api/reporte/stock?sucursal=${document.getElementById('sucursal').value}`);
             const data = await res.json();
             
-            if (!data.detalles || data.detalles.length === 0) {
-                summary.style.display = 'none';
-                tbody.innerHTML = '<tr><td colspan="3" class="py-5 text-center">No se detectaron movimientos de stock para esta entidad.</td></tr>';
-                return;
-            }
-
             const total = data.detalles.reduce((acc, i) => acc + i.CANTIDAD, 0);
+            document.getElementById('pnl-total').style.display = 'block';
             document.getElementById('total-unidades').innerText = total.toLocaleString('es-AR');
-            summary.style.display = 'block';
 
             tbody.innerHTML = data.detalles.map(i => `
                 <tr>
-                    <td class="item-code">${i.CODITM}</td>
-                    <td style="color: #475569;">${i.DESCRIPCION || 'N/A'}</td>
-                    <td class="text-center"><span class="stock-pill">${i.CANTIDAD}</span></td>
+                    <td style="font-weight:400; color:#1e293b;">${i.CODITM}</td>
+                    <td class="text-center"><span class="badge rounded-pill bg-light text-primary px-3 py-2 border" style="font-weight:600;">${i.CANTIDAD}</span></td>
                 </tr>`).join('');
         } catch(e) { 
-            tbody.innerHTML = '<tr><td colspan="3" class="py-5 text-center text-danger">Falla crítica en la comunicación con el servidor.</td></tr>'; 
+            tbody.innerHTML = '<tr><td colspan="2" class="text-center py-4">Error al procesar la solicitud.</td></tr>'; 
         }
     }
 </script>

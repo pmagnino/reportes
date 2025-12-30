@@ -2,137 +2,71 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mimo & Co | Dashboard Estratégico</title>
+    <title>Mimo & Co | BI Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script src="auth.js"></script>
     <style>
-        :root {
-            --mimo-dark: #1e293b;
-            --mimo-bg: #f8fafc;
-            --mimo-border: #e2e8f0;
-            --mimo-accent: #3b82f6;
-        }
-
-        body {
-            background-color: var(--mimo-bg);
-            font-family: 'Segoe UI', 'Calibri', sans-serif;
-            color: var(--mimo-dark);
-            min-height: 100vh;
-        }
-
-        .navbar-executive {
-            background: white;
-            border-bottom: 2px solid var(--mimo-border);
-            padding: 1rem 0;
-            margin-bottom: 50px;
-        }
-
-        .brand-text { font-weight: 700; letter-spacing: 1px; }
-
-        /* Tarjeta Estilo Executive (2x2) */
-        .card-executive {
-            background: white;
-            border: 1px solid var(--mimo-border);
-            border-radius: 4px;
-            text-decoration: none;
-            color: inherit;
-            display: flex;
-            align-items: center;
-            padding: 2.5rem 2rem;
-            height: 100%;
-            transition: all 0.25s ease;
-        }
-
-        .card-executive:hover {
-            transform: translateY(-4px);
-            border-color: var(--mimo-accent);
-            box-shadow: 0 12px 20px -5px rgba(0,0,0,0.08);
-        }
-
-        .icon-container {
-            width: 65px;
-            height: 65px;
-            background: #f1f5f9;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 1.5rem;
-            color: #64748b;
-            font-size: 2rem;
-            transition: 0.3s;
-        }
-
-        .card-executive:hover .icon-container {
-            background: var(--mimo-dark);
-            color: white;
-        }
-
-        .title-main { font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
-        .desc-sub { font-size: 0.9rem; color: #64748b; line-height: 1.4; }
+        :root { --mimo-navy: #1e293b; --mimo-bg: #f8fafc; }
+        body { background-color: var(--mimo-bg); font-family: 'Segoe UI', sans-serif; font-weight: 300; }
+        .hero-section { background: #1e293b; color: white; padding: 60px 0; border-radius: 0 0 20px 20px; margin-bottom: 40px; }
+        .menu-card { background: white; border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; height: 100%; text-decoration: none; color: inherit; }
+        .menu-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); color: inherit; }
+        .icon-box { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 1.5rem; }
+        
+        /* Colores por Sección */
+        .color-audit { background: #e0f2fe; color: #0369a1; }
+        .color-stock { background: #dcfce7; color: #15803d; }
+        .color-util { background: #f1f5f9; color: #475569; }
+        
+        .section-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
     </style>
 </head>
-<body onload="protectPage()">
-
-<nav class="navbar-executive shadow-sm">
-    <div class="container d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center">
-            <span class="brand-text text-danger">MIMO & CO</span>
-            <span class="ms-3 text-muted fw-light">| BI EXECUTIVE PANEL</span>
+<body>
+<div class="hero-section text-center">
+    <img src="Logo.png" style="height: 50px; background: white; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+    <h2 style="font-weight: 300; letter-spacing: 1px;">SISTEMA DE GESTIÓN BI</h2>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-12"><div class="section-label">Auditoría y Ventas</div></div>
+        <div class="col-md-4 mb-4">
+            <a href="reporte_ventas.html" class="menu-card d-block p-4 shadow-sm">
+                <div class="icon-box color-audit"><i class="bi bi-receipt-cutoff"></i></div>
+                <h5 style="font-weight: 400;">Auditoría de Ventas</h5>
+                <p class="text-muted small">Control detallado de tickets y medios de pago.</p>
+            </a>
         </div>
-        <button class="btn btn-outline-secondary btn-sm px-3" onclick="logout()">CERRAR SESIÓN</button>
-    </div>
-</nav>
-
-<div class="container" style="max-width: 1100px;">
-    <div class="row g-4">
-        <div class="col-md-6">
-            <a href="reporte_ventas.html" class="card-executive shadow-sm">
-                <div class="icon-container"><i class="bi bi-graph-up-arrow"></i></div>
-                <div>
-                    <div class="title-main">Auditoría de Ventas</div>
-                    <div class="desc-sub">Control de tickets, medios de pago y arqueo de cajas.</div>
-                </div>
+        <div class="col-md-4 mb-4">
+            <a href="reporte_ticket_promedio.html" class="menu-card d-block p-4 shadow-sm">
+                <div class="icon-box color-audit"><i class="bi bi-graph-up-arrow"></i></div>
+                <h5 style="font-weight: 400;">Ticket Promedio</h5>
+                <p class="text-muted small">Análisis evolutivo de ventas por operación.</p>
             </a>
         </div>
         
-        <div class="col-md-6">
-            <a href="reporte_stock.html" class="card-executive shadow-sm">
-                <div class="icon-container"><i class="bi bi-boxes"></i></div>
-                <div>
-                    <div class="title-main">Listado de Stock en tiempo real</div>
-                    <div class="desc-sub">Inventario físico actualizado por punto de venta.</div>
-                </div>
+        <div class="col-12 mt-4"><div class="section-label">Inventarios</div></div>
+        <div class="col-md-4 mb-4">
+            <a href="reporte_stock.html" class="menu-card d-block p-4 shadow-sm">
+                <div class="icon-box color-stock"><i class="bi bi-box-seam"></i></div>
+                <h5 style="font-weight: 400;">Stock en Tiempo Real</h5>
+                <p class="text-muted small">Existencia física actual por sucursal.</p>
             </a>
         </div>
-
-        <div class="col-md-6">
-            <a href="reporte_valorizado.html" class="card-executive shadow-sm">
-                <div class="icon-container"><i class="bi bi-currency-dollar"></i></div>
-                <div>
-                    <div class="title-main">Stock Valorizado</div>
-                    <div class="desc-sub">Valuación monetaria de activos bajo lista mayorista.</div>
-                </div>
+        <div class="col-md-4 mb-4">
+            <a href="reporte_valorizado.html" class="menu-card d-block p-4 shadow-sm">
+                <div class="icon-box color-stock"><i class="bi bi-currency-dollar"></i></div>
+                <h5 style="font-weight: 400;">Stock Valorizado</h5>
+                <p class="text-muted small">Valuación de mercadería a precio de lista.</p>
             </a>
         </div>
-
-        <div class="col-md-6">
-            <a href="reporte_movimientos.html" class="card-executive shadow-sm">
-                <div class="icon-container"><i class="bi bi-truck-flatbed"></i></div>
-                <div>
-                    <div class="title-main">Flujo de Mercadería</div>
-                    <div class="desc-sub">Historial de ingresos, egresos y auditoría de traslados.</div>
-                </div>
+        <div class="col-md-4 mb-4">
+            <a href="reporte_movimientos.html" class="menu-card d-block p-4 shadow-sm">
+                <div class="icon-box color-stock"><i class="bi bi-arrow-left-right"></i></div>
+                <h5 style="font-weight: 400;">Movimientos</h5>
+                <p class="text-muted small">Ingresos, egresos y transferencias.</p>
             </a>
         </div>
     </div>
 </div>
-
-<footer class="mt-5 py-4 text-center">
-    <hr class="w-25 mx-auto mb-4">
-    <small class="text-muted text-uppercase fw-bold" style="letter-spacing: 2px;">Gestión Estratégica &copy; 2025</small>
-</footer>
-
 </body>
 </html>

@@ -8,79 +8,106 @@
     <script src="auth.js"></script>
     <style>
         :root { --mimo-navy: #1e293b; --mimo-border: #e2e8f0; --mimo-bg: #f8fafc; }
-        body { background-color: var(--mimo-bg); font-family: 'Segoe UI', 'Calibri', sans-serif; color: var(--mimo-navy); }
-        .report-header { background: white; border-bottom: 2px solid var(--mimo-border); padding: 0.6rem 0; }
-        .logo-mimo { height: 35px; cursor: pointer; transition: opacity 0.2s; }
-        .logo-mimo:hover { opacity: 0.8; }
-        .header-title { color: #64748b; font-weight: 400; text-transform: uppercase; font-size: 0.85rem; margin-left: 80px; border-left: 1px solid var(--mimo-border); padding-left: 20px; }
-        .card-factura { background: white; border: 1px solid var(--mimo-border); margin-bottom: 25px; border-left: 5px solid #10b981; border-radius: 4px; overflow: hidden; }
-        .row-negativa { background-color: #fff1f2 !important; color: #e11d48 !important; font-weight: 600; }
-        .row-descuento { background-color: #f8fafc !important; color: #64748b; font-style: italic; }
-        .table-full { width: 100%; margin-bottom: 0; border-collapse: collapse; }
-        .table-full th { background-color: #fcfdfe; color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; padding: 12px 20px; border-bottom: 1px solid var(--mimo-border); }
-        .table-full td { padding: 10px 20px; border-bottom: 1px solid #f1f5f9; }
-        .btn-home { border: 1px solid var(--mimo-border); color: #64748b; background: white; padding: 0.4rem 0.8rem; border-radius: 4px; }
+        body { background-color: var(--mimo-bg); font-family: 'Segoe UI', sans-serif; color: var(--mimo-navy); font-weight: 300; }
+        
+        /* Cabecera Oscura Unificada */
+        .report-header-dark { background: #1e293b; color: white; padding: 1rem 0; border-radius: 4px; margin-bottom: 20px; }
+        .logo-mimo-header { height: 35px; background: white; padding: 5px; border-radius: 4px; margin-right: 20px; }
+        .header-title-text { font-size: 1.2rem; font-weight: 400; vertical-align: middle; }
+
+        /* Barra de Filtros */
+        .filter-bar { background: white; border: 1px solid var(--mimo-border); border-radius: 4px; padding: 15px; margin-bottom: 30px; }
+        
+        /* KPIs de Medios de Pago */
+        .kpi-container { display: flex; gap: 12px; margin-bottom: 25px; }
+        .kpi-box { flex: 1; padding: 15px; border-radius: 4px; background: white; border: 1px solid var(--mimo-border); border-bottom: 4px solid transparent; }
+        .kpi-box.efectivo { border-bottom-color: #10b981; }
+        .kpi-box.tarjetas { border-bottom-color: #facc15; }
+        .kpi-box.mp { border-bottom-color: #3b82f6; }
+        .kpi-box.total { background: #1e293b; color: white; border-bottom-color: #475569; }
+        .kpi-label { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: #94a3b8; display: block; margin-bottom: 8px; }
+        .kpi-value { font-size: 1.25rem; font-weight: 400; display: block; text-align: right; }
+
+        /* Facturas */
+        .card-factura { background: white; border: 1px solid var(--mimo-border); margin-bottom: 20px; border-radius: 4px; overflow: hidden; }
+        .header-fac { padding: 10px 20px; background: #fcfdfe; border-bottom: 1px solid var(--mimo-border); font-size: 0.85rem; font-weight: 400; color: #64748b; }
+        .table-full { width: 100%; border-collapse: collapse; }
+        .table-full th { font-weight: 500; font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; padding: 10px 20px; border-bottom: 1px solid var(--mimo-border); }
+        .table-full td { padding: 10px 20px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        .row-negativa { background-color: #fff1f2 !important; color: #e11d48 !important; }
+        .btn-mimo-dark { background: #1e293b; color: white; border: none; font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body onload="init()">
-<header class="report-header sticky-top mb-4">
-    <div class="container d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center">
-            <a href="reporte_index.html"><img src="Logo.png" class="logo-mimo" alt="Mimo"></a>
-            <span class="header-title">Auditoría de Ventas</span>
+
+<div class="container mt-4">
+    <div class="report-header-dark px-4 shadow-sm d-flex align-items-center">
+        <a href="reporte_index.html"><img src="Logo.png" class="logo-mimo-header" alt="Mimo"></a>
+        <span class="header-title-text">Auditoría de Ventas</span>
+    </div>
+
+    <div class="filter-bar shadow-sm d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <input type="date" id="desde" class="form-control form-control-sm" style="width: 140px;">
+            <input type="date" id="hasta" class="form-control form-control-sm" style="width: 140px;">
+            <select id="sucursal" class="form-select form-select-sm" style="width: 200px;"></select>
         </div>
-        <div class="d-flex gap-2 align-items-center">
-            <input type="date" id="desde" class="form-control form-control-sm" style="width: 135px;">
-            <input type="date" id="hasta" class="form-control form-control-sm" style="width: 135px;">
-            <select id="sucursal" class="form-select form-select-sm" style="width: 210px;"></select>
-            <button class="btn btn-dark btn-sm px-4 fw-bold" onclick="consultar()">CONSULTAR</button>
-            <a href="reporte_index.html" class="btn-home shadow-sm"><i class="bi bi-house-door"></i></a>
+        <div class="d-flex gap-2">
+            <button class="btn btn-mimo-dark px-4 py-2 rounded-1" onclick="consultar()">CONSULTAR</button>
+            <a href="reporte_index.html" class="btn btn-outline-secondary btn-sm d-flex align-items-center px-3 shadow-sm rounded-1"><i class="bi bi-house-door"></i></a>
         </div>
     </div>
-</header>
-<div class="container">
-    <div id="totales-resumen" class="mb-4" style="display: none;">
-        <div class="p-3 bg-white border flex-fill shadow-sm rounded-1">
-            <label class="small text-muted d-block text-uppercase fw-bold mb-1">Venta Neta Total</label>
-            <span id="res-total" class="h4 fw-bold"></span>
-        </div>
+
+    <div class="kpi-container" id="totales-resumen" style="display: none;">
+        <div class="kpi-box efectivo"><span class="kpi-label">Efectivo</span><span id="res-efectivo" class="kpi-value">$ 0</span></div>
+        <div class="kpi-box tarjetas"><span class="kpi-label">Tarjetas</span><span id="res-tarjetas" class="kpi-value">$ 0</span></div>
+        <div class="kpi-box mp"><span class="kpi-label">Mercado Pago</span><span id="res-mp" class="kpi-value">$ 0</span></div>
+        <div class="kpi-box total"><span class="kpi-label">Total Neto</span><span id="res-total" class="kpi-value">$ 0</span></div>
     </div>
+
     <div id="resultado"></div>
 </div>
+
 <script>
-    function init() { protectPage(); const hoy = new Date().toISOString().split('T')[0]; document.getElementById('desde').value = hoy; document.getElementById('hasta').value = hoy; cargarSucursales(); }
-    async function cargarSucursales() { const res = await authFetch('/api/sucursales'); const data = await res.json(); document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join(''); }
+    async function init() {
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('desde').value = hoy;
+        document.getElementById('hasta').value = hoy;
+        const res = await fetch('/api/sucursales');
+        const data = await res.json();
+        document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+    }
+
     async function consultar() {
         const container = document.getElementById('resultado');
-        container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-secondary"></div></div>';
+        container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-secondary spinner-border-sm"></div></div>';
         try {
-            const res = await authFetch(`/api/facturas?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
+            const res = await fetch(`/api/facturas?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
             const data = await res.json();
-            const fmt = { style: 'currency', currency: 'ARS' };
-            document.getElementById('totales-resumen').style.display = 'block';
-            document.getElementById('res-total').innerText = data.totales.general.toLocaleString('es-AR', fmt);
+            const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
+
+            document.getElementById('totales-resumen').style.display = 'flex';
+            document.getElementById('res-efectivo').innerText = fmt.format(data.totales.efectivo);
+            document.getElementById('res-tarjetas').innerText = fmt.format(data.totales.tarjeta);
+            document.getElementById('res-mp').innerText = fmt.format(data.totales.mp);
+            document.getElementById('res-total').innerText = fmt.format(data.totales.general);
+
             container.innerHTML = data.datos.map(f => {
-                const itemsOrd = [...f.items].sort((a, b) => (a.cant < 0 || a.cod.startsWith('DC')) - (b.cant < 0 || b.cod.startsWith('DC')));
                 const totalTicket = f.items.reduce((acc, i) => acc + (i.cant * i.pre), 0);
                 return `<div class="card-factura shadow-sm">
-                    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
-                        <span class="fw-bold">COMPROBANTE: ${f.prefijo}-${f.numero}</span>
-                        <span class="badge border text-success bg-white px-3 py-2 fw-bold">${f.pago}</span>
+                    <div class="header-fac d-flex justify-content-between">
+                        <span>COMPROBANTE: ${f.prefijo}-${f.numero}</span>
+                        <span class="badge border text-muted fw-normal px-2">${f.pago}</span>
                     </div>
                     <table class="table-full">
                         <thead><tr><th>Artículo</th><th class="text-center">Cant.</th><th class="text-end">Subtotal</th></tr></thead>
-                        <tbody>
-                            ${itemsOrd.map(i => `<tr class="${i.cant < 0 ? 'row-negativa' : (i.cod.startsWith('DC') ? 'row-descuento' : '')}">
-                                <td>${i.cod}</td>
-                                <td class="text-center">${i.cant}</td>
-                                <td class="text-end">${(i.cant*i.pre).toLocaleString('es-AR', fmt)}</td>
-                            </tr>`).join('')}
-                        </tbody>
+                        <tbody>${f.items.map(i => `<tr class="${i.cant < 0 ? 'row-negativa' : ''}">
+                            <td>${i.cod}</td><td class="text-center">${i.cant}</td><td class="text-end">${fmt.format(i.cant * i.pre)}</td></tr>`).join('')}</tbody>
                     </table>
-                    <div class="p-3 text-end fw-bold border-top bg-white fs-5">TOTAL TICKET: ${totalTicket.toLocaleString('es-AR', fmt)}</div>
+                    <div class="p-3 text-end fw-normal border-top">TOTAL: ${fmt.format(totalTicket)}</div>
                 </div>`;
             }).join('');
-        } catch(e) { container.innerHTML = '<div class="text-center py-5 text-danger">Error de carga.</div>'; }
+        } catch(e) { container.innerHTML = '<div class="text-center py-4">Error de conexión</div>'; }
     }
 </script>
 </body>
