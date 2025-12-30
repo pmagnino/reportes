@@ -1,11 +1,21 @@
 FROM node:20-alpine
 
+# Variables de entorno
+ENV NODE_ENV=production
+
 WORKDIR /app
 
+# Copiamos solo dependencias primero (mejor cache)
 COPY package*.json ./
-RUN npm install --omit=dev
 
+# Instalamos solo prod deps
+RUN npm ci --omit=dev
+
+# Copiamos el resto del código
 COPY . .
+
+# Seguridad: no correr como root
+USER node
 
 EXPOSE 3000
 
