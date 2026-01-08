@@ -4,46 +4,102 @@
     <meta charset="UTF-8">
     <title>Mimo & Co | Stock Valorizado</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script src="auth.js"></script>
     <style>
-        :root { --mimo-navy: #1e293b; --mimo-border: #e2e8f0; --mimo-bg: #f8fafc; }
-        body { background-color: var(--mimo-bg); font-family: 'Segoe UI', sans-serif; color: var(--mimo-navy); font-weight: 400; }
-        .report-header { background: white; border-bottom: 2px solid var(--mimo-border); padding: 0.6rem 0; }
-        .logo-mimo { height: 35px; }
-        .header-title { color: #64748b; font-weight: 400; text-transform: uppercase; font-size: 0.8rem; margin-left: 80px; border-left: 1px solid var(--mimo-border); padding-left: 20px; letter-spacing: 1px; }
-        .val-card { background: #1e293b; color: white; padding: 20px; border-radius: 4px; border-left: 6px solid #10b981; margin-bottom: 25px; }
-        .val-label { font-size: 0.65rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 1px; }
-        .table-full { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--mimo-border); }
-        .table-full th { font-weight: 500; font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; padding: 12px 20px; border-bottom: 1px solid var(--mimo-border); }
-        .table-full td { padding: 8px 20px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        body { background-color: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; color: #334155; margin: 0; }
+        .nav-header { background: #1e293b; color: white; padding: 10px 30px; display: flex; align-items: center; height: 60px; }
+        .nav-header img { height: 35px; background-color: white; padding: 5px; border-radius: 4px; margin-right: 20px; }
+        .nav-header span { font-size: 13px; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
+        .filter-container { background: white; border-bottom: 1px solid #e2e8f0; padding: 25px 40px; margin-bottom: 30px; }
+        .card-pro { background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .label-sm { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+        .total-card-green { border-left: 4px solid #10b981; }
+        .total-card-blue { border-left: 4px solid #3b82f6; }
+        .stat-val { font-size: 22px; font-weight: 700; color: #1e293b; margin-top: 5px; }
+        .btn-execute { background: #1e293b; color: white; font-weight: 700; border: none; border-radius: 6px; font-size: 12px; height: 40px; transition: 0.2s; }
+        .btn-execute:hover { background: #334155; }
+        .val-item { border-bottom: 1px solid #f1f5f9; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: white; }
+        .val-item:last-child { border-bottom: none; border-radius: 0 0 8px 8px; }
+        .val-item:first-child { border-radius: 8px 8px 0 0; }
+        .info-main { font-size: 15px; color: #1e293b; font-weight: 600; display: block; }
+        .info-sub { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
+        .price-main { color: #10b981; font-size: 16px; font-weight: 700; display: block; }
     </style>
 </head>
 <body onload="init()">
-<header class="report-header sticky-top mb-4">
-    <div class="container d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center"><a href="reporte_index.html"><img src="Logo.png" class="logo-mimo"></a><span class="header-title">Stock Valorizado (MAY)</span></div>
-        <div class="d-flex gap-2"><select id="sucursal" class="form-select form-select-sm" style="width: 200px;"></select><button class="btn btn-dark btn-sm px-4" onclick="consultar()">CONSULTAR</button><a href="reporte_index.html" class="btn btn-outline-secondary btn-sm"><i class="bi bi-house-door"></i></a></div>
-    </div>
-</header>
-<div class="container">
-    <div class="val-card shadow-sm" id="pnl-val" style="display: none;"><span class="val-label">Valuación Total</span><h2 id="total-val" style="font-weight: 400; margin-top: 5px;"></h2></div>
-    <div class="shadow-sm"><table class="table-full"><thead><tr><th>Artículo</th><th class="text-center">Stock</th><th class="text-end">Precio Unit.</th><th class="text-end">Total</th></tr></thead><tbody id="res-body"></tbody></table></div>
+
+<div class="nav-header">
+    <a href="reporte_index.html"><img src="Logo.png" alt="Mimo & Co"></a>
+    <span>STOCK VALORIZADO DE CARTERA</span>
 </div>
+
+<div class="filter-container">
+    <div class="row g-4 align-items-stretch">
+        <div class="col-md-5">
+            <div class="card-pro">
+                <span class="label-sm">Sucursal de Consulta</span>
+                <div class="d-flex gap-2">
+                    <select id="sucursal" class="form-select border-light-subtle bg-light shadow-none"></select>
+                    <button class="btn-execute px-4" onclick="consultar()">CALCULAR</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card-pro total-card-green">
+                <span class="label-sm">Total Valorizado (Costo MAY)</span>
+                <div id="total-cartera" class="stat-val">$ 0,00</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-pro total-card-blue">
+                <span class="label-sm">Artículos con Existencia</span>
+                <div id="total-articulos" class="stat-val">0</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-5">
+    <div id="cont-resultados" class="card-pro p-0 overflow-hidden" style="display: none; border-radius: 8px;">
+        <div id="res-body"></div>
+    </div>
+</div>
+
 <script>
-    function init() { protectPage(); cargarSucursales(); }
-    async function cargarSucursales() { 
-        const res = await fetch('/api/sucursales'); const data = await res.json();
+    const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
+
+    async function init() {
+        const res = await fetch('/api/sucursales');
+        const data = await res.json();
         document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
     }
+
     async function consultar() {
-        const tbody = document.getElementById('res-body'); tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5"><div class="spinner-border text-secondary spinner-border-sm"></div></td></tr>';
-        try {
-            const res = await fetch(`/api/reporte/stock-valorizado?sucursal=${document.getElementById('sucursal').value}`);
-            const data = await res.json(); const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
-            document.getElementById('pnl-val').style.display = 'block'; document.getElementById('total-val').innerText = fmt.format(data.totalCartera);
-            tbody.innerHTML = data.detalles.map(i => `<tr><td style="font-weight: 500;">${i.CODITM}</td><td class="text-center">${i.STKACTUAL}</td><td class="text-end">${fmt.format(i.PRECIO_COMPRA_UNITARIO)}</td><td class="text-end" style="font-weight: 500;">${fmt.format(i.TOTAL_COMPRA)}</td></tr>`).join('');
-        } catch(e) { tbody.innerHTML = 'Error'; }
+        const suc = document.getElementById('sucursal').value;
+        const res = await fetch(`/api/reporte/stock-valorizado?sucursal=${suc}`);
+        const data = await res.json();
+        
+        // Blindaje: data.detalles existe porque lo corregimos en el servidor
+        const detalles = data.detalles || [];
+        const total = data.totalCartera || 0;
+
+        document.getElementById('total-cartera').innerText = fmt.format(total);
+        document.getElementById('total-articulos').innerText = detalles.length;
+
+        if (detalles.length > 0) {
+            document.getElementById('cont-resultados').style.display = 'block';
+            document.getElementById('res-body').innerHTML = detalles.map(r => `
+                <div class="val-item">
+                    <div>
+                        <span class="info-main">${r.CODITM}</span>
+                        <span class="info-sub">EXISTENCIA: ${r.STKACTUAL}</span>
+                    </div>
+                    <div class="text-end">
+                        <span class="price-main">${fmt.format(r.TOTAL_VALORIZADO)}</span>
+                        <span class="info-sub">LISTA PCI: ${fmt.format(r.PRECIO_UNITARIO)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
     }
 </script>
 </body>

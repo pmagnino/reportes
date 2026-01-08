@@ -4,60 +4,98 @@
     <meta charset="UTF-8">
     <title>Mimo & Co | Ticket Promedio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        :root { --mimo-navy: #1e293b; --mimo-border: #e2e8f0; --mimo-bg: #f8fafc; }
-        body { background-color: var(--mimo-bg); font-family: 'Segoe UI', sans-serif; color: var(--mimo-navy); font-weight: 300; }
-        .report-header-dark { background: #1e293b; color: white; padding: 1rem 0; border-radius: 4px; margin-bottom: 20px; }
-        .logo-mimo-header { height: 35px; background: white; padding: 5px; border-radius: 4px; margin-right: 20px; }
-        .filter-bar { background: white; border: 1px solid var(--mimo-border); border-radius: 4px; padding: 15px; margin-bottom: 30px; }
-        .kpi-box { flex: 1; padding: 15px; border-radius: 4px; background: white; border: 1px solid var(--mimo-border); border-bottom: 4px solid #10b981; }
-        .table-executive { width: 100%; background: white; border-radius: 4px; border: 1px solid var(--mimo-border); }
-        .table-executive th { background: #fcfdfe; color: #94a3b8; font-size: 0.7rem; text-transform: uppercase; padding: 12px 20px; border-bottom: 1px solid var(--mimo-border); }
-        .table-executive td { padding: 12px 20px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
-        .btn-mimo-dark { background: #1e293b; color: white; border: none; font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+        body { background-color: #f8f9fa; font-family: 'Calibri', sans-serif; color: #475569; font-size: 14px; }
+        .header-bar { background: #1e293b; color: white; padding: 12px 30px; display: flex; align-items: center; }
+        .header-bar img { height: 35px; margin-right: 20px; }
+        .card-pro { background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 20px; }
+        .label-sm { font-size: 11px; font-weight: 400; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .row-total-highlight td { background-color: #64748b !important; color: #ffffff !important; font-weight: 700 !important; padding: 12px 25px !important; border: none !important; }
+        .info-note { font-size: 12px; color: #94a3b8; font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-bottom: 20px; }
     </style>
 </head>
 <body onload="init()">
-<div class="container mt-4">
-    <div class="report-header-dark px-4 shadow-sm d-flex align-items-center">
-        <a href="reporte_index.html"><img src="Logo.png" class="logo-mimo-header"></a>
-        <span style="font-size: 1.2rem;">Análisis de Ticket Promedio</span>
-    </div>
-    <div class="filter-bar shadow-sm d-flex justify-content-between align-items-center">
-        <div class="d-flex gap-2">
-            <input type="date" id="desde" class="form-control form-control-sm" style="width: 140px;">
-            <input type="date" id="hasta" class="form-control form-control-sm" style="width: 140px;">
-            <select id="sucursal" class="form-select form-select-sm" style="width: 200px;"></select>
-        </div>
-        <button class="btn btn-mimo-dark px-4 py-2 rounded-1" onclick="consultar()">CONSULTAR</button>
-    </div>
-    <div class="d-flex gap-3 mb-4" id="totales-resumen" style="display: none;">
-        <div class="kpi-box"> <small class="text-muted text-uppercase fw-bold" style="font-size: 0.6rem;">Venta Neta</small> <span id="res-total" class="d-block fs-4"></span> </div>
-        <div class="kpi-box" style="border-bottom-color: #3b82f6;"> <small class="text-muted text-uppercase fw-bold" style="font-size: 0.6rem;">Tickets</small> <span id="res-cantidad" class="d-block fs-4"></span> </div>
-        <div class="kpi-box" style="border-bottom-color: #e21c24;"> <small class="text-muted text-uppercase fw-bold" style="font-size: 0.6rem;">Promedio</small> <span id="res-promedio" class="d-block fs-4" style="color: #e21c24;"></span> </div>
-    </div>
-    <table class="table-executive shadow-sm">
-        <thead><tr><th>Fecha</th><th class="text-center">Tickets</th><th class="text-end">Venta Neta</th><th class="text-end">Promedio</th></tr></thead>
-        <tbody id="res-body"></tbody>
-    </table>
+<div class="header-bar shadow-sm">
+    <a href="reporte_index.html" style="text-decoration: none; color: white;"><img src="Logo.png" alt="Mimo & Co"></a>
+    <span style="font-size: 16px; text-transform: uppercase; font-weight: 300; margin-left: 10px;">Ticket Promedio</span>
 </div>
+
+<div class="container-fluid py-4 px-5">
+    <div class="card-pro">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4"><span class="label-sm">Sucursal</span><select id="sucursal" class="form-select border-0 bg-light shadow-none"></select></div>
+            <div class="col-md-3"><span class="label-sm">Desde</span><input type="date" id="desde" class="form-control border-0 bg-light shadow-none"></div>
+            <div class="col-md-3"><span class="label-sm">Hasta</span><input type="date" id="hasta" class="form-control border-0 bg-light shadow-none"></div>
+            <div class="col-md-2"><button class="btn btn-dark w-100 fw-bold py-2 btn-sm" onclick="consultar()">CONSULTAR</button></div>
+        </div>
+    </div>
+
+    <div id="cont-resultados" style="display: none;">
+        <div class="info-note">
+            <strong>Nota metodológica:</strong> El Ticket Promedio surge de dividir la Venta Neta por la cantidad total de tickets emitidos en el período.
+        </div>
+
+        <div class="card-pro p-0 overflow-hidden">
+            <table class="table mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="px-4 py-3 border-0 small text-uppercase">Fecha</th>
+                        <th class="text-center py-3 border-0 small text-uppercase">Tickets</th>
+                        <th class="text-end py-3 border-0 small text-uppercase">Venta Neta</th>
+                        <th class="text-end px-4 py-3 border-0 small text-uppercase">Promedio</th>
+                    </tr>
+                </thead>
+                <tbody id="res-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <script>
+    const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
+
     async function init() {
-        const hoy = new Date().toISOString().split('T')[0];
-        document.getElementById('desde').value = hoy; document.getElementById('hasta').value = hoy;
-        const res = await fetch('/api/sucursales'); const data = await res.json();
+        const res = await fetch('/api/sucursales');
+        const data = await res.json();
         document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+        document.getElementById('desde').value = document.getElementById('hasta').value = new Date().toISOString().split('T')[0];
     }
+
     async function consultar() {
-        const tbody = document.getElementById('res-body'); tbody.innerHTML = '<tr><td colspan="4" class="text-center py-5"><div class="spinner-border text-secondary spinner-border-sm"></div></td></tr>';
-        const res = await fetch(`/api/reporte/ticket-promedio?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
-        const data = await res.json(); const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
-        document.getElementById('totales-resumen').style.display = 'flex';
-        document.getElementById('res-total').innerText = fmt.format(data.resumen.totalVenta);
-        document.getElementById('res-cantidad').innerText = data.resumen.totalTickets;
-        document.getElementById('res-promedio').innerText = fmt.format(data.resumen.promedio);
-        tbody.innerHTML = data.datos.map(d => `<tr><td>${new Date(d.FECHA).toLocaleDateString('es-AR')}</td><td class="text-center">${d.CANTIDAD_TICKETS}</td><td class="text-end">${fmt.format(d.VENTA_NETA_TOTAL)}</td><td class="text-end" style="color: #e21c24;">${fmt.format(d.TICKET_PROMEDIO)}</td></tr>`).join('');
+        try {
+            const suc = document.getElementById('sucursal').value;
+            const d = document.getElementById('desde').value;
+            const h = document.getElementById('hasta').value;
+
+            // LLAMADA CORREGIDA: Apunta al endpoint exacto definido en index.js
+            const res = await fetch(`/api/reporte/ticket-promedio?sucursal=${suc}&desde=${d}&hasta=${h}`);
+            if (!res.ok) throw new Error("Error en el servidor");
+            
+            const result = await res.json();
+            document.getElementById('cont-resultados').style.display = 'block';
+
+            let html = result.datos.map(r => `
+                <tr>
+                    <td class="px-4 py-3">${r.FECHA}</td>
+                    <td class="text-center">${r.TICKETS}</td>
+                    <td class="text-end">${fmt.format(r.VENTA_NETA)}</td>
+                    <td class="text-end px-4">${fmt.format(r.PROMEDIO)}</td>
+                </tr>`).join('');
+            
+            // Fila de total utilizando el objeto resumen del servidor
+            html += `
+                <tr class="row-total-highlight">
+                    <td class="px-4">TOTAL PERÍODO</td>
+                    <td class="text-center">${result.resumen.tickets}</td>
+                    <td class="text-end">${fmt.format(result.resumen.venta)}</td>
+                    <td class="text-end px-4">${fmt.format(result.resumen.promedio)}</td>
+                </tr>`;
+            
+            document.getElementById('res-body').innerHTML = html;
+        } catch (e) {
+            console.error(e);
+            alert("No se pudo cargar el reporte. Verifique que el servidor esté encendido.");
+        }
     }
 </script>
 </body>
