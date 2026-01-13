@@ -9,97 +9,95 @@
         .nav-header { background: #1e293b; color: white; padding: 10px 30px; display: flex; align-items: center; height: 60px; }
         .nav-header img { height: 35px; background-color: white; padding: 5px; border-radius: 4px; margin-right: 20px; }
         .nav-header span { font-size: 13px; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
-        .filter-container { background: white; border-bottom: 1px solid #e2e8f0; padding: 25px 40px; margin-bottom: 30px; }
+        .filter-container { background: white; border-bottom: 1px solid #e2e8f0; padding: 25px 40px; margin-bottom: 20px; }
         .card-pro { background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .label-sm { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
-        .total-card-green { border-left: 4px solid #10b981; }
-        .total-card-blue { border-left: 4px solid #3b82f6; }
+        .total-card { border-left: 4px solid #10b981; }
         .stat-val { font-size: 22px; font-weight: 700; color: #1e293b; margin-top: 5px; }
-        .btn-execute { background: #1e293b; color: white; font-weight: 700; border: none; border-radius: 6px; font-size: 12px; height: 40px; transition: 0.2s; }
-        .btn-execute:hover { background: #334155; }
-        .val-item { border-bottom: 1px solid #f1f5f9; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: white; }
+        .btn-execute { background: #1e293b; color: white; font-weight: 700; border: none; border-radius: 6px; font-size: 12px; height: 40px; }
+        
+        .val-item { border-bottom: 1px solid #f1f5f9; padding: 15px 25px; display: grid; grid-template-columns: 2fr 1fr 1fr; align-items: center; background: white; }
         .val-item:last-child { border-bottom: none; border-radius: 0 0 8px 8px; }
-        .val-item:first-child { border-radius: 8px 8px 0 0; }
-        .info-main { font-size: 15px; color: #1e293b; font-weight: 600; display: block; }
-        .info-sub { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
-        .price-main { color: #10b981; font-size: 16px; font-weight: 700; display: block; }
+        
+        .info-main { font-size: 14px; color: #1e293b; font-weight: 700; }
+        .info-desc { font-size: 11px; color: #64748b; text-transform: uppercase; display: block; }
+        .badge-rubro { background-color: #f1f5f9; color: #475569; font-size: 9px; padding: 2px 8px; border-radius: 12px; margin-left: 8px; border: 1px solid #e2e8f0; font-weight: 600; }
+        
+        .stock-val { font-size: 20px; font-weight: 800; color: #1e293b; text-align: center; display: block; }
+        .stock-label { font-size: 9px; color: #94a3b8; font-weight: 700; text-align: center; display: block; }
+        
+        .price-total { color: #10b981; font-size: 16px; font-weight: 700; text-align: right; display: block; }
+        .price-label { font-size: 9px; color: #94a3b8; font-weight: 700; text-align: right; display: block; }
     </style>
 </head>
 <body onload="init()">
-
 <div class="nav-header">
-    <a href="reporte_index.html"><img src="Logo.png" alt="Mimo & Co"></a>
+    <a href="reporte_index.html"><img src="Logo.png" alt="Mimo"></a>
     <span>STOCK VALORIZADO DE CARTERA</span>
 </div>
-
 <div class="filter-container">
-    <div class="row g-4 align-items-stretch">
-        <div class="col-md-5">
-            <div class="card-pro">
-                <span class="label-sm">Sucursal de Consulta</span>
-                <div class="d-flex gap-2">
-                    <select id="sucursal" class="form-select border-light-subtle bg-light shadow-none"></select>
-                    <button class="btn-execute px-4" onclick="consultar()">CALCULAR</button>
-                </div>
-            </div>
+    <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <span class="label-sm">Sucursal de Consulta</span>
+            <select id="sucursal" class="form-select border-light-subtle bg-light shadow-none"></select>
         </div>
         <div class="col-md-3">
-            <div class="card-pro total-card-green">
-                <span class="label-sm">Total Valorizado (Costo MAY)</span>
-                <div id="total-cartera" class="stat-val">$ 0,00</div>
-            </div>
+            <span class="label-sm">Buscar en Resultados</span>
+            <input type="text" id="buscador" class="form-control border-light-subtle bg-light shadow-none" onkeyup="filtrar()">
+        </div>
+        <div class="col-md-2">
+            <button class="btn-execute w-100" onclick="consultar()">CONSULTAR</button>
         </div>
         <div class="col-md-4">
-            <div class="card-pro total-card-blue">
-                <span class="label-sm">Artículos con Existencia</span>
-                <div id="total-articulos" class="stat-val">0</div>
+            <div class="card-pro total-card py-2 d-flex justify-content-between align-items-center">
+                <div><span class="label-sm">Total Valorizado</span><div id="total-cartera" class="stat-val">$ 0,00</div></div>
+                <div class="text-end border-start ps-3"><span class="label-sm">Stock Total</span><div id="total-stock-kpi" class="stat-val" style="color: #3b82f6;">0</div></div>
             </div>
         </div>
     </div>
 </div>
-
-<div class="container-fluid px-5">
-    <div id="cont-resultados" class="card-pro p-0 overflow-hidden" style="display: none; border-radius: 8px;">
+<div class="container-fluid px-5 pb-5">
+    <div id="cont-resultados" class="card-pro p-0 overflow-hidden" style="display: none;">
+        <div class="bg-light px-4 py-2 border-bottom d-grid" style="grid-template-columns: 2fr 1fr 1fr;">
+            <span class="label-sm m-0">Producto / Descripción</span>
+            <span class="label-sm m-0 text-center">Existencia Física</span>
+            <span class="label-sm m-0 text-end">Valorización Total</span>
+        </div>
         <div id="res-body"></div>
     </div>
 </div>
-
 <script>
+    let datosOriginales = [];
     const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
-
     async function init() {
         const res = await fetch('/api/sucursales');
         const data = await res.json();
         document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
     }
-
     async function consultar() {
         const suc = document.getElementById('sucursal').value;
         const res = await fetch(`/api/reporte/stock-valorizado?sucursal=${suc}`);
         const data = await res.json();
-        
-        // Blindaje: data.detalles existe porque lo corregimos en el servidor
-        const detalles = data.detalles || [];
-        const total = data.totalCartera || 0;
-
-        document.getElementById('total-cartera').innerText = fmt.format(total);
-        document.getElementById('total-articulos').innerText = detalles.length;
-
-        if (detalles.length > 0) {
-            document.getElementById('cont-resultados').style.display = 'block';
-            document.getElementById('res-body').innerHTML = detalles.map(r => `
-                <div class="val-item">
-                    <div>
-                        <span class="info-main">${r.CODITM}</span>
-                        <span class="info-sub">EXISTENCIA: ${r.STKACTUAL}</span>
-                    </div>
-                    <div class="text-end">
-                        <span class="price-main">${fmt.format(r.TOTAL_VALORIZADO)}</span>
-                        <span class="info-sub">LISTA PCI: ${fmt.format(r.PRECIO_UNITARIO)}</span>
-                    </div>
+        datosOriginales = data.detalles || [];
+        render(datosOriginales);
+    }
+    function render(lista) {
+        document.getElementById('total-cartera').innerText = fmt.format(lista.reduce((acc, r) => acc + r.TOTAL_VALORIZADO, 0));
+        document.getElementById('total-stock-kpi').innerText = lista.reduce((acc, r) => acc + r.STKACTUAL, 0).toLocaleString('es-AR');
+        document.getElementById('cont-resultados').style.display = 'block';
+        document.getElementById('res-body').innerHTML = lista.map(r => `
+            <div class="val-item">
+                <div>
+                    <div class="d-flex align-items-center mb-1"><span class="info-main">${r.CODITM}</span><span class="badge-rubro">${r.RUBRO}</span></div>
+                    <span class="info-desc">${r.DESCRIPCION || 'SIN DESCRIPCIÓN'}</span>
                 </div>
-            `).join('');
-        }
+                <div><span class="stock-val">${r.STKACTUAL}</span><span class="stock-label">UNIDADES</span></div>
+                <div><span class="price-total">${fmt.format(r.TOTAL_VALORIZADO)}</span><span class="price-label">VALOR TOTAL</span></div>
+            </div>`).join('');
+    }
+    function filtrar() {
+        const b = document.getElementById('buscador').value.toLowerCase();
+        render(datosOriginales.filter(i => i.CODITM.toLowerCase().includes(b) || (i.DESCRIPCION && i.DESCRIPCION.toLowerCase().includes(b))));
     }
 </script>
 </body>

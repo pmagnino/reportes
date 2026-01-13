@@ -20,7 +20,7 @@ const dbConfig = {
 const poolMainPromise = new sql.ConnectionPool(dbConfig).connect();
 const cleanParam = (p) => p ? p.toString().replace(':1', '').trim() : '';
 
-// 1. SUCURSALES
+// --- 1. SUCURSALES ---
 app.get('/api/sucursales', async (req, res) => {
     try {
         const pool = await poolMainPromise;
@@ -29,96 +29,164 @@ app.get('/api/sucursales', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 2. VENTAS
+// --- 2. AUDITORÍA DE VENTAS ---
 app.get('/api/facturas', async (req, res) => {
-    let { sucursal, desde, hasta, articulo } = req.query;
+    let { sucursal, desde, hasta, articulo, medioPago } = req.query;
     try {
         const pool = await poolMainPromise;
-        let q = `SELECT A.CODCMP, A.PREFIJO, A.NUMERO, CONVERT(VARCHAR(10), A.FECHA, 103) AS FECHA_STR, B.CODITM, B.CANTIDAD1 AS cant, CAST(B.PRECIO AS MONEY) AS pre, ISNULL(B.OBSERVACIONES, '') AS obs, CASE WHEN C.CODPAG = '001' THEN 'EFECTIVO' WHEN C.CODPAG = '100' THEN 'TARJETA' WHEN C.CODPAG IN ('125','225') THEN 'MERCADOPAGO' ELSE 'OTRO' END AS pago_desc, CAST(A.TOTAL AS MONEY) AS total_comprobante FROM dbo.QRMVS A INNER JOIN dbo.QRLINEASITEMS B ON A.IdRouter = B.IdRouter INNER JOIN dbo.QRLineasPago C ON A.IdRouter = C.IdRouter WHERE A.CODSUC = @suc AND CAST(A.FECHA AS DATE) >= CAST(@desde AS DATE) AND CAST(A.FECHA AS DATE) <= CAST(@hasta AS DATE) AND A.CODCMP IN ('FA', 'FB', 'CA', 'CB') AND A.IDCOMPROBANTE > 0`;
-        if (cleanParam(articulo) !== "") q += ` AND A.IdRouter IN (SELECT IdRouter FROM dbo.QRLINEASITEMS WHERE CODITM LIKE '%' + @art + '%')`;
-        const result = await pool.request().input('suc', sql.Int, cleanParam(sucursal)).input('desde', sql.VarChar, cleanParam(desde)).input('hasta', sql.VarChar, cleanParam(hasta)).input('art', sql.VarChar, cleanParam(articulo)).query(q);
-        const facturas = {}; const procesados = new Set();
+        let q = `
+            WITH FacturasBase AS (
+                SELECT A.CODCMP, A.PREFIJO, A.NUMERO, A.IdRouter,
+                CONVERT(VARCHAR(10), A.FECHA, 103) AS FECHA_STR, 
+                CAST(A.TOTAL AS MONEY) AS total_comprobante,
+                ISNULL((SELECT TOP 1 CASE 
+                    WHEN CODPAG = '001' THEN 'EFECTIVO' 
+                    WHEN CODPAG = '100' THEN 'TARJETAS' 
+                    WHEN CODPAG IN ('125','225') THEN 'MERCADO PAGO' 
+                    ELSE 'EFECTIVO' END 
+                 FROM dbo.QRLineasPago WHERE IdRouter = A.IdRouter), 'EFECTIVO') AS pago_desc
+                FROM dbo.QRMVS A 
+                WHERE CAST(A.CODSUC AS VARCHAR) LIKE '%' + CAST(@suc AS VARCHAR) 
+                AND CAST(A.FECHA AS DATE) BETWEEN @desde AND @hasta 
+                AND A.CODCMP IN ('FA', 'FB', 'CA', 'CB') AND A.IDCOMPROBANTE > 0 AND A.ANULADO = 0
+            )
+            SELECT * FROM FacturasBase WHERE 1=1`;
+        if (cleanParam(articulo) !== "") q += ` AND IdRouter IN (SELECT IdRouter FROM dbo.QRLINEASITEMS WHERE CODITM LIKE '%' + @art + '%')`;
+        if (cleanParam(medioPago) !== "" && cleanParam(medioPago) !== "TODOS") q += ` AND pago_desc = @mpago`;
+        const request = pool.request()
+            .input('suc', sql.Int, cleanParam(sucursal))
+            .input('desde', sql.VarChar, cleanParam(desde))
+            .input('hasta', sql.VarChar, cleanParam(hasta))
+            .input('art', sql.VarChar, cleanParam(articulo))
+            .input('mpago', sql.VarChar, cleanParam(medioPago));
+        const result = await request.query(q);
         let ef = 0, tj = 0, mp = 0, gr = 0, cFA = 0, cNC = 0;
-        result.recordset.forEach(r => {
-            const k = `${r.CODCMP}-${r.PREFIJO}-${r.NUMERO}`;
-            if (!facturas[k]) {
-                facturas[k] = { prefijo: r.PREFIJO, numero: r.NUMERO, tipo: r.CODCMP, fecha: r.FECHA_STR, pago: r.pago_desc, totalTicket: r.total_comprobante, items: [] };
-                if (!procesados.has(k)) {
-                    const factor = r.CODCMP.startsWith('C') ? -1 : 1;
-                    const val = r.total_comprobante * factor;
-                    if (r.pago_desc === 'EFECTIVO') ef += val; else if (r.pago_desc === 'TARJETA') tj += val; else if (r.pago_desc === 'MERCADOPAGO') mp += val;
-                    if (r.CODCMP.startsWith('F')) cFA++; else cNC++;
-                    gr += val; procesados.add(k);
-                }
-            }
-            facturas[k].items.push({ cod: r.CODITM, cant: r.cant, pre: r.pre, obs: r.obs });
+        const facturas = result.recordset.map(r => {
+            const factor = (r.CODCMP === 'CA' || r.CODCMP === 'CB') ? -1 : 1;
+            const netoReal = r.total_comprobante * factor;
+            if (r.pago_desc === 'EFECTIVO') ef += netoReal;
+            else if (r.pago_desc === 'TARJETAS') tj += netoReal;
+            else if (r.pago_desc === 'MERCADO PAGO') mp += netoReal;
+            else ef += netoReal;
+            if (factor === 1) cFA++; else cNC++;
+            gr += netoReal;
+            return { prefijo: r.PREFIJO, numero: r.NUMERO, tipo: r.CODCMP, fecha: r.FECHA_STR, pago: r.pago_desc, totalTicket: r.total_comprobante, IdRouter: r.IdRouter, items: [] };
         });
-        res.json({ datos: Object.values(facturas), totales: { efectivo: ef, tarjeta: tj, mp: mp, general: gr, facturas: cFA, notas: cNC } });
+        if (facturas.length > 0) {
+            const ids = result.recordset.map(r => `'${r.IdRouter}'`).join(',');
+            const itemsRes = await pool.request().query(`SELECT IdRouter, CODITM, CANTIDAD1, PRECIO, OBSERVACIONES FROM QRLINEASITEMS WHERE IdRouter IN (${ids})`);
+            facturas.forEach(f => { f.items = itemsRes.recordset.filter(i => i.IdRouter === f.IdRouter).map(i => ({ cod: i.CODITM, cant: i.CANTIDAD1, pre: i.PRECIO, obs: i.OBSERVACIONES })); });
+        }
+        res.json({ datos: facturas, totales: { efectivo: ef, tarjeta: tj, mp: mp, general: gr, facturas: cFA, notas: cNC } });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 3. MEDIOS DE PAGO
+// --- 3. MEDIOS DE PAGO ---
 app.get('/api/reporte/medios-pago', async (req, res) => {
     let { sucursal, desde, hasta } = req.query;
     try {
         const pool = await poolMainPromise;
-        const result = await pool.request().input('suc', sql.Int, cleanParam(sucursal)).input('desde', sql.VarChar, cleanParam(desde)).input('hasta', sql.VarChar, cleanParam(hasta)).query(`SELECT J.CODPAG, CASE WHEN J.CODPAG = '100' THEN ISNULL(T.DESCRIPCION, 'TARJETA') WHEN J.CODPAG = '001' THEN 'EFECTIVO' WHEN J.CODPAG IN ('125','225') THEN 'MERCADO PAGO' ELSE M.DESCRIPCION END AS MEDIO, ISNULL(P.DESCRIPCION, 'N/A') AS PLAN_PAGO, COUNT(DISTINCT A.IdRouter) AS TICKETS, CAST(SUM(CASE WHEN A.CODCMP IN ('CA', 'CB') THEN -J.IMPORTE ELSE J.IMPORTE END) AS MONEY) AS TOTAL_NETO FROM dbo.QRMVS A INNER JOIN dbo.QRLineasPago J ON A.IdRouter = J.IdRouter INNER JOIN dbo.QRMediosPago M ON J.CODPAG = M.CODPAG LEFT JOIN dbo.QRCUPONES C ON J.IDCUPON = C.IDCUPON AND J.CODPAG = '100' LEFT JOIN dbo.QRTARJETAS T ON C.CODTARjeta = T.CODTARjeta LEFT JOIN dbo.QRTarjetplanes P ON C.CODPLAn = P.CODPLAn WHERE A.CODSUC = @suc AND A.IDCOMPROBANTE > 0 AND A.CODCMP IN ('FA', 'FB', 'CA', 'CB') AND CAST(A.FECHA AS DATE) >= CAST(@desde AS DATE) AND CAST(A.FECHA AS DATE) <= CAST(@hasta AS DATE) GROUP BY J.CODPAG, M.DESCRIPCION, T.DESCRIPCION, P.DESCRIPCION ORDER BY TOTAL_NETO DESC`);
+        const result = await pool.request().input('suc', sql.Int, cleanParam(sucursal)).input('desde', sql.VarChar, cleanParam(desde)).input('hasta', sql.VarChar, cleanParam(hasta)).query(`
+            SELECT Calc.MEDIO, COUNT(DISTINCT A.IdRouter) AS TICKETS,
+            CAST(SUM(CASE WHEN A.CODCMP IN ('CA', 'CB') THEN -A.TOTAL ELSE A.TOTAL END) AS MONEY) AS TOTAL_NETO
+            FROM dbo.QRMVS A
+            CROSS APPLY (SELECT TOP 1 CASE WHEN P.CODPAG = '001' THEN 'EFECTIVO' WHEN P.CODPAG = '100' THEN 'TARJETAS' WHEN P.CODPAG IN ('125','225') THEN 'MERCADO PAGO' ELSE 'EFECTIVO' END AS MEDIO FROM dbo.QRLineasPago P WHERE P.IdRouter = A.IdRouter) Calc
+            WHERE CAST(A.CODSUC AS VARCHAR) LIKE '%' + CAST(@suc AS VARCHAR) AND A.IDCOMPROBANTE > 0 AND A.CODCMP IN ('FA', 'FB', 'CA', 'CB') AND CAST(A.FECHA AS DATE) BETWEEN @desde AND @hasta AND A.ANULADO = 0
+            GROUP BY Calc.MEDIO ORDER BY TOTAL_NETO DESC`);
         res.json(result.recordset);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 4. FRANJAS
+// --- 4. FRANJAS HORARIAS (CORREGIDO CON TIMESTAMP REAL) ---
 app.get('/api/reporte/franjas', async (req, res) => {
     let { sucursal, desde, hasta } = req.query;
     try {
         const pool = await poolMainPromise;
-        const result = await pool.request().input('suc', sql.Int, cleanParam(sucursal)).input('desde', sql.VarChar, cleanParam(desde)).input('hasta', sql.VarChar, cleanParam(hasta)).query(`SELECT CASE WHEN DATEPART(HOUR, timestamp) >= 9 AND DATEPART(HOUR, timestamp) < 13 THEN 'MAÑANA (09-13hs)' WHEN DATEPART(HOUR, timestamp) >= 13 AND DATEPART(HOUR, timestamp) < 17 THEN 'TARDE 1 (13-17hs)' ELSE 'TARDE 2 (17-22hs)' END AS FRANJA, COUNT(DISTINCT CAST(CODCMP AS VARCHAR)+CAST(PREFIJO AS VARCHAR)+CAST(NUMERO AS VARCHAR)) AS TICKETS, SUM(CAST(TOTAL AS MONEY)) AS TOTAL_VENTAS FROM dbo.QRMVS WHERE CODSUC = @suc AND CAST(FECHA AS DATE) >= CAST(@desde AS DATE) AND CAST(FECHA AS DATE) <= CAST(@hasta AS DATE) AND CODCMP IN ('FA', 'FB', 'CA', 'CB') AND IDCOMPROBANTE > 0 GROUP BY CASE WHEN DATEPART(HOUR, timestamp) >= 9 AND DATEPART(HOUR, timestamp) < 13 THEN 'MAÑANA (09-13hs)' WHEN DATEPART(HOUR, timestamp) >= 13 AND DATEPART(HOUR, timestamp) < 17 THEN 'TARDE 1 (13-17hs)' ELSE 'TARDE 2 (17-22hs)' END ORDER BY MIN(timestamp)`);
+        const result = await pool.request()
+            .input('suc', sql.Int, cleanParam(sucursal))
+            .input('desde', sql.VarChar, cleanParam(desde))
+            .input('hasta', sql.VarChar, cleanParam(hasta))
+            .query(`
+                SET LANGUAGE Spanish;
+                WITH MasterFranjas AS (
+                    SELECT 'MAÑANA (09-13hs)' AS F_NOM, 1 AS Ord
+                    UNION ALL SELECT 'TARDE 1 (13-17hs)', 2
+                    UNION ALL SELECT 'TARDE 2 (17-22hs)', 3
+                ),
+                Ventas AS (
+                    SELECT 
+                        A.IdRouter,
+                        (CASE WHEN A.CODCMP IN ('CA', 'CB') THEN -A.TOTAL ELSE A.TOTAL END) as MONTO,
+                        CASE 
+                            WHEN DATEPART(HOUR, A.timestamp) >= 9 AND DATEPART(HOUR, A.timestamp) < 13 THEN 'MAÑANA (09-13hs)' 
+                            WHEN DATEPART(HOUR, A.timestamp) >= 13 AND DATEPART(HOUR, A.timestamp) < 17 THEN 'TARDE 1 (13-17hs)' 
+                            ELSE 'TARDE 2 (17-22hs)' 
+                        END AS F_ASIG
+                    FROM dbo.QRMVS A 
+                    WHERE CAST(A.CODSUC AS VARCHAR) LIKE '%' + CAST(@suc AS VARCHAR)
+                      AND CAST(A.FECHA AS DATE) BETWEEN @desde AND @hasta
+                      AND A.CODCMP IN ('FA', 'FB', 'CA', 'CB') 
+                      AND A.IDCOMPROBANTE > 0 AND A.ANULADO = 0
+                )
+                SELECT M.F_NOM AS FRANJA, COUNT(V.IdRouter) AS TICKETS, ISNULL(SUM(V.MONTO), 0) AS TOTAL_VENTAS
+                FROM MasterFranjas M
+                LEFT JOIN Ventas V ON M.F_NOM = V.F_ASIG
+                GROUP BY M.F_NOM, M.Ord ORDER BY M.Ord`);
         res.json(result.recordset);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 5. TICKET PROMEDIO
+// --- 5. TICKET PROMEDIO ---
 app.get('/api/reporte/ticket-promedio', async (req, res) => {
     let { sucursal, desde, hasta } = req.query;
     try {
         const pool = await poolMainPromise;
-        const result = await pool.request().input('suc', sql.Int, cleanParam(sucursal)).input('desde', sql.VarChar, cleanParam(desde)).input('hasta', sql.VarChar, cleanParam(hasta)).query(`SELECT CONVERT(VARCHAR(10), FECHA, 103) AS FECHA, COUNT(DISTINCT CAST(CODCMP AS VARCHAR)+CAST(PREFIJO AS VARCHAR)+CAST(NUMERO AS VARCHAR)) AS TICKETS, SUM(CAST(TOTAL AS MONEY)) AS VENTA_NETA FROM dbo.QRMVS WHERE CODSUC = @suc AND CAST(FECHA AS DATE) >= CAST(@desde AS DATE) AND CAST(FECHA AS DATE) <= CAST(@hasta AS DATE) AND CODCMP IN ('FA','FB', 'CA', 'CB') AND IDCOMPROBANTE > 0 GROUP BY CONVERT(VARCHAR(10), FECHA, 103) ORDER BY FECHA DESC`);
-        const datosConPromedio = result.recordset.map(r => ({ ...r, PROMEDIO: r.TICKETS > 0 ? (r.VENTA_NETA / r.TICKETS) : 0 }));
+        const result = await pool.request().input('suc', sql.Int, cleanParam(sucursal)).input('desde', sql.VarChar, cleanParam(desde)).input('hasta', sql.VarChar, cleanParam(hasta)).query(`
+            SELECT CONVERT(VARCHAR(10), FECHA, 103) AS FECHA, COUNT(DISTINCT IdRouter) AS TICKETS, 
+            SUM(CASE WHEN CODCMP IN ('CA', 'CB') THEN -TOTAL ELSE TOTAL END) AS VENTA_NETA 
+            FROM dbo.QRMVS WHERE CAST(CODSUC AS VARCHAR) LIKE '%' + CAST(@suc AS VARCHAR) AND CAST(FECHA AS DATE) BETWEEN @desde AND @hasta AND CODCMP IN ('FA','FB', 'CA', 'CB') AND IDCOMPROBANTE > 0 AND ANULADO = 0 GROUP BY CONVERT(VARCHAR(10), FECHA, 103) ORDER BY FECHA DESC`);
         const totalVenta = result.recordset.reduce((a, r) => a + r.VENTA_NETA, 0);
         const totalTickets = result.recordset.reduce((a, r) => a + r.TICKETS, 0);
-        res.json({ datos: datosConPromedio, resumen: { venta: totalVenta, tickets: totalTickets, promedio: totalTickets > 0 ? totalVenta / totalTickets : 0 } });
+        res.json({ datos: result.recordset, resumen: { venta: totalVenta, tickets: totalTickets, promedio: totalTickets > 0 ? totalVenta / totalTickets : 0 } });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 6. STOCK FÍSICO
+// --- 6. STOCK FÍSICO ---
 app.get('/api/reporte/stock-fisico', async (req, res) => {
     let { sucursal, articulo } = req.query;
     try {
         const pool = await poolMainPromise;
-        let q = `SELECT S.CODITM, I.DESCRIPCION, CAST(S.STKACTUAL AS INT) AS STOCK FROM dbo.QRITEMSACUM S INNER JOIN dbo.QRITEMS I ON S.CODITM = I.CODITM WHERE S.CODSUC = @suc AND S.STKACTUAL <> 0`;
+        let q = `SELECT S.CODITM, I.DESCRIPCION, CAST(S.STKACTUAL AS INT) AS STOCK FROM dbo.QRITEMSACUM S INNER JOIN dbo.QRITEMS I ON S.CODITM = I.CODITM WHERE CAST(S.CODSUC AS VARCHAR) LIKE '%' + CAST(@suc AS VARCHAR) AND S.STKACTUAL > 0`;
         if (cleanParam(articulo) !== "") q += ` AND S.CODITM LIKE '%' + @art + '%'`;
         const result = await pool.request().input('suc', sql.Int, cleanParam(sucursal)).input('art', sql.VarChar, cleanParam(articulo)).query(q + " ORDER BY S.CODITM");
         res.json(result.recordset);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 7. STOCK VALORIZADO
+// --- 7. STOCK VALORIZADO ---
 app.get('/api/reporte/stock-valorizado', async (req, res) => {
     let { sucursal } = req.query;
     try {
         const pool = await poolMainPromise;
-        const result = await pool.request().input('suc', sql.Int, cleanParam(sucursal)).query(`SELECT A.CODITM, CAST(A.STKACTUAL AS MONEY) AS STKACTUAL, CAST(B.PRECIO AS MONEY) AS PRECIO_UNITARIO, CAST(A.STKACTUAL * B.PRECIO AS MONEY) AS TOTAL_VALORIZADO FROM QRITEMSACUM A INNER JOIN QRLISTASPRECIOS B ON A.CODITM = B.CODITM WHERE A.CODSUC = @suc AND B.CODLIS = 'PCI' AND A.STKACTUAL > 0 ORDER BY TOTAL_VALORIZADO DESC`);
-        const total = result.recordset.reduce((acc, r) => acc + r.TOTAL_VALORIZADO, 0);
-        res.json({ detalles: result.recordset, totalCartera: total });
+        const result = await pool.request()
+            .input('suc', sql.Int, cleanParam(sucursal))
+            .query(`
+                SELECT A.CODITM, C.DESCRIPCION, CAST(A.STKACTUAL AS INT) AS STKACTUAL, ISNULL(P.PRECIO, 0) AS PRECIO_UNITARIO,
+                ISNULL(CAST(A.STKACTUAL * P.PRECIO AS MONEY), 0) AS TOTAL_VALORIZADO, ISNULL(R.RUBRO_DESC, 'SIN RUBRO') AS RUBRO
+                FROM dbo.QRITEMSACUM A INNER JOIN dbo.QRITEMS C ON A.CODITM = C.CODITM
+                OUTER APPLY (SELECT TOP 1 PRECIO FROM dbo.QRLISTASPRECIOS WHERE CODITM = A.CODITM AND CODLIS = 'PCI') P
+                OUTER APPLY (SELECT TOP 1 VAL.DESCRIPCION AS RUBRO_DESC FROM dbo.QRITEMSATRIB ATR INNER JOIN dbo.QRATRIBUTOSVAL VAL ON ATR.CODATR = VAL.CODATR AND ATR.CODATRVAL = VAL.CODATRVAL WHERE ATR.CODITM = A.CODITM AND ATR.CODATR = 'R') R
+                WHERE CAST(A.CODSUC AS VARCHAR) LIKE '%' + CAST(@suc AS VARCHAR) AND A.STKACTUAL > 0 ORDER BY TOTAL_VALORIZADO DESC`);
+        res.json({ detalles: result.recordset, totalCartera: result.recordset.reduce((acc, r) => acc + r.TOTAL_VALORIZADO, 0) });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 8. MOVIMIENTOS LOGÍSTICA
+// --- 8. LOGÍSTICA (IE/EE) ---
 app.get('/api/reporte/logistica', async (req, res) => {
     let { sucursal, desde, hasta, articulo } = req.query;
     try {
         const pool = await poolMainPromise;
-        let q = `SELECT CONVERT(VARCHAR(10), A.FECHA, 103) AS FECHA_STR, A.CODCMP, A.PREFIJO, A.NUMERO, H.DESCRIPCION AS CONCEPTO, B.CODITM, CAST(B.CANTIDAD1 AS INT) AS CANT FROM dbo.QRMVS A INNER JOIN dbo.QRLINEASITEMS B ON A.IdRouter = B.IdRouter INNER JOIN dbo.QRMVSMAT G ON G.IdRouter = A.IdRouter INNER JOIN dbo.QRConceptos H ON G.CodConcepto = H.CODCPT WHERE A.CODSUC = @suc AND CAST(A.FECHA AS DATE) >= CAST(@desde AS DATE) AND CAST(A.FECHA AS DATE) <= CAST(@hasta AS DATE) AND A.CODCMP IN ('EE', 'IE') AND A.IDCOMPROBANTE > 0`;
+        let q = `SELECT CONVERT(VARCHAR(10), A.FECHA, 103) AS FECHA_STR, A.CODCMP, A.PREFIJO, A.NUMERO, H.DESCRIPCION AS CONCEPTO, B.CODITM, CAST(B.CANTIDAD1 AS INT) AS CANT FROM dbo.QRMVS A INNER JOIN dbo.QRLINEASITEMS B ON A.IdRouter = B.IdRouter INNER JOIN dbo.QRMVSMAT G ON G.IdRouter = A.IdRouter INNER JOIN dbo.QRConceptos H ON G.CodConcepto = H.CODCPT WHERE CAST(A.CODSUC AS VARCHAR) LIKE '%' + CAST(@suc AS VARCHAR) AND CAST(A.FECHA AS DATE) BETWEEN @desde AND @hasta AND A.CODCMP IN ('EE', 'IE') AND A.IDCOMPROBANTE > 0 AND A.ANULADO = 0`;
         if (cleanParam(articulo) !== "") q += ` AND B.CODITM LIKE '%' + @art + '%'`;
         const result = await pool.request().input('suc', sql.Int, cleanParam(sucursal)).input('desde', sql.VarChar, cleanParam(desde)).input('hasta', sql.VarChar, cleanParam(hasta)).input('art', sql.VarChar, cleanParam(articulo)).query(q + " ORDER BY A.FECHA DESC");
         const movs = {};
@@ -131,21 +199,70 @@ app.get('/api/reporte/logistica', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 9. RANKING TOP 5 (EXCLUYENDO DIFPRECIO)
+// --- 9. RANKING TOP ARTÍCULOS ---
 app.get('/api/reporte/ranking', async (req, res) => {
     let { sucursal, desde, hasta } = req.query;
     try {
         const pool = await poolMainPromise;
         const result = await pool.request().input('suc', sql.Int, cleanParam(sucursal)).input('desde', sql.VarChar, cleanParam(desde)).input('hasta', sql.VarChar, cleanParam(hasta)).query(`
-            SELECT TOP 5 B.CODITM AS ARTICULO, C.DESCRIPCION, SUM(CAST(B.CANTIDAD1 AS MONEY)) AS UNIDADES, SUM(CAST(B.CANTIDAD1 * B.PRECIO AS MONEY)) AS RECAUDACION_NETA 
+            SELECT TOP 5 B.CODITM AS ARTICULO, C.DESCRIPCION, SUM(CAST(CASE WHEN A.CODCMP IN ('CA', 'CB') THEN -B.CANTIDAD1 ELSE B.CANTIDAD1 END AS MONEY)) AS UNIDADES, SUM(CAST(CASE WHEN A.CODCMP IN ('CA', 'CB') THEN -B.CANTIDAD1 ELSE B.CANTIDAD1 END * B.PRECIO AS MONEY)) AS RECAUDACION_NETA 
             FROM dbo.QRMVS A INNER JOIN dbo.QRLINEASITEMS B ON A.IdRouter = B.IdRouter INNER JOIN dbo.QRITEMS C ON C.CODITM = B.CODITM 
-            WHERE A.CODSUC = @suc AND CAST(A.FECHA AS DATE) BETWEEN @desde AND @hasta 
-            AND A.CODCMP IN ('FA', 'FB', 'CA', 'CB') AND A.IDCOMPROBANTE > 0 
+            WHERE CAST(A.CODSUC AS VARCHAR) LIKE '%' + CAST(@suc AS VARCHAR) AND CAST(A.FECHA AS DATE) BETWEEN @desde AND @hasta AND A.CODCMP IN ('FA', 'FB', 'CA', 'CB') AND A.IDCOMPROBANTE > 0 AND A.ANULADO = 0 
             AND B.CODITM NOT LIKE 'DC%' AND B.CODITM NOT IN ('ajucen', 'SCAMBIO', 'difprecio', 'AJS')
             GROUP BY B.CODITM, C.DESCRIPCION ORDER BY UNIDADES DESC`);
         res.json({ ranking: result.recordset });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`🚀 Master Server Activo en Puerto ${PORT}`));
+// --- 10. COMPARATIVO HISTÓRICO 7 DÍAS (Triple Comparación con Fechas) ---
+app.get('/api/reporte/comparativo-ventas', async (req, res) => {
+    let { sucursal } = req.query; 
+    const hoy = new Date().toISOString().split('T')[0];
+    try {
+        const pool = await poolMainPromise;
+        const result = await pool.request()
+            .input('suc', sql.Int, cleanParam(sucursal))
+            .input('fechaRef', sql.Date, hoy)
+            .query(`
+                SET LANGUAGE Spanish;
+                WITH Calendario AS (
+                    SELECT 
+                        CAST(@fechaRef AS DATE) as FechaAct, 
+                        DATEADD(DAY, -7, @fechaRef) as FechaSemAnt, 
+                        DATEADD(DAY, -28, @fechaRef) as FechaMesAnt, 0 as Orden
+                    UNION ALL SELECT DATEADD(DAY, -1, @fechaRef), DATEADD(DAY, -8, @fechaRef), DATEADD(DAY, -29, @fechaRef), 1
+                    UNION ALL SELECT DATEADD(DAY, -2, @fechaRef), DATEADD(DAY, -9, @fechaRef), DATEADD(DAY, -30, @fechaRef), 2
+                    UNION ALL SELECT DATEADD(DAY, -3, @fechaRef), DATEADD(DAY, -10, @fechaRef), DATEADD(DAY, -31, @fechaRef), 3
+                    UNION ALL SELECT DATEADD(DAY, -4, @fechaRef), DATEADD(DAY, -11, @fechaRef), DATEADD(DAY, -32, @fechaRef), 4
+                    UNION ALL SELECT DATEADD(DAY, -5, @fechaRef), DATEADD(DAY, -12, @fechaRef), DATEADD(DAY, -33, @fechaRef), 5
+                    UNION ALL SELECT DATEADD(DAY, -6, @fechaRef), DATEADD(DAY, -13, @fechaRef), DATEADD(DAY, -34, @fechaRef), 6
+                ),
+                VentasBase AS (
+                    SELECT 
+                        CAST(FECHA AS DATE) as F,
+                        SUM(CASE WHEN CODCMP IN ('CA', 'CB') THEN -TOTAL ELSE TOTAL END) as MontoDia,
+                        COUNT(DISTINCT IdRouter) as TicketsDia
+                    FROM dbo.QRMVS
+                    WHERE CAST(CODSUC AS VARCHAR) LIKE '%' + CAST(@suc AS VARCHAR)
+                      AND CODCMP IN ('FA', 'FB', 'CA', 'CB') AND ANULADO = 0 AND IDCOMPROBANTE > 0
+                    GROUP BY CAST(FECHA AS DATE)
+                )
+                SELECT 
+                    FORMAT(C.FechaAct, 'dd/MM') as FechaLabel,
+                    UPPER(LEFT(DATENAME(WEEKDAY, C.FechaAct), 3)) as DiaSemana,
+                    FORMAT(C.FechaSemAnt, 'dd/MM') as LabelSem,
+                    FORMAT(C.FechaMesAnt, 'dd/MM') as LabelMes,
+                    CAST(ISNULL(V1.MontoDia, 0) AS MONEY) as MontoAct, ISNULL(V1.TicketsDia, 0) as TktAct,
+                    CAST(ISNULL(V2.MontoDia, 0) AS MONEY) as MontoSem, ISNULL(V2.TicketsDia, 0) as TktSem,
+                    CAST(ISNULL(V3.MontoDia, 0) AS MONEY) as MontoMes, ISNULL(V3.TicketsDia, 0) as TktMes
+                FROM Calendario C
+                LEFT JOIN VentasBase V1 ON V1.F = C.FechaAct
+                LEFT JOIN VentasBase V2 ON V2.F = C.FechaSemAnt
+                LEFT JOIN VentasBase V3 ON V3.F = C.FechaMesAnt
+                ORDER BY C.Orden ASC
+            `);
+        res.json(result.recordset);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Mimo BI Server Activo en Puerto ${PORT}`));

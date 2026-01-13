@@ -13,7 +13,7 @@
             color: #475569; 
         }
         .main-container { 
-            max-width: 1100px; 
+            max-width: 1200px; 
             margin: 60px auto; 
             padding: 0 20px; 
         }
@@ -92,6 +92,7 @@
         .c-cyan i { background: #ecfeff; color: #0891b2; }
         .c-purple i { background: #f5f3ff; color: #8b5cf6; }
         .c-indigo i { background: #eef2ff; color: #6366f1; }
+        .c-emerald i { background: #ecfdf5; color: #10b981; } /* Nuevo para Comparativo */
         .c-orange i { background: #fff7ed; color: #f59e0b; }
         .c-green i { background: #f0fdf4; color: #22c55e; }
         .c-teal i { background: #f0fdfa; color: #14b8a6; }
@@ -116,6 +117,7 @@
         .c-cyan:hover { border-bottom: 4px solid #0891b2; }
         .c-purple:hover { border-bottom: 4px solid #8b5cf6; }
         .c-indigo:hover { border-bottom: 4px solid #6366f1; }
+        .c-emerald:hover { border-bottom: 4px solid #10b981; }
         .c-orange:hover { border-bottom: 4px solid #f59e0b; }
         .c-green:hover { border-bottom: 4px solid #22c55e; }
         .c-teal:hover { border-bottom: 4px solid #14b8a6; }
@@ -132,18 +134,32 @@
 
     <div class="section-title">Gestión de Ventas y Rendimiento</div>
     <div class="row g-4">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <a href="reporte_ventas.html" class="card-menu c-blue">
                 <i class="bi bi-graph-up-arrow"></i>
                 <h5>Estadística de Ventas</h5>
                 <p>Análisis de facturación, artículos y auditoría de tickets.</p>
             </a>
         </div>
+        <div class="col-md-4">
+            <a href="reporte_comparativo.html" class="card-menu c-emerald">
+                <i class="bi bi-arrow-left-right"></i>
+                <h5>Comparativo Comercial</h5>
+                <p>Evolución de ventas: Hoy vs. mismo día hace 4 semanas.</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="reporte_ticket_promedio.html" class="card-menu c-indigo">
+                <i class="bi bi-receipt-cutoff"></i>
+                <h5>Ticket Promedio</h5>
+                <p>Evolución de la eficiencia y valor de transacciones.</p>
+            </a>
+        </div>
         <div class="col-md-3">
             <a href="reporte_pagos.html" class="card-menu c-cyan">
                 <i class="bi bi-credit-card-2-back"></i>
                 <h5>Medios de Pago</h5>
-                <p>Desglose de recaudación por tarjetas, efectivo y planes.</p>
+                <p>Desglose de recaudación por tarjetas y efectivo.</p>
             </a>
         </div>
         <div class="col-md-3">
@@ -154,23 +170,16 @@
             </a>
         </div>
         <div class="col-md-3">
-            <a href="reporte_ticket_promedio.html" class="card-menu c-indigo">
-                <i class="bi bi-receipt-cutoff"></i>
-                <h5>Ticket Promedio</h5>
-                <p>Evolución de la eficiencia y valor de transacciones.</p>
+            <a href="reporte_ranking.html" class="card-menu c-orange">
+                <i class="bi bi-trophy"></i>
+                <h5>Ranking Artículos</h5>
+                <p>Top productos con mayor rotación y recaudación.</p>
             </a>
         </div>
     </div>
 
     <div class="section-title">Inventarios y Flujos Logísticos</div>
-    <div class="row g-4">
-        <div class="col-md-3">
-            <a href="reporte_ranking.html" class="card-menu c-orange">
-                <i class="bi bi-trophy"></i>
-                <h5>Ranking Artículos</h5>
-                <p>Top 10 productos con mayor rotación y recaudación.</p>
-            </a>
-        </div>
+    <div class="row g-4 justify-content-center">
         <div class="col-md-3">
             <a href="reporte_stock.html" class="card-menu c-green">
                 <i class="bi bi-boxes"></i>
@@ -195,7 +204,7 @@
     </div>
 
     <div class="mt-5 text-center">
-        <p style="font-size: 0.7rem; color: #cbd5e1; letter-spacing: 1px;">MIMO & CO - DEPARTAMENTO DE SISTEMAS v2.0</p>
+        <p style="font-size: 0.7rem; color: #cbd5e1; letter-spacing: 1px;">MIMO & CO - DEPARTAMENTO DE SISTEMAS v2.1</p>
     </div>
 </div>
 

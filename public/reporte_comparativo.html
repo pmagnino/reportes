@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mimo & Co | Comparativo con Fechas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background-color: #f8fafc; font-family: 'Segoe UI', Calibri, sans-serif; font-size: 13px; color: #334155; margin: 0; }
+        
+        .nav-header { background: #1e293b; color: white; padding: 10px 30px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+        .nav-header a { text-decoration: none; color: white; display: flex; align-items: center; }
+        .nav-header img { height: 35px; background-color: white; padding: 5px; border-radius: 4px; }
+        
+        .filter-container { background: white; border-bottom: 1px solid #cbd5e1; padding: 20px 40px; }
+        .report-title { color: #1e293b; font-weight: 600; text-transform: uppercase; margin: 25px 40px; font-size: 17px; }
+        
+        .card-pro { background: white; border-radius: 4px; border: 1px solid #cbd5e1; margin: 0 40px; overflow-x: auto; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .table-custom { width: 100%; border-collapse: collapse; min-width: 1100px; table-layout: fixed; }
+        .table-custom th { background-color: #f1f5f9; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1; padding: 10px; color: #475569; font-weight: 600; text-align: center; }
+        .table-custom th:first-child { text-align: left; width: 180px; padding-left: 20px; }
+        
+        .table-custom td { padding: 10px; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1; text-align: center; vertical-align: middle; }
+        .table-custom td:first-child { text-align: left; font-weight: 600; color: #1e293b; padding-left: 20px; background-color: #fdfdfd; }
+        
+        .var-box { display: flex; flex-direction: column; align-items: center; margin-top: 6px; border-top: 1px dashed #e2e8f0; padding-top: 4px; }
+        .var-row { font-size: 10px; font-weight: 700; width: 100%; display: flex; justify-content: space-between; padding: 0 8px; line-height: 1.6; }
+        .var-label { color: #94a3b8; font-weight: 400; font-size: 9px; }
+        
+        .up { color: #15803d; } 
+        .down { color: #b91c1c; } 
+        .neutral { color: #94a3b8; }
+        .day-name { display: block; font-size: 10px; color: #64748b; font-weight: 400; text-transform: uppercase; }
+        
+        .btn-consultar { background: #1e293b; color: white; font-weight: 600; border: none; border-radius: 4px; padding: 8px 25px; font-size: 12px; }
+    </style>
+</head>
+<body onload="init()">
+
+<div class="nav-header">
+    <a href="reporte_index.html">
+        <img src="Logo.png" alt="Mimo">
+        <span class="ms-3 fw-normal">Mimo & Co. - BI System</span>
+    </a>
+    <i class="bi bi-list fs-4"></i>
+</div>
+
+<div class="filter-container">
+    <div class="row g-3 align-items-center">
+        <div class="col-auto"><strong>Sucursal:</strong></div>
+        <div class="col-md-3"><select id="sucursal" class="form-select shadow-none"></select></div>
+        <div class="col-md-2"><button class="btn-consultar" onclick="consultar()">CONSULTAR</button></div>
+    </div>
+</div>
+
+<h4 class="report-title">Comparativo de Ventas (vs. Semanas Anteriores)</h4>
+
+<div class="card-pro shadow-sm" id="res-container" style="display:none;">
+    <table class="table-custom">
+        <thead id="thead-7"></thead>
+        <tbody id="tbody-7"></tbody>
+    </table>
+</div>
+
+<script>
+    const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
+
+    async function init() {
+        const res = await fetch('/api/sucursales');
+        const data = await res.json();
+        document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+    }
+
+    function getVarRow(act, ant, fechaLabel) {
+        if (!ant || ant === 0) return `<div class="var-row"><span class="var-label">vs ${fechaLabel}</span><span class="neutral">--%</span></div>`;
+        const v = ((act - ant) / ant) * 100;
+        const color = v > 0 ? 'up' : v < 0 ? 'down' : 'neutral';
+        const icon = v > 0 ? '↑ ' : v < 0 ? '↓ ' : '';
+        return `<div class="var-row">
+                    <span class="var-label">vs ${fechaLabel}</span>
+                    <span class="${color}">${icon}${Math.abs(v).toFixed(1)}%</span>
+                </div>`;
+    }
+
+    async function consultar() {
+        const suc = document.getElementById('sucursal').value;
+        const res = await fetch(`/api/reporte/comparativo-ventas?sucursal=${suc}`);
+        const data = await res.json();
+
+        let headHtml = `<tr><th>INDICADOR</th>`;
+        data.forEach(d => {
+            headHtml += `<th>${d.FechaLabel}<span class="day-name">${d.DiaSemana}</span></th>`;
+        });
+        document.getElementById('thead-7').innerHTML = headHtml + `</tr>`;
+
+        const rows = [
+            { label: 'Importe Ventas', act: 'MontoAct', sem: 'MontoSem', mes: 'MontoMes', type: 'money' },
+            { label: 'Cantidad Tickets', act: 'TktAct', sem: 'TktSem', mes: 'TktMes', type: 'num' }
+        ];
+
+        let bodyHtml = "";
+        rows.forEach(row => {
+            bodyHtml += `<tr><td>${row.label}</td>`;
+            data.forEach(d => {
+                const actVal = d[row.act];
+                const displayVal = row.type === 'money' ? fmt.format(actVal) : actVal;
+                
+                bodyHtml += `
+                    <td>
+                        <div style="font-weight:600; font-size:14px; color: #1e293b;">${displayVal}</div>
+                        <div class="var-box">
+                            ${getVarRow(actVal, d[row.sem], d.LabelSem)}
+                            ${getVarRow(actVal, d[row.mes], d.LabelMes)}
+                        </div>
+                    </td>`;
+            });
+            bodyHtml += `</tr>`;
+        });
+        document.getElementById('tbody-7').innerHTML = bodyHtml;
+        document.getElementById('res-container').style.display = 'block';
+    }
+</script>
+</body>
+</html>

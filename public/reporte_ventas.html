@@ -23,11 +23,11 @@
         .item-grid { padding: 10px 40px; display: grid; grid-template-columns: 2fr 1fr 1fr; align-items: center; font-size: 14px; border-bottom: 1px solid #f8fafc; }
         .obs-text { font-size: 12px; color: #f59e0b; font-style: italic; display: block; margin-top: 2px; }
         
+        /* COLORES CORREGIDOS */
         .bg-efectivo { background-color: #10b981 !important; color: white; }
-        .bg-tarjeta { background-color: #3b82f6 !important; color: white; }
+        .bg-tarjeta { background-color: #3b82f6 !important; color: white; } /* AZUL */
         .bg-mp { background-color: #f59e0b !important; color: white; }
 
-        /* Botones de Exportación */
         .btn-export-excel { background-color: #ffffff; color: #10b981; border: 1px solid #10b981; font-weight: 600; font-size: 11px; height: 38px; border-radius: 6px; }
         .btn-export-excel:hover { background-color: #10b981; color: white; }
         
@@ -52,10 +52,25 @@
             <div class="col-md-2"><span class="label-sm">Sucursal</span><select id="sucursal" class="form-select border-0 bg-light shadow-none"></select></div>
             <div class="col-md-2"><span class="label-sm">Desde</span><input type="date" id="desde" class="form-control border-0 bg-light shadow-none"></div>
             <div class="col-md-2"><span class="label-sm">Hasta</span><input type="date" id="hasta" class="form-control border-0 bg-light shadow-none"></div>
+            
+            <div class="col-md-2">
+                <span class="label-sm">Medio de Pago</span>
+                <select id="filtroMedioPago" class="form-select border-0 bg-light shadow-none">
+                    <option value="TODOS">TODOS</option>
+                    <option value="EFECTIVO">EFECTIVO</option>
+                    <option value="TARJETAS">TARJETAS</option>
+                    <option value="MERCADO PAGO">MERCADO PAGO</option>
+                </select>
+            </div>
+
             <div class="col-md-2"><span class="label-sm">Artículo</span><input type="text" id="articulo" class="form-control border-0 bg-light shadow-none" placeholder="Buscar..."></div>
+            
             <div class="col-md-2">
                 <button class="btn btn-dark w-100 fw-bold py-2 btn-sm" style="height: 38px;" onclick="consultar()">CONSULTAR</button>
             </div>
+        </div>
+        <div class="row g-2 mt-2">
+            <div class="col-md-10"></div>
             <div class="col-md-1">
                 <button class="btn btn-export-excel w-100" id="btnXls" style="display:none" onclick="exportarExcel()">
                     <i class="bi bi-file-excel"></i> XLS
@@ -93,11 +108,17 @@
 
     async function consultar() {
         const suc = document.getElementById('sucursal').value;
-        const res = await fetch(`/api/facturas?sucursal=${suc}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}&articulo=${document.getElementById('articulo').value}`);
+        const mp = document.getElementById('filtroMedioPago').value;
+        const art = document.getElementById('articulo').value;
+        const d = document.getElementById('desde').value;
+        const h = document.getElementById('hasta').value;
+
+        // URL con el nuevo parámetro medioPago
+        const res = await fetch(`/api/facturas?sucursal=${suc}&desde=${d}&hasta=${h}&articulo=${art}&medioPago=${mp}`);
         const result = await res.json();
         
-        datosMemoria = result.datos;
-        totalesMemoria = result.totales;
+        datosMemoria = result.datos || [];
+        totalesMemoria = result.totales || {};
         
         document.getElementById('cont-resultados').style.display = 'block';
         document.getElementById('btnXls').style.display = 'block';
@@ -106,14 +127,16 @@
         document.getElementById('kpi-container').innerHTML = `
             <div class="col-md-2"><div class="card-pro"><span class="label-sm">Facturas</span><div class="kpi-val">${result.totales.facturas || 0}</div></div></div>
             <div class="col-md-2"><div class="card-pro"><span class="label-sm">Notas Cred.</span><div class="kpi-val text-danger">${result.totales.notas || 0}</div></div></div>
-            <div class="col-md-2"><div class="card-pro" style="border-bottom: 4px solid #10b981"><span class="label-sm">Efectivo</span><div class="kpi-val">${fmt.format(result.totales.efectivo)}</div></div></div>
-            <div class="col-md-2"><div class="card-pro" style="border-bottom: 4px solid #3b82f6"><span class="label-sm">Tarjetas</span><div class="kpi-val">${fmt.format(result.totales.tarjeta)}</div></div></div>
-            <div class="col-md-2"><div class="card-pro" style="border-bottom: 4px solid #f59e0b"><span class="label-sm">Mercado Pago</span><div class="kpi-val">${fmt.format(result.totales.mp)}</div></div></div>
-            <div class="col-md-2"><div class="card-pro" style="background: #64748b; color: white;"><span class="label-sm text-white">Total Neto</span><div class="kpi-val text-white">${fmt.format(result.totales.general)}</div></div></div>
+            <div class="col-md-2"><div class="card-pro" style="border-bottom: 4px solid #10b981"><span class="label-sm">Efectivo</span><div class="kpi-val">${fmt.format(result.totales.efectivo || 0)}</div></div></div>
+            <div class="col-md-2"><div class="card-pro" style="border-bottom: 4px solid #3b82f6"><span class="label-sm">Tarjetas</span><div class="kpi-val">${fmt.format(result.totales.tarjeta || 0)}</div></div></div>
+            <div class="col-md-2"><div class="card-pro" style="border-bottom: 4px solid #f59e0b"><span class="label-sm">Mercado Pago</span><div class="kpi-val">${fmt.format(result.totales.mp || 0)}</div></div></div>
+            <div class="col-md-2"><div class="card-pro" style="background: #64748b; color: white;"><span class="label-sm text-white">Total Neto</span><div class="kpi-val text-white">${fmt.format(result.totales.general || 0)}</div></div></div>
         `;
 
-        document.getElementById('res-body').innerHTML = result.datos.map(f => {
-            let cls = f.pago === 'EFECTIVO' ? 'bg-efectivo' : (f.pago === 'TARJETA' ? 'bg-tarjeta' : 'bg-mp');
+        document.getElementById('res-body').innerHTML = datosMemoria.map(f => {
+            // CORRECCIÓN: 'TARJETAS' con S para que coincida con la base de datos y asigne azul
+            let cls = f.pago === 'EFECTIVO' ? 'bg-efectivo' : (f.pago === 'TARJETAS' ? 'bg-tarjeta' : 'bg-mp');
+            
             return `<div class="card-pro p-0 overflow-hidden mb-3">
                 <div class="ticket-header">
                     <span class="fw-bold">${f.tipo} ${f.prefijo}-${f.numero} <small class="text-muted ms-3">${f.fecha}</small></span>
@@ -125,6 +148,7 @@
         document.getElementById('articulo').select();
     }
 
+    // Funciones de exportación se mantienen igual...
     function exportarExcel() {
         const filas = [];
         datosMemoria.forEach(f => f.items.forEach(it => {
