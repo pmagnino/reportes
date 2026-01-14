@@ -2,51 +2,84 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mimo & Co | Ventas por Franja Horaria</title>
+    <title>Mimo & Co | Franjas Horarias</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
-        body { background-color: #f8f9fa; font-family: 'Calibri', sans-serif; color: #64748b; font-size: 14px; }
-        .header-bar { background: #1e293b; color: white; padding: 12px 30px; display: flex; align-items: center; }
-        .header-bar img { height: 35px; margin-right: 20px; }
-        .card-pro { background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 20px; }
-        .label-sm { font-size: 11px; font-weight: 400; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        .row-total-highlight td { background-color: #64748b !important; color: #ffffff !important; font-weight: 700 !important; padding: 12px 25px !important; border: none !important; }
-        .info-note { font-size: 12px; color: #94a3b8; font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-bottom: 20px; }
-        .chart-wrapper { height: 220px; }
+        :root { --navy: #1e293b; --slate-500: #64748b; }
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; }
+        
+        .header-bar { background: var(--navy); color: white; padding: 0 30px; display: flex; align-items: center; height: 55px; }
+        .header-bar a { text-decoration: none; color: white; display: flex; align-items: center; }
+        .header-bar img { height: 28px; background: white; padding: 3px; border-radius: 4px; margin-right: 15px; }
+        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.85rem; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; }
+
+        .main-content { max-width: 950px; margin: 0 auto; padding: 25px 20px; }
+        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 20px; }
+        .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; }
+        
+        .form-select, .form-control { font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; height: 38px; }
+        .chart-container { height: 230px; position: relative; }
+
+        /* Tabla sin negritas en las filas */
+        .table-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+        .table thead th { background: #f8fafc; font-family: 'Outfit', sans-serif; font-size: 10px; text-transform: uppercase; color: var(--slate-500); padding: 12px 20px; border-bottom: 2px solid #f1f5f9; }
+        .table tbody td { padding: 12px 20px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; font-variant-numeric: tabular-nums; font-weight: 400; color: #475569; }
+        
+        /* Solo el total mantiene el estilo destacado */
+        .row-total-highlight td { background-color: var(--navy) !important; color: white !important; font-weight: 700 !important; font-size: 14px; }
+        
+        .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 6px; height: 38px; border: none; }
+        .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-bottom: 20px; }
     </style>
 </head>
 <body onload="init()">
+
 <div class="header-bar shadow-sm">
-    <a href="reporte_index.html" style="text-decoration: none; color: white;"><img src="Logo.png" alt="Mimo & Co"></a>
-    <span style="font-size: 16px; text-transform: uppercase; font-weight: 300; margin-left: 10px;">Ventas por Franja Horaria</span>
+    <a href="reporte_index.html">
+        <img src="Logo.png" alt="Mimo">
+        <span class="header-title">Ventas por Franja Horaria</span>
+    </a>
 </div>
-<div class="container-fluid py-4 px-5">
+
+<div class="main-content">
     <div class="card-pro">
-        <div class="row g-3 align-items-end">
-            <div class="col-md-4"><span class="label-sm">Sucursal</span><select id="sucursal" class="form-select border-0 bg-light shadow-none"></select></div>
-            <div class="col-md-3"><span class="label-sm">Desde</span><input type="date" id="desde" class="form-control border-0 bg-light shadow-none"></div>
-            <div class="col-md-3"><span class="label-sm">Hasta</span><input type="date" id="hasta" class="form-control border-0 bg-light shadow-none"></div>
-            <div class="col-md-2"><button class="btn btn-dark w-100 fw-bold py-2 btn-sm" onclick="consultar()">CONSULTAR</button></div>
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4"><span class="label-sm">Sucursal</span><select id="sucursal" class="form-select shadow-none"></select></div>
+            <div class="col-md-3"><span class="label-sm">Desde</span><input type="date" id="desde" class="form-control shadow-none"></div>
+            <div class="col-md-3"><span class="label-sm">Hasta</span><input type="date" id="hasta" class="form-control shadow-none"></div>
+            <div class="col-md-2"><button class="btn btn-consultar w-100" onclick="consultar()">EJECUTAR</button></div>
         </div>
     </div>
 
     <div id="cont-resultados" style="display: none;">
         <div class="info-note">
-            <strong>Nota metodológica:</strong> La "Venta Neta" se calcula sumando Facturas (FA/FB) y restando Notas de Crédito (CA/CB).
+            <strong>Nota metodológica:</strong> Análisis basado en la hora de emisión del ticket. Venta Neta = (FA/FB) - (CA/CB).
         </div>
-        <div class="row g-4">
-            <div class="col-md-6"><div class="card-pro"><span class="label-sm">Tickets por Turno</span><div class="chart-wrapper"><canvas id="chartBarras"></canvas></div></div></div>
-            <div class="col-md-6"><div class="card-pro"><span class="label-sm">Distribución de Ingresos</span><div class="chart-wrapper"><canvas id="chartTorta"></canvas></div></div></div>
+        
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="card-pro"><span class="label-sm mb-3 text-center">Tickets por Turno</span><div class="chart-container"><canvas id="chartBarras"></canvas></div></div>
+            </div>
+            <div class="col-md-6">
+                <div class="card-pro"><span class="label-sm mb-3 text-center">Facturación Diaria</span><div class="chart-container"><canvas id="chartTorta"></canvas></div></div>
+            </div>
         </div>
-        <div class="card-pro p-0 overflow-hidden">
+
+        <div class="table-card">
             <table class="table mb-0">
-                <thead class="bg-light">
+                <thead>
                     <tr>
-                        <th class="px-4 py-3 border-0 small text-uppercase">Turno</th>
-                        <th class="text-center py-3 border-0 small text-uppercase">Tickets</th>
-                        <th class="text-end py-3 border-0 small text-uppercase">Venta Neta</th>
-                        <th class="text-end px-4 py-3 border-0 small text-uppercase">Promedio</th>
+                        <th>Intervalo Horario</th>
+                        <th class="text-center">Tickets</th>
+                        <th class="text-end">Venta Neta</th>
                     </tr>
                 </thead>
                 <tbody id="res-body"></tbody>
@@ -57,82 +90,64 @@
 
 <script>
     let chart1, chart2;
-    const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
-    const paleta = ['#CDE6B4', '#F9F4C2', '#F9C7C7'];
+    const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 });
+    const paletaSoft = ['#CDE6B4', '#F9F4C2', '#F9C7C7', '#D1E8FF', '#E2D1FF', '#FFD1F5'];
 
     async function init() {
-        const res = await fetch('/api/sucursales');
-        const data = await res.json();
-        document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-        document.getElementById('desde').value = document.getElementById('hasta').value = new Date().toISOString().split('T')[0];
+        try {
+            const res = await fetch('/api/sucursales');
+            const data = await res.json();
+            document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+            document.getElementById('desde').value = document.getElementById('hasta').value = new Date().toISOString().split('T')[0];
+        } catch (e) { console.error(e); }
     }
 
     async function consultar() {
-        const res = await fetch(`/api/reporte/franjas?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
-        const data = await res.json();
-        
-        document.getElementById('cont-resultados').style.display = 'block';
-        
-        let tT = 0, tV = 0; 
-        
-        // Renderizado de la tabla con cálculo de promedio dinámico
-        let html = data.map(r => { 
-            tT += r.TICKETS; 
-            tV += r.TOTAL_VENTAS; 
+        const resBody = document.getElementById('res-body');
+        resBody.innerHTML = `<tr><td colspan="3" class="text-center p-5"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>`;
+
+        try {
+            const res = await fetch(`/api/reporte/franjas?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
+            const data = await res.json();
+            document.getElementById('cont-resultados').style.display = 'block';
             
-            // Calculamos el promedio aquí para evitar el error de "undefined" o "NaN"
-            const promedioFila = r.TICKETS > 0 ? (r.TOTAL_VENTAS / r.TICKETS) : 0;
+            let tT = 0, tV = 0; 
+            let html = data.map(r => { 
+                tT += r.TICKETS; 
+                tV += r.TOTAL_VENTAS; 
+                return `
+                    <tr>
+                        <td>${r.FRANJA}</td>
+                        <td class="text-center">${r.TICKETS}</td>
+                        <td class="text-end">${fmt.format(r.TOTAL_VENTAS)}</td>
+                    </tr>`; 
+            }).join('');
 
-            return `
-                <tr>
-                    <td class="px-4 py-3">${r.FRANJA}</td>
-                    <td class="text-center">${r.TICKETS}</td>
-                    <td class="text-end">${fmt.format(r.TOTAL_VENTAS)}</td>
-                    <td class="text-end px-4">${fmt.format(promedioFila)}</td>
-                </tr>`; 
-        }).join('');
+            html += `
+                <tr class="row-total-highlight">
+                    <td>TOTAL GENERAL</td>
+                    <td class="text-center">${tT}</td>
+                    <td class="text-end">${fmt.format(tV)}</td>
+                </tr>`;
+            
+            resBody.innerHTML = html;
 
-        // Cálculo del Total General
-        let pG = tT > 0 ? tV / tT : 0;
-        html += `
-            <tr class="row-total-highlight">
-                <td class="px-4">TOTAL GENERAL</td>
-                <td class="text-center">${tT}</td>
-                <td class="text-end">${fmt.format(tV)}</td>
-                <td class="text-end px-4">${fmt.format(pG)}</td>
-            </tr>`;
-        
-        document.getElementById('res-body').innerHTML = html;
+            if (chart1) chart1.destroy(); 
+            if (chart2) chart2.destroy();
 
-        // Actualización de Gráficos
-        if (chart1) chart1.destroy(); 
-        if (chart2) chart2.destroy();
+            chart1 = new Chart(document.getElementById('chartBarras'), { 
+                type: 'bar', 
+                data: { labels: data.map(r => r.FRANJA), datasets: [{ data: data.map(r => r.TICKETS), backgroundColor: paletaSoft, borderRadius: 4 }] }, 
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } 
+            });
 
-        chart1 = new Chart(document.getElementById('chartBarras'), { 
-            type: 'bar', 
-            data: { 
-                labels: data.map(r => r.FRANJA), 
-                datasets: [{ 
-                    data: data.map(r => r.TICKETS), 
-                    backgroundColor: paleta, 
-                    borderRadius: 4 
-                }] 
-            }, 
-            options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } 
-        });
+            chart2 = new Chart(document.getElementById('chartTorta'), { 
+                type: 'doughnut', 
+                data: { labels: data.map(r => r.FRANJA), datasets: [{ data: data.map(r => r.TOTAL_VENTAS), backgroundColor: paletaSoft, borderWidth: 1, borderColor: '#ffffff' }] }, 
+                options: { maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } } 
+            });
 
-        chart2 = new Chart(document.getElementById('chartTorta'), { 
-            type: 'doughnut', 
-            data: { 
-                labels: data.map(r => r.FRANJA), 
-                datasets: [{ 
-                    data: data.map(r => r.TOTAL_VENTAS), 
-                    backgroundColor: paleta, 
-                    borderWidth: 0 
-                }] 
-            }, 
-            options: { maintainAspectRatio: false, cutout: '75%' } 
-        });
+        } catch (err) { resBody.innerHTML = `<tr><td colspan="3" class="alert alert-danger">${err.message}</td></tr>`; }
     }
 </script>
 </body>

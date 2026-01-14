@@ -3,50 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <title>Mimo & Co | Ticket Promedio</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
     <style>
-        body { background-color: #f8f9fa; font-family: 'Calibri', sans-serif; color: #475569; font-size: 14px; }
-        .header-bar { background: #1e293b; color: white; padding: 12px 30px; display: flex; align-items: center; }
-        .header-bar img { height: 35px; margin-right: 20px; }
-        .card-pro { background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 20px; }
-        .label-sm { font-size: 11px; font-weight: 400; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        .row-total-highlight td { background-color: #64748b !important; color: #ffffff !important; font-weight: 700 !important; padding: 12px 25px !important; border: none !important; }
-        .info-note { font-size: 12px; color: #94a3b8; font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-bottom: 20px; }
+        :root { --navy: #1e293b; --slate-500: #64748b; --mimo-blue: #3b82f6; }
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; -webkit-font-smoothing: antialiased; }
+        
+        .header-bar { background: var(--navy); color: white; padding: 0 30px; display: flex; align-items: center; height: 55px; }
+        .header-bar a { text-decoration: none; color: white; display: flex; align-items: center; }
+        .header-bar img { height: 28px; background: white; padding: 3px; border-radius: 4px; margin-right: 15px; }
+        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.85rem; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; }
+
+        .main-content { max-width: 950px; margin: 0 auto; padding: 30px 20px; }
+        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        
+        .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
+        .form-select, .form-control { font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; }
+        
+        .kpi-row-compact { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 25px; }
+        .kpi-card-mini { background: white; padding: 12px 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
+        .kpi-val { font-size: 1.1rem; color: #1e293b; font-weight: 800; font-variant-numeric: tabular-nums; }
+        
+        .date-wrapper { margin-bottom: 12px; }
+        .date-card { background: white; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border-left: 4px solid var(--navy); }
+        .date-header { background: #f8fafc; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; }
+        .date-title { font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--navy); text-transform: uppercase; font-size: 13px; }
+        
+        /* Grid de 2 columnas para que sea bien legible */
+        .item-grid { padding: 20px 40px; display: grid; grid-template-columns: 1fr 1fr; text-align: center; font-variant-numeric: tabular-nums; }
+        
+        .badge-tickets { background: #eff6ff; color: #1d4ed8; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 11px; border: 1px solid #dbeafe; }
+        .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 6px; height: 38px; border: none; }
+        .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-top: 20px; }
     </style>
 </head>
 <body onload="init()">
+
 <div class="header-bar shadow-sm">
-    <a href="reporte_index.html" style="text-decoration: none; color: white;"><img src="Logo.png" alt="Mimo & Co"></a>
-    <span style="font-size: 16px; text-transform: uppercase; font-weight: 300; margin-left: 10px;">Ticket Promedio</span>
+    <a href="reporte_index.html">
+        <img src="Logo.png" alt="Mimo">
+        <span class="header-title">Auditoría de Ticket Promedio</span>
+    </a>
 </div>
 
-<div class="container-fluid py-4 px-5">
+<div class="main-content">
     <div class="card-pro">
-        <div class="row g-3 align-items-end">
-            <div class="col-md-4"><span class="label-sm">Sucursal</span><select id="sucursal" class="form-select border-0 bg-light shadow-none"></select></div>
-            <div class="col-md-3"><span class="label-sm">Desde</span><input type="date" id="desde" class="form-control border-0 bg-light shadow-none"></div>
-            <div class="col-md-3"><span class="label-sm">Hasta</span><input type="date" id="hasta" class="form-control border-0 bg-light shadow-none"></div>
-            <div class="col-md-2"><button class="btn btn-dark w-100 fw-bold py-2 btn-sm" onclick="consultar()">CONSULTAR</button></div>
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4"><span class="label-sm">Sucursal</span><select id="sucursal" class="form-select shadow-none"></select></div>
+            <div class="col-md-3"><span class="label-sm">Desde</span><input type="date" id="desde" class="form-control shadow-none"></div>
+            <div class="col-md-3"><span class="label-sm">Hasta</span><input type="date" id="hasta" class="form-control shadow-none"></div>
+            <div class="col-md-2">
+                <button class="btn btn-consultar w-100" onclick="consultar()">EJECUTAR</button>
+            </div>
         </div>
     </div>
 
     <div id="cont-resultados" style="display: none;">
+        <div class="kpi-row-compact" id="kpi-container"></div>
+        <div id="res-body"></div>
         <div class="info-note">
-            <strong>Nota metodológica:</strong> El Ticket Promedio surge de dividir la Venta Neta por la cantidad total de tickets emitidos en el período.
-        </div>
-
-        <div class="card-pro p-0 overflow-hidden">
-            <table class="table mb-0">
-                <thead class="bg-light">
-                    <tr>
-                        <th class="px-4 py-3 border-0 small text-uppercase">Fecha</th>
-                        <th class="text-center py-3 border-0 small text-uppercase">Tickets</th>
-                        <th class="text-end py-3 border-0 small text-uppercase">Venta Neta</th>
-                        <th class="text-end px-4 py-3 border-0 small text-uppercase">Promedio</th>
-                    </tr>
-                </thead>
-                <tbody id="res-body"></tbody>
-            </table>
+            <b>Nota Auditoría:</b> El cálculo se realiza sobre venta final neta de devoluciones dividida por tickets emitidos.
         </div>
     </div>
 </div>
@@ -55,47 +77,73 @@
     const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
 
     async function init() {
-        const res = await fetch('/api/sucursales');
-        const data = await res.json();
-        document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-        document.getElementById('desde').value = document.getElementById('hasta').value = new Date().toISOString().split('T')[0];
+        try {
+            const res = await fetch('/api/sucursales');
+            const data = await res.json();
+            document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+            document.getElementById('desde').value = document.getElementById('hasta').value = new Date().toISOString().split('T')[0];
+        } catch (e) { console.error(e); }
     }
 
     async function consultar() {
-        try {
-            const suc = document.getElementById('sucursal').value;
-            const d = document.getElementById('desde').value;
-            const h = document.getElementById('hasta').value;
+        const resBody = document.getElementById('res-body');
+        resBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>`;
 
-            // LLAMADA CORREGIDA: Apunta al endpoint exacto definido en index.js
-            const res = await fetch(`/api/reporte/ticket-promedio?sucursal=${suc}&desde=${d}&hasta=${h}`);
-            if (!res.ok) throw new Error("Error en el servidor");
-            
+        try {
+            const res = await fetch(`/api/reporte/ticket-promedio?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
             const result = await res.json();
+
             document.getElementById('cont-resultados').style.display = 'block';
 
-            let html = result.datos.map(r => `
-                <tr>
-                    <td class="px-4 py-3">${r.FECHA}</td>
-                    <td class="text-center">${r.TICKETS}</td>
-                    <td class="text-end">${fmt.format(r.VENTA_NETA)}</td>
-                    <td class="text-end px-4">${fmt.format(r.PROMEDIO)}</td>
-                </tr>`).join('');
-            
-            // Fila de total utilizando el objeto resumen del servidor
-            html += `
-                <tr class="row-total-highlight">
-                    <td class="px-4">TOTAL PERÍODO</td>
-                    <td class="text-center">${result.resumen.tickets}</td>
-                    <td class="text-end">${fmt.format(result.resumen.venta)}</td>
-                    <td class="text-end px-4">${fmt.format(result.resumen.promedio)}</td>
-                </tr>`;
-            
-            document.getElementById('res-body').innerHTML = html;
-        } catch (e) {
-            console.error(e);
-            alert("No se pudo cargar el reporte. Verifique que el servidor esté encendido.");
-        }
+            // KPIs Superiores
+            document.getElementById('kpi-container').innerHTML = `
+                <div class="kpi-card-mini" style="background: var(--navy); color: white;">
+                    <span class="label-sm text-white opacity-75">Promedio Período</span>
+                    <div class="kpi-val text-white">${fmt.format(result.resumen.promedio || 0)}</div>
+                </div>
+                <div class="kpi-card-mini">
+                    <span class="label-sm">Venta Neta Total</span>
+                    <div class="kpi-val text-success">${fmt.format(result.resumen.venta || 0)}</div>
+                </div>
+                <div class="kpi-card-mini">
+                    <span class="label-sm">Tickets Totales</span>
+                    <div class="kpi-val">${result.resumen.tickets || 0}</div>
+                </div>
+                <div class="kpi-card-mini">
+                    <span class="label-sm">Días Operados</span>
+                    <div class="kpi-val text-primary">${result.datos.length}</div>
+                </div>
+            `;
+
+            // Render Tarjetas Diarias - Corregido cálculo de promedio
+            resBody.innerHTML = result.datos.map(r => {
+                // Forzamos el cálculo por si el servidor manda 0
+                const venta = parseFloat(r.VENTA_NETA) || 0;
+                const tickets = parseInt(r.TICKETS) || 0;
+                const promedio = tickets > 0 ? (venta / tickets) : 0;
+
+                return `
+                <div class="date-wrapper">
+                    <div class="date-card">
+                        <div class="date-header">
+                            <span class="date-title">Fecha: ${r.FECHA}</span>
+                            <span class="badge-tickets">${tickets} tickets</span>
+                        </div>
+                        <div class="item-grid bg-white">
+                            <div>
+                                <span class="label-sm">Venta del Día</span>
+                                <span class="fw-bold" style="font-size:16px">${fmt.format(venta)}</span>
+                            </div>
+                            <div>
+                                <span class="label-sm">Promedio por Ticket</span>
+                                <span class="fw-800 text-primary" style="font-size:18px">${fmt.format(promedio)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+
+        } catch (err) { resBody.innerHTML = `<div class="alert alert-danger">${err.message}</div>`; }
     }
 </script>
 </body>

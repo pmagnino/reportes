@@ -214,22 +214,19 @@ app.get('/api/reporte/ranking', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// --- 10. COMPARATIVO HISTÓRICO 7 DÍAS (Triple Comparación con Fechas) ---
+// --- 10. COMPARATIVO HISTÓRICO 7 DÍAS (CORREGIDO CONTRA DUPLICADOS) ---
 app.get('/api/reporte/comparativo-ventas', async (req, res) => {
     let { sucursal } = req.query; 
     const hoy = new Date().toISOString().split('T')[0];
     try {
         const pool = await poolMainPromise;
         const result = await pool.request()
-            .input('suc', sql.Int, cleanParam(sucursal))
+            .input('suc', sql.VarChar, sucursal)
             .input('fechaRef', sql.Date, hoy)
             .query(`
                 SET LANGUAGE Spanish;
                 WITH Calendario AS (
-                    SELECT 
-                        CAST(@fechaRef AS DATE) as FechaAct, 
-                        DATEADD(DAY, -7, @fechaRef) as FechaSemAnt, 
-                        DATEADD(DAY, -28, @fechaRef) as FechaMesAnt, 0 as Orden
+                    SELECT CAST(@fechaRef AS DATE) as FechaAct, DATEADD(DAY, -7, @fechaRef) as FechaSemAnt, DATEADD(DAY, -28, @fechaRef) as FechaMesAnt, 0 as Orden
                     UNION ALL SELECT DATEADD(DAY, -1, @fechaRef), DATEADD(DAY, -8, @fechaRef), DATEADD(DAY, -29, @fechaRef), 1
                     UNION ALL SELECT DATEADD(DAY, -2, @fechaRef), DATEADD(DAY, -9, @fechaRef), DATEADD(DAY, -30, @fechaRef), 2
                     UNION ALL SELECT DATEADD(DAY, -3, @fechaRef), DATEADD(DAY, -10, @fechaRef), DATEADD(DAY, -31, @fechaRef), 3
@@ -239,22 +236,40 @@ app.get('/api/reporte/comparativo-ventas', async (req, res) => {
                 ),
                 VentasBase AS (
                     SELECT 
-                        CAST(FECHA AS DATE) as F,
-                        SUM(CASE WHEN CODCMP IN ('CA', 'CB') THEN -TOTAL ELSE TOTAL END) as MontoDia,
-                        COUNT(DISTINCT IdRouter) as TicketsDia
-                    FROM dbo.QRMVS
-                    WHERE CAST(CODSUC AS VARCHAR) LIKE '%' + CAST(@suc AS VARCHAR)
-                      AND CODCMP IN ('FA', 'FB', 'CA', 'CB') AND ANULADO = 0 AND IDCOMPROBANTE > 0
-                    GROUP BY CAST(FECHA AS DATE)
+                        CAST(M.FECHA AS DATE) as F,
+                        -- DINERO: Sumamos directo de la cabecera QRMVS (Sin duplicados)
+                        SUM(CASE WHEN M.CODCMP IN ('CA', 'CB') THEN -M.TOTAL ELSE M.TOTAL END) as MontoDia,
+                        -- UNIDADES: Subconsulta para traer Cantidad1 de QRLINEASITEMS sin afectar la suma de dinero
+                        ISNULL((
+                            SELECT SUM(CASE WHEN M2.CODCMP IN ('CA', 'CB') THEN -I.CANTIDAD1 ELSE I.CANTIDAD1 END)
+                            FROM dbo.QRMVS M2
+                            INNER JOIN dbo.QRLINEASITEMS I ON M2.IdRouter = I.IdRouter
+                            WHERE CAST(M2.FECHA AS DATE) = CAST(M.FECHA AS DATE)
+                              AND CAST(M2.CODSUC AS VARCHAR) LIKE '%' + @suc
+                              AND M2.CODCMP IN ('FA', 'FB', 'CA', 'CB') AND M2.ANULADO = 0 AND M2.IDCOMPROBANTE > 0
+                              AND I.CODITM NOT LIKE 'DC%'
+                              AND I.CODITM NOT IN ('AJUCEN', 'SEÑA', 'VALE')
+                        ), 0) as UnidadesDia
+                    FROM dbo.QRMVS M
+                    WHERE CAST(M.CODSUC AS VARCHAR) LIKE '%' + @suc
+                      AND M.CODCMP IN ('FA', 'FB', 'CA', 'CB') AND M.ANULADO = 0 AND M.IDCOMPROBANTE > 0
+                    GROUP BY CAST(M.FECHA AS DATE)
                 )
                 SELECT 
                     FORMAT(C.FechaAct, 'dd/MM') as FechaLabel,
                     UPPER(LEFT(DATENAME(WEEKDAY, C.FechaAct), 3)) as DiaSemana,
                     FORMAT(C.FechaSemAnt, 'dd/MM') as LabelSem,
                     FORMAT(C.FechaMesAnt, 'dd/MM') as LabelMes,
-                    CAST(ISNULL(V1.MontoDia, 0) AS MONEY) as MontoAct, ISNULL(V1.TicketsDia, 0) as TktAct,
-                    CAST(ISNULL(V2.MontoDia, 0) AS MONEY) as MontoSem, ISNULL(V2.TicketsDia, 0) as TktSem,
-                    CAST(ISNULL(V3.MontoDia, 0) AS MONEY) as MontoMes, ISNULL(V3.TicketsDia, 0) as TktMes
+                    -- Formatos de Dinero para el Frontend
+                    '$ ' + FORMAT(ISNULL(V1.MontoDia, 0), '#,0.00') as MontoActStr,
+                    -- Valores numéricos puros para cálculos de %
+                    CAST(ISNULL(V1.MontoDia, 0) AS FLOAT) as MontoAct, 
+                    CAST(ISNULL(V2.MontoDia, 0) AS FLOAT) as MontoSem, 
+                    CAST(ISNULL(V3.MontoDia, 0) AS FLOAT) as MontoMes,
+                    -- Unidades
+                    CAST(ISNULL(V1.UnidadesDia, 0) AS INT) as UniAct,
+                    CAST(ISNULL(V2.UnidadesDia, 0) AS INT) as UniSem,
+                    CAST(ISNULL(V3.UnidadesDia, 0) AS INT) as UniMes
                 FROM Calendario C
                 LEFT JOIN VentasBase V1 ON V1.F = C.FechaAct
                 LEFT JOIN VentasBase V2 ON V2.F = C.FechaSemAnt
@@ -262,6 +277,125 @@ app.get('/api/reporte/comparativo-ventas', async (req, res) => {
                 ORDER BY C.Orden ASC
             `);
         res.json(result.recordset);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+// --- 11. RANKING DE RUBROS (SOLO UNIDADES) ---
+app.get('/api/reporte/rubros', async (req, res) => {
+    let { sucursal, desde, hasta } = req.query;
+    try {
+        const pool = await poolMainPromise;
+        const result = await pool.request()
+            .input('suc', sql.VarChar, sucursal)
+            .input('desde', sql.Date, desde)
+            .input('hasta', sql.Date, hasta)
+            .query(`
+                SET LANGUAGE Spanish;
+                WITH ItemsLimpios AS (
+                    SELECT 
+                        A.IdRouter, B.CODITM, A.CODCMP,
+                        ISNULL((SELECT TOP 1 VAL.DESCRIPCION FROM dbo.QRITEMSATRIB ATR 
+                                INNER JOIN dbo.QRATRIBUTOSVAL VAL ON ATR.CODATR = VAL.CODATR AND ATR.CODATRVAL = VAL.CODATRVAL 
+                                WHERE ATR.CODITM = B.CODITM AND ATR.CODATR = 'R'), 'SIN RUBRO') AS RubroNombre,
+                        MAX(B.CANTIDAD1) as CantidadUnica
+                    FROM dbo.QRMVS A
+                    INNER JOIN dbo.QRLINEASITEMS B ON A.IdRouter = B.IdRouter
+                    WHERE CAST(A.CODSUC AS VARCHAR) LIKE '%' + @suc
+                      AND CAST(A.FECHA AS DATE) BETWEEN @desde AND @hasta
+                      AND A.ANULADO = 0 AND B.IDCOMPROBANTE > 0
+                      AND A.CODCMP IN ('FA', 'FB', 'CA', 'CB')
+                      AND B.CODITM NOT LIKE 'DC%'
+                      AND B.CODITM NOT IN ('AJUCEN', 'SEÑA', 'VALE', 'DIFPRECIO')
+                    GROUP BY A.IdRouter, B.CODITM, A.CODCMP
+                )
+                SELECT 
+                    RubroNombre AS Rubro,
+                    CAST(SUM(CASE WHEN CODCMP IN ('CA', 'CB') THEN -CantidadUnica ELSE CantidadUnica END) AS INT) AS TotalUnidades
+                FROM ItemsLimpios
+                GROUP BY RubroNombre
+                HAVING SUM(CASE WHEN CODCMP IN ('CA', 'CB') THEN -CantidadUnica ELSE CantidadUnica END) <> 0
+                ORDER BY TotalUnidades DESC;
+            `);
+        res.json(result.recordset);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+// --- 12. AUDITORÍA ESTRATÉGICA DE DESCUENTOS (VERSIÓN DIRECTORIO) ---
+app.get('/api/reporte/auditoria-descuentos', async (req, res) => {
+    let { sucursal, desde, hasta } = req.query;
+    try {
+        const pool = await poolMainPromise;
+        const result = await pool.request()
+            .input('suc', sql.VarChar, sucursal)
+            .input('desde', sql.Date, desde)
+            .input('hasta', sql.Date, hasta)
+            .query(`
+                SET LANGUAGE Spanish;
+                
+                WITH VentasYDescuentos AS (
+                    SELECT 
+                        A.IdRouter,
+                        B.CODITM,
+                        CAST(B.DESCRIPCION AS VARCHAR(MAX)) as DescripcionItem,
+                        CASE WHEN B.CODITM LIKE 'DC%' THEN 'DESCUENTO' ELSE 'PRODUCTO' END AS TipoFila,
+                        CASE WHEN A.CODCMP IN ('CA', 'CB') THEN -B.IMPORTE ELSE B.IMPORTE END AS ImporteNeto
+                    FROM dbo.QRMVS A
+                    INNER JOIN dbo.QRLINEASITEMS B ON A.IdRouter = B.IdRouter
+                    WHERE CAST(A.CODSUC AS VARCHAR) LIKE '%' + @suc
+                      AND CAST(A.FECHA AS DATE) BETWEEN @desde AND @hasta
+                      AND A.ANULADO = 0 AND B.IDCOMPROBANTE > 0
+                ),
+                GlobalBruto AS (
+                    SELECT SUM(ImporteNeto) as VentaBrutaTotal FROM VentasYDescuentos WHERE TipoFila = 'PRODUCTO'
+                )
+                SELECT 
+                    'RESUMEN' as TipoFila,
+                    'TOTAL GENERAL' as Concepto,
+                    '' as Codigo,
+                    CAST(ISNULL((SELECT VentaBrutaTotal FROM GlobalBruto), 0) AS MONEY) as ValBruto,
+                    CAST(SUM(ABS(ImporteNeto)) AS MONEY) as ValDcto,
+                    CAST(ISNULL((SELECT VentaBrutaTotal FROM GlobalBruto), 0) - SUM(ABS(ImporteNeto)) AS MONEY) as ValNeto,
+                    CAST((SUM(ABS(ImporteNeto)) / NULLIF((SELECT VentaBrutaTotal FROM GlobalBruto), 0)) * 100 AS DECIMAL(10,2)) as Porcentaje,
+                    COUNT(DISTINCT IdRouter) as CantTickets
+                FROM VentasYDescuentos
+                WHERE TipoFila = 'DESCUENTO'
+
+                UNION ALL
+
+                SELECT 
+                    'DETALLE' as TipoFila,
+                    DescripcionItem,
+                    CODITM,
+                    0, 
+                    CAST(SUM(ABS(ImporteNeto)) AS MONEY), 
+                    0, 
+                    CAST((SUM(ABS(ImporteNeto)) / NULLIF((SELECT VentaBrutaTotal FROM GlobalBruto), 0)) * 100 AS DECIMAL(10,2)),
+                    COUNT(DISTINCT IdRouter)
+                FROM VentasYDescuentos 
+                WHERE TipoFila = 'DESCUENTO'
+                GROUP BY CODITM, DescripcionItem;
+            `);
+
+        const resumen = result.recordset.find(r => r.TipoFila === 'RESUMEN');
+        const detalle = result.recordset.filter(r => r.TipoFila === 'DETALLE');
+        
+        // Formateamos los números a moneda con $ en el servidor para seguridad
+        const formatMoney = (val) => '$ ' + val.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        res.json({
+            resumen: {
+                bruto: formatMoney(resumen.ValBruto),
+                descuento: formatMoney(resumen.ValDcto),
+                neto: formatMoney(resumen.ValNeto),
+                porcentaje: resumen.Porcentaje,
+                tickets: resumen.CantTickets
+            },
+            detalle: detalle.map(d => ({
+                codigo: d.Codigo,
+                concepto: d.Concepto,
+                monto: formatMoney(d.ValDcto),
+                porcentaje: d.Porcentaje,
+                tickets: d.CantTickets
+            }))
+        });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 const PORT = process.env.PORT || 3000;
