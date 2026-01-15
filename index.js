@@ -1,23 +1,16 @@
 const express = require('express');
-const sql = require('mssql');
 const path = require('path');
 const cors = require('cors');
-require('dotenv').config();
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+const { sql, poolMainPromise, poolAuthPromise } = require('./db');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const dbConfig = {
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    server: process.env.DB_SERVER,
-    database: process.env.DB_DATABASE,
-    options: { encrypt: false, trustServerCertificate: true }
-};
-
-const poolMainPromise = new sql.ConnectionPool(dbConfig).connect();
 const cleanParam = (p) => p ? p.toString().replace(':1', '').trim() : '';
 
 // =============================
