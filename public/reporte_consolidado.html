@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mimo & Co | Grilla Consolidada</title>
+    <title>Mimo & Co | Venta Consolidada Canal Franquicias</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -39,63 +39,67 @@
         /* Cabeceras Sticky */
         .table-sabana thead th { 
             position: sticky; top: 0; background: #f8fafc; z-index: 10; 
-            padding: 8px; border-bottom: 2px solid var(--slate-200); border-right: 1px solid var(--slate-200);
-            font-family: 'Outfit', sans-serif; font-size: 9px; text-align: center; min-width: 110px; color: var(--slate-500);
+            padding: 10px; border-bottom: 2px solid var(--slate-200); border-right: 1px solid var(--slate-200);
+            font-family: 'Outfit', sans-serif; font-size: 9px; text-align: center; min-width: 120px; color: var(--slate-500);
         }
 
+        /* Sucursal Sticky Izquierda */
         .sticky-suc { 
             position: sticky; left: 0; background: white !important; z-index: 11; 
-            min-width: 170px; border-right: 2px solid var(--slate-200) !important;
+            min-width: 200px; border-right: 2px solid var(--slate-200) !important;
             font-weight: 700; color: var(--navy); text-align: left !important;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.03);
         }
 
         .table-sabana thead th.sticky-suc { z-index: 12; top: 0; }
 
-        .table-sabana td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; text-align: right; font-variant-numeric: tabular-nums; }
+        .table-sabana td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; text-align: right; font-variant-numeric: tabular-nums; }
 
+        /* Columna Total Acumulado */
         .col-total { background: #f1f5f9 !important; font-weight: 800; border-left: 2px solid var(--slate-200) !important; position: sticky; right: 0; z-index: 9; }
 
-        .val-zero { color: #cbd5e1; font-weight: 400; }
-        .btn-run { background: var(--navy); color: white; font-size: 10px; font-weight: 700; height: 32px; border: none; padding: 0 15px; border-radius: 4px; }
-        .btn-pdf { background: #dc2626; color: white; font-size: 10px; font-weight: 700; height: 32px; border: none; padding: 0 15px; border-radius: 4px; margin-left: 10px; }
-
-        /* ============================================================
-           CONFIGURACIÓN PARA IMPRESIÓN / PDF (A4 HORIZONTAL)
-           ============================================================ */
-        @media print {
-            @page { size: A4 landscape; margin: 1cm; }
-            body { overflow: visible !important; height: auto !important; background: white !important; }
-            .header-bar, .filter-area, .btn-run, .btn-pdf { display: none !important; } /* Ocultar interfaz */
-            .grid-viewport { overflow: visible !important; position: static !important; }
-            .table-sabana { width: 100% !important; table-layout: auto !important; border: 1px solid #000; }
-            .table-sabana th, .table-sabana td { font-size: 8pt !important; border: 0.5pt solid #ccc !important; padding: 4pt !important; }
-            .sticky-suc, .col-total { position: static !important; background: white !important; border-right: 1px solid #000 !important; }
-            .val-zero { color: #aaa !important; }
-            .table-sabana thead th { background: #eee !important; color: #000 !important; }
+        /* FILA DE PIE (TOTAL FRANQUICIAS) */
+        .table-sabana tfoot td {
+            position: sticky;
+            bottom: 0;
+            background: var(--navy) !important;
+            color: white !important;
+            font-weight: 800;
+            z-index: 13;
+            border-top: 2px solid #000;
+            padding: 10px 12px;
         }
+        .table-sabana tfoot td.sticky-suc { background: var(--navy) !important; z-index: 14; }
+
+        .val-zero { color: #cbd5e1; font-weight: 400; }
+        .btn-run { background: var(--navy); color: white; font-size: 10px; font-weight: 700; height: 32px; border: none; padding: 0 20px; border-radius: 4px; transition: 0.2s; }
+        .btn-run:hover { background: #000; transform: scale(1.02); }
+
     </style>
 </head>
 <body onload="init()">
 
 <div class="header-bar">
-    <a href="reporte_index.html"><img src="Logo.png" alt="Mimo"></a>
-    <span class="header-title">Ventas Consolidadas por Día</span>
+    <a href="reporte_index.html">
+        <img src="Logo.png" alt="Mimo">
+        <span class="header-title">Ventas Consolidadas Canal Franquicias</span>
+    </a>
 </div>
 
 <div class="filter-area shadow-sm">
-    <div class="d-flex align-items-end">
-        <div class="me-3" style="width: 130px;">
+    <div class="d-flex align-items-end gap-3">
+        <div style="width: 140px;">
             <span class="label-sm">Desde</span>
             <input type="date" id="desde" class="form-control form-control-sm shadow-none">
         </div>
-        <div class="me-3" style="width: 130px;">
+        <div style="width: 140px;">
             <span class="label-sm">Hasta</span>
             <input type="date" id="hasta" class="form-control form-control-sm shadow-none">
         </div>
-        <button class="btn-run" onclick="consultar()">PROCESAR</button>
-        <button class="btn-pdf" id="btnExport" style="display: none;" onclick="window.print()">
-            <i class="bi bi-file-earmark-pdf me-1"></i> PDF / IMPRIMIR
-        </button>
+        <button class="btn-run" onclick="consultar()">CONSULTAR</button>
+        <div class="ms-auto text-muted small italic">
+            * Valores con IVA incluido.
+        </div>
     </div>
 </div>
 
@@ -103,6 +107,7 @@
     <table class="table-sabana" id="tabla-datos">
         <thead id="res-head"></thead>
         <tbody id="res-body"></tbody>
+        <tfoot id="res-foot"></tfoot>
     </table>
 </div>
 
@@ -120,29 +125,30 @@
     async function consultar() {
         const resBody = document.getElementById('res-body');
         const resHead = document.getElementById('res-head');
-        const btnPdf = document.getElementById('btnExport');
+        const resFoot = document.getElementById('res-foot');
         
-        resBody.innerHTML = `<tr><td colspan="30" class="p-5 text-center"><div class="spinner-border spinner-border-sm text-primary"></div><br>Calculando red...</td></tr>`;
+        resBody.innerHTML = `<tr><td colspan="30" class="p-5 text-center"><div class="spinner-border spinner-border-sm text-primary"></div><br>Consolidando Red...</td></tr>`;
+        resFoot.innerHTML = "";
 
         try {
             const res = await fetch(`/api/reporte/ventas-grilla-diaria?desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
             const data = await res.json();
 
             if (data.length === 0) {
-                resBody.innerHTML = '<tr><td class="p-4">No hay datos.</td></tr>';
-                btnPdf.style.display = 'none';
+                resBody.innerHTML = '<tr><td class="p-4">No se registran movimientos.</td></tr>';
                 return;
             }
 
-            btnPdf.style.display = 'block';
             const keys = Object.keys(data[0]);
             
+            // 1. Renderizar Cabecera
             resHead.innerHTML = `<tr>${keys.map(k => {
-                let label = k === 'TOTAL_SUCURSAL' ? 'TOTAL' : k;
+                let label = k === 'TOTAL_SUCURSAL' ? 'TOTAL SUC.' : k;
                 let css = k === 'SUCURSAL' ? 'sticky-suc' : (k === 'TOTAL_SUCURSAL' ? 'col-total' : '');
                 return `<th class="${css}">${label}</th>`;
             }).join('')}</tr>`;
 
+            // 2. Renderizar Cuerpo
             resBody.innerHTML = data.map(row => `
                 <tr>
                     ${keys.map(k => {
@@ -155,6 +161,22 @@
                     }).join('')}
                 </tr>
             `).join('');
+
+            // 3. CÁLCULO DE FILA "TOTAL FRANQUICIAS"
+            let footHtml = `<tr><td class="sticky-suc">TOTAL FRANQUICIAS (${data.length})</td>`;
+            
+            keys.forEach((k, index) => {
+                if (index === 0) return; // Saltear nombre sucursal
+
+                const totalColumna = data.reduce((acc, row) => acc + (parseFloat(row[k]) || 0), 0);
+                const isTotalFinal = k === 'TOTAL_SUCURSAL';
+                const cssClass = isTotalFinal ? 'col-total' : '';
+
+                footHtml += `<td class="${cssClass}">${fmt.format(totalColumna)}</td>`;
+            });
+
+            footHtml += `</tr>`;
+            resFoot.innerHTML = footHtml;
 
         } catch (err) {
             resBody.innerHTML = `<tr><td class="alert alert-danger">Error: ${err.message}</td></tr>`;
