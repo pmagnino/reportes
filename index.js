@@ -515,6 +515,68 @@ app.post('/api/login', async (req, res) => {
         return res.status(500).json({ error: err.message });
     }
 });
+// =============================
+// AUTH (LOGIN) - DB AUTENTICACION
+// =============================
+app.post('/api/login', async (req, res) => {
+    try {
+        const { usuario, password } = req.body;
+
+        if (!usuario || !password) {
+            return res.status(400).json({ error: 'Faltan credenciales' });
+        }
+
+        const pool = await poolAuthPromise;
+
+        const result = await pool.request()
+            .input('usuario', sql.VarChar, usuario)
+            .query(`
+                SELECT TOP 1
+                    id,
+                    usuario,
+                    password_hash,
+                    rol,
+                    sucursal,
+                    activo
+                FROM dbo.usuarios_reportes
+                WHERE usuario = @usuario
+            `);
+
+        if (result.recordset.length === 0) {
+            return res.status(401).json({ error: 'Credenciales invalidas' });
+        }
+
+        const u = result.recordset[0];
+
+        if (!u.activo) {
+            return res.status(403).json({ error: 'Usuario inactivo' });
+        }
+
+        const ok = await bcrypt.compare(password, u.password_hash);
+        if (!ok) {
+            return res.status(401).json({ error: 'Credenciales invalidas' });
+        }
+
+        const token = jwt.sign(
+            { id: u.id, usuario: u.usuario, rol: u.rol, sucursal: u.sucursal },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES || '8h' }
+        );
+
+        return res.json({
+            token,
+            user: {
+                id: u.id,
+                usuario: u.usuario,
+                rol: u.rol,
+                sucursal: u.sucursal,
+                activo: !!u.activo
+            }
+        });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+});
 
 // =============================
 // USUARIOS (ABM) - DB AUTENTICACION
@@ -532,7 +594,7 @@ app.get('/api/usuarios', async (req, res) => {
                 rol,
                 sucursal,
                 activo
-            FROM users
+            FROM dbo.usuarios_reportes
             ORDER BY usuario ASC
         `);
 
@@ -556,7 +618,7 @@ app.post('/api/usuarios', async (req, res) => {
         // evitar duplicados
         const exists = await pool.request()
             .input('usuario', sql.VarChar, usuario)
-            .query(`SELECT TOP 1 id FROM users WHERE usuario = @usuario`);
+            .query(`SELECT TOP 1 id FROM dbo.usuarios_reportes WHERE usuario = @usuario`);
 
         if (exists.recordset.length > 0) {
             return res.status(409).json({ error: 'El usuario ya existe' });
@@ -571,7 +633,7 @@ app.post('/api/usuarios', async (req, res) => {
             .input('sucursal', sql.Int, sucursal ? parseInt(sucursal, 10) : null)
             .input('activo', sql.Bit, activo ? 1 : 0)
             .query(`
-                INSERT INTO users (usuario, password_hash, rol, sucursal, activo)
+                INSERT INTO dbo.usuarios_reportes (usuario, password_hash, rol, sucursal, activo)
                 VALUES (@usuario, @password_hash, @rol, @sucursal, @activo)
             `);
 
@@ -593,7 +655,6 @@ app.put('/api/usuarios/:id', async (req, res) => {
 
         const pool = await poolAuthPromise;
 
-        // Si viene password, actualiza hash, si no, no lo toca
         if (password && password.trim() !== '') {
             const hash = await bcrypt.hash(password, 10);
 
@@ -605,7 +666,7 @@ app.put('/api/usuarios/:id', async (req, res) => {
                 .input('sucursal', sql.Int, sucursal ? parseInt(sucursal, 10) : null)
                 .input('activo', sql.Bit, activo ? 1 : 0)
                 .query(`
-                    UPDATE users
+                    UPDATE dbo.usuarios_reportes
                     SET usuario = @usuario,
                         password_hash = @password_hash,
                         rol = @rol,
@@ -621,7 +682,7 @@ app.put('/api/usuarios/:id', async (req, res) => {
                 .input('sucursal', sql.Int, sucursal ? parseInt(sucursal, 10) : null)
                 .input('activo', sql.Bit, activo ? 1 : 0)
                 .query(`
-                    UPDATE users
+                    UPDATE dbo.usuarios_reportes
                     SET usuario = @usuario,
                         rol = @rol,
                         sucursal = @sucursal,
@@ -635,6 +696,7 @@ app.put('/api/usuarios/:id', async (req, res) => {
         return res.status(500).json({ error: err.message });
     }
 });
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Mimo BI Server Activo en Puerto ${PORT}`));
