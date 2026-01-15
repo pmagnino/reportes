@@ -2,115 +2,110 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mimo & Co | Estadística por Medio de Pago</title>
+    <title>Mimo & Co | Medios de Pago</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
-        body { background-color: #f1f5f9; font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; color: #334155; margin: 0; }
+        :root { --navy: #1e293b; --slate-500: #64748b; }
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; -webkit-font-smoothing: antialiased; }
         
-        /* Barra superior idéntica a Franjas */
-        .nav-header { 
-            background: #1e293b; 
-            color: white; 
-            padding: 10px 30px; 
-            display: flex; 
-            align-items: center; 
-            height: 60px; /* Altura delgada como en Franjas */
-        }
-        .nav-header img { 
-            height: 35px; /* Tamaño del logo controlado */
-            background-color: white;
-            padding: 5px;
-            border-radius: 4px;
-            margin-right: 20px;
-        }
-        .nav-header span { 
-            font-size: 13px; 
-            letter-spacing: 1px; 
-            text-transform: uppercase; 
-            font-weight: 500;
-        }
+        /* Navbar unificada */
+        .header-bar { background: var(--navy); color: white; padding: 0 30px; display: flex; align-items: center; height: 55px; }
+        .header-bar a { text-decoration: none; color: white; display: flex; align-items: center; }
+        .header-bar img { height: 28px; background: white; padding: 3px; border-radius: 4px; margin-right: 15px; }
+        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.85rem; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; }
 
-        /* Bloque de Filtros */
-        .filter-container { background: white; border-bottom: 1px solid #e2e8f0; padding: 25px 40px; margin-bottom: 30px; }
-        .label-tech { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
-        .form-control, .form-select { background-color: #f8fafc; border: 1px solid #e2e8f0; font-size: 13px; }
-        .btn-execute { background: #1e293b; color: white; font-weight: 700; border: none; border-radius: 6px; font-size: 12px; height: 38px; }
-        .btn-execute:hover { background: #334155; }
-
-        /* Estructura Split */
-        .main-content { padding: 0 40px 40px 40px; }
-        .card-formal { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px; height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .table-custom thead th { background: white; color: #64748b; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #f1f5f9; padding: 15px; }
-        .table-custom tbody td { padding: 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        .main-content { max-width: 1050px; margin: 0 auto; padding: 25px 20px; }
         
-        /* Acordeón */
-        .row-group { background-color: #ffffff; font-weight: 600; color: #2563eb; cursor: pointer; }
-        .detalle-container { display: none; background-color: #fcfcfc; }
-        .sub-item { color: #94a3b8; font-size: 12px; padding-left: 45px !important; }
-        .total-row { background-color: #1e293b !important; color: white !important; font-weight: 700; }
-        .chart-box { position: relative; height: 320px; width: 100%; }
+        /* Filtros idénticos a Franjas */
+        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
+        .form-select, .form-control { font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; height: 38px; }
+        
+        /* Gráfico */
+        .chart-container { height: 250px; position: relative; }
+
+        /* Tabla Estilo Franjas */
+        .table-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+        .table thead th { background: #f8fafc; font-family: 'Outfit', sans-serif; font-size: 10px; text-transform: uppercase; color: var(--slate-500); padding: 12px 20px; border-bottom: 2px solid #f1f5f9; }
+        .table tbody td { padding: 12px 20px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; font-variant-numeric: tabular-nums; }
+        
+        /* Acordeón y Totales */
+        .row-group { background-color: #f8fafc; font-weight: 600; color: #3b82f6; cursor: pointer; }
+        .sub-item { color: var(--slate-500); font-size: 11px; padding-left: 40px !important; }
+        .row-total-highlight td { background-color: var(--navy) !important; color: white !important; font-weight: 800 !important; font-size: 14px; }
+        
+        .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 6px; height: 38px; border: none; }
+        .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-bottom: 20px; }
     </style>
 </head>
 <body onload="init()">
 
-<div class="nav-header">
-    <a href="reporte_index.html"><img src="Logo.png" alt="Mimo & Co"></a>
-    <span>ESTADISTICA POR MEDIO DE PAGO</span>
-</div>
-
-<div class="filter-container">
-    <div class="row g-3 align-items-end">
-        <div class="col-md-4">
-            <span class="label-tech">Sucursal Operativa</span>
-            <select id="sucursal" class="form-select"></select>
-        </div>
-        <div class="col-md-2">
-            <span class="label-tech">Fecha Desde</span>
-            <input type="date" id="desde" class="form-control">
-        </div>
-        <div class="col-md-2">
-            <span class="label-tech">Fecha Hasta</span>
-            <input type="date" id="hasta" class="form-control">
-        </div>
-        <div class="col-md-2">
-            <button class="btn-execute w-100" onclick="consultar()">CONSULTAR</button>
-        </div>
-    </div>
+<div class="header-bar shadow-sm">
+    <a href="reporte_index.html">
+        <img src="Logo.png" alt="Mimo">
+        <span class="header-title">Estadística por Medio de Pago</span>
+    </a>
 </div>
 
 <div class="main-content">
+    <div class="card-pro">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4"><span class="label-sm">Sucursal</span><select id="sucursal" class="form-select shadow-none"></select></div>
+            <div class="col-md-3"><span class="label-sm">Desde</span><input type="date" id="desde" class="form-control shadow-none"></div>
+            <div class="col-md-3"><span class="label-sm">Hasta</span><input type="date" id="hasta" class="form-control shadow-none"></div>
+            <div class="col-md-2"><button class="btn btn-consultar w-100" onclick="consultar()">EJECUTAR</button></div>
+        </div>
+    </div>
+
     <div id="cont-resultados" style="display: none;">
-        <div class="row g-4">
-            <div class="col-md-5">
-                <div class="card-formal">
-                    <span class="label-tech mb-4">Composición de Ingresos</span>
-                    <div class="chart-box"><canvas id="chartPagos"></canvas></div>
+        <div class="info-note">
+            <strong>Auditoría de Caja:</strong> Composición de ingresos netos por medio de cobro (incluye tarjetas agrupadas).
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card-pro">
+                    <span class="label-sm mb-3 text-center">Distribución de Ingresos</span>
+                    <div class="chart-container"><canvas id="chartPagos"></canvas></div>
                 </div>
             </div>
-            <div class="col-md-7">
-                <div class="card-formal p-0 overflow-hidden">
-                    <table class="table table-custom mb-0">
-                        <thead>
-                            <tr><th>MEDIO DE PAGO</th><th class="text-center">TICKETS</th><th class="text-end px-4">IMPORTE NETO</th></tr>
-                        </thead>
-                        <tbody id="res-body"></tbody>
-                    </table>
-                </div>
-            </div>
+        </div>
+
+        <div class="table-card shadow-sm">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Medio de Pago</th>
+                        <th class="text-center">Tickets</th>
+                        <th class="text-end">Importe Neto</th>
+                    </tr>
+                </thead>
+                <tbody id="res-body"></tbody>
+            </table>
         </div>
     </div>
 </div>
 
 <script>
     let myChart;
-    const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
+    const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 });
+    const paletaSoft = ['#CDE6B4', '#F9F4C2', '#F9C7C7', '#D1E8FF', '#E2D1FF', '#FFD1F5'];
 
     async function init() {
-        const res = await fetch('/api/sucursales');
-        const data = await res.json();
-        document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-        document.getElementById('desde').value = document.getElementById('hasta').value = new Date().toISOString().split('T')[0];
+        try {
+            const res = await fetch('/api/sucursales');
+            const data = await res.json();
+            document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+            document.getElementById('desde').value = document.getElementById('hasta').value = new Date().toISOString().split('T')[0];
+        } catch (e) { console.error(e); }
     }
 
     function toggleDetalle() {
@@ -119,38 +114,74 @@
     }
 
     async function consultar() {
-        const res = await fetch(`/api/reporte/medios-pago?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
-        const data = await res.json();
-        document.getElementById('cont-resultados').style.display = 'block';
-        
-        const otros = data.filter(r => r.CODPAG !== '100');
-        const tarjetas = data.filter(r => r.CODPAG === '100');
-        let tT = 0, tI = 0, labels = [], valores = [];
+        const resBody = document.getElementById('res-body');
+        resBody.innerHTML = `<tr><td colspan="3" class="text-center p-5"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>`;
 
-        let html = otros.map(r => {
-            tT += r.TICKETS; tI += r.TOTAL_NETO;
-            labels.push(r.MEDIO); valores.push(r.TOTAL_NETO);
-            return `<tr><td>${r.MEDIO}</td><td class="text-center">${r.TICKETS}</td><td class="text-end px-4 fw-bold">${fmt.format(r.TOTAL_NETO)}</td></tr>`;
-        }).join('');
+        try {
+            const res = await fetch(`/api/reporte/medios-pago?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
+            const data = await res.json();
+            document.getElementById('cont-resultados').style.display = 'block';
+            
+            const otros = data.filter(r => r.CODPAG !== '100');
+            const tarjetas = data.filter(r => r.CODPAG === '100');
+            let tT = 0, tI = 0, labels = [], valores = [];
 
-        if (tarjetas.length > 0) {
-            const sumT = tarjetas.reduce((a, b) => a + b.TICKETS, 0);
-            const sumI = tarjetas.reduce((a, b) => a + b.TOTAL_NETO, 0);
-            tT += sumT; tI += sumI;
-            labels.push('TARJETAS'); valores.push(sumI);
-            html += `<tr class="row-group" onclick="toggleDetalle()"><td>TARJETAS <span style="font-size: 9px; font-weight: normal; color: #94a3b8;">(Ver detalle ▼)</span></td><td class="text-center">${sumT}</td><td class="text-end px-4">${fmt.format(sumI)}</td></tr>
-            <tbody id="tbody-detalle" class="detalle-container" style="display: none;">${tarjetas.map(t => `<tr><td class="ps-5 sub-item">└ ${t.MEDIO} (${t.PLAN_PAGO})</td><td class="text-center text-muted">${t.TICKETS}</td><td class="text-end px-4 text-muted">${fmt.format(t.TOTAL_NETO)}</td></tr>`).join('')}</tbody>`;
-        }
+            let html = otros.map(r => {
+                tT += r.TICKETS; tI += r.TOTAL_NETO;
+                labels.push(r.MEDIO); valores.push(r.TOTAL_NETO);
+                return `<tr><td>${r.MEDIO}</td><td class="text-center">${r.TICKETS}</td><td class="text-end fw-bold">${fmt.format(r.TOTAL_NETO)}</td></tr>`;
+            }).join('');
 
-        html += `<tr class="total-row"><td>TOTAL GENERAL</td><td class="text-center">${tT}</td><td class="text-end px-4">${fmt.format(tI)}</td></tr>`;
-        document.getElementById('res-body').innerHTML = html;
+            if (tarjetas.length > 0) {
+                const sumT = tarjetas.reduce((a, b) => a + b.TICKETS, 0);
+                const sumI = tarjetas.reduce((a, b) => a + b.TOTAL_NETO, 0);
+                tT += sumT; tI += sumI;
+                labels.push('TARJETAS'); valores.push(sumI);
+                
+                html += `
+                    <tr class="row-group" onclick="toggleDetalle()">
+                        <td><i class="bi bi-chevron-down me-2"></i>TARJETAS</td>
+                        <td class="text-center">${sumT}</td>
+                        <td class="text-end">${fmt.format(sumI)}</td>
+                    </tr>
+                    <tbody id="tbody-detalle" style="display: none; border-top:none;">
+                        ${tarjetas.map(t => `
+                            <tr>
+                                <td class="sub-item">└ ${t.MEDIO} (${t.PLAN_PAGO})</td>
+                                <td class="text-center text-muted">${t.TICKETS}</td>
+                                <td class="text-end text-muted">${fmt.format(t.TOTAL_NETO)}</td>
+                            </tr>`).join('')}
+                    </tbody>`;
+            }
 
-        if (myChart) myChart.destroy();
-        myChart = new Chart(document.getElementById('chartPagos'), {
-            type: 'doughnut',
-            data: { labels: labels, datasets: [{ data: valores, backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#6366f1'], borderWidth: 2, borderColor: '#ffffff' }] },
-            options: { maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } }
-        });
+            html += `<tr class="row-total-highlight"><td>TOTAL GENERAL</td><td class="text-center">${tT}</td><td class="text-end">${fmt.format(tI)}</td></tr>`;
+            resBody.innerHTML = html;
+
+            if (myChart) myChart.destroy();
+            myChart = new Chart(document.getElementById('chartPagos'), {
+                type: 'doughnut',
+                data: { 
+                    labels: labels, 
+                    datasets: [{ 
+                        data: valores, 
+                        backgroundColor: paletaSoft, 
+                        borderWidth: 2, 
+                        borderColor: '#ffffff' 
+                    }] 
+                },
+                options: { 
+                    maintainAspectRatio: false, 
+                    cutout: '75%', 
+                    plugins: { 
+                        legend: { 
+                            position: 'bottom', 
+                            labels: { boxWidth: 10, font: { size: 11, family: 'Inter' }, padding: 15 } 
+                        } 
+                    } 
+                }
+            });
+
+        } catch (err) { resBody.innerHTML = `<tr><td colspan="3" class="alert alert-danger">${err.message}</td></tr>`; }
     }
 </script>
 </body>
