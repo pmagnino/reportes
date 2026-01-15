@@ -20,6 +20,19 @@ const dbConfig = {
 const poolMainPromise = new sql.ConnectionPool(dbConfig).connect();
 const cleanParam = (p) => p ? p.toString().replace(':1', '').trim() : '';
 
+// =============================
+// HEALTHCHECK (PARA ECS / ALB)
+// =============================
+app.get('/health', async (req, res) => {
+    try {
+        const pool = await poolMainPromise;
+        await pool.request().query('SELECT 1');
+        return res.status(200).send('OK');
+    } catch (err) {
+        return res.status(500).send('DB ERROR');
+    }
+});
+
 // --- 1. SUCURSALES ---
 app.get('/api/sucursales', async (req, res) => {
     try {
@@ -51,20 +64,20 @@ app.get('/api/facturas', async (req, res) => {
                 AND A.CODCMP IN ('FA', 'FB', 'CA', 'CB') AND A.IDCOMPROBANTE > 0 AND A.ANULADO = 0
             )
             SELECT * FROM FacturasBase WHERE 1=1`;
-        
+
         if (cleanParam(articulo) !== "") q += ` AND IdRouter IN (SELECT IdRouter FROM dbo.QRLINEASITEMS WHERE CODITM LIKE '%' + @art + '%')`;
         if (cleanParam(medioPago) !== "" && cleanParam(medioPago) !== "TODOS") q += ` AND pago_desc = @mpago`;
-        
+
         const request = pool.request()
             .input('suc', sql.Int, cleanParam(sucursal))
             .input('desde', sql.VarChar, cleanParam(desde))
             .input('hasta', sql.VarChar, cleanParam(hasta))
             .input('art', sql.VarChar, cleanParam(articulo))
             .input('mpago', sql.VarChar, cleanParam(medioPago));
-            
+
         const result = await request.query(q);
         let ef = 0, tj = 0, mp = 0, gr = 0, cFA = 0, cNC = 0;
-        
+
         const facturas = result.recordset.map(r => {
             const factor = (r.CODCMP === 'CA' || r.CODCMP === 'CB') ? -1 : 1;
             const netoReal = r.total_comprobante * factor;
@@ -80,7 +93,11 @@ app.get('/api/facturas', async (req, res) => {
         if (facturas.length > 0) {
             const ids = result.recordset.map(r => `'${r.IdRouter}'`).join(',');
             const itemsRes = await pool.request().query(`SELECT IdRouter, CODITM, CANTIDAD1, PRECIO, OBSERVACIONES FROM QRLINEASITEMS WHERE IdRouter IN (${ids})`);
-            facturas.forEach(f => { f.items = itemsRes.recordset.filter(i => i.IdRouter === f.IdRouter).map(i => ({ cod: i.CODITM, cant: i.CANTIDAD1, pre: i.PRECIO, obs: i.OBSERVACIONES })); });
+            facturas.forEach(f => {
+                f.items = itemsRes.recordset
+                    .filter(i => i.IdRouter === f.IdRouter)
+                    .map(i => ({ cod: i.CODITM, cant: i.CANTIDAD1, pre: i.PRECIO, obs: i.OBSERVACIONES }));
+            });
         }
         res.json({ datos: facturas, totales: { efectivo: ef, tarjeta: tj, mp: mp, general: gr, facturas: cFA, notas: cNC } });
     } catch (err) { res.status(500).json({ error: err.message }); }
@@ -171,7 +188,10 @@ app.get('/api/reporte/stock-fisico', async (req, res) => {
         const pool = await poolMainPromise;
         let q = `SELECT S.CODITM, I.DESCRIPCION, CAST(S.STKACTUAL AS INT) AS STOCK FROM dbo.QRITEMSACUM S INNER JOIN dbo.QRITEMS I ON S.CODITM = I.CODITM WHERE CAST(S.CODSUC AS VARCHAR) LIKE '%' + CAST(@suc AS VARCHAR) AND S.STKACTUAL > 0`;
         if (cleanParam(articulo) !== "") q += ` AND S.CODITM LIKE '%' + @art + '%'`;
-        const result = await pool.request().input('suc', sql.Int, cleanParam(sucursal)).input('art', sql.VarChar, cleanParam(articulo)).query(q + " ORDER BY S.CODITM");
+        const result = await pool.request()
+            .input('suc', sql.Int, cleanParam(sucursal))
+            .input('art', sql.VarChar, cleanParam(articulo))
+            .query(q + " ORDER BY S.CODITM");
         res.json(result.recordset);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -201,7 +221,12 @@ app.get('/api/reporte/logistica', async (req, res) => {
         const pool = await poolMainPromise;
         let q = `SELECT CONVERT(VARCHAR(10), A.FECHA, 103) AS FECHA_STR, A.CODCMP, A.PREFIJO, A.NUMERO, H.DESCRIPCION AS CONCEPTO, B.CODITM, CAST(B.CANTIDAD1 AS INT) AS CANT FROM dbo.QRMVS A INNER JOIN dbo.QRLINEASITEMS B ON A.IdRouter = B.IdRouter INNER JOIN dbo.QRMVSMAT G ON G.IdRouter = A.IdRouter INNER JOIN dbo.QRConceptos H ON G.CodConcepto = H.CODCPT WHERE CAST(A.CODSUC AS VARCHAR) LIKE '%' + CAST(@suc AS VARCHAR) AND CAST(A.FECHA AS DATE) BETWEEN @desde AND @hasta AND A.CODCMP IN ('EE', 'IE') AND A.IDCOMPROBANTE > 0 AND A.ANULADO = 0`;
         if (cleanParam(articulo) !== "") q += ` AND B.CODITM LIKE '%' + @art + '%'`;
-        const result = await pool.request().input('suc', sql.Int, cleanParam(sucursal)).input('desde', sql.VarChar, cleanParam(desde)).input('hasta', sql.VarChar, cleanParam(hasta)).input('art', sql.VarChar, cleanParam(articulo)).query(q + " ORDER BY A.FECHA DESC");
+        const result = await pool.request()
+            .input('suc', sql.Int, cleanParam(sucursal))
+            .input('desde', sql.VarChar, cleanParam(desde))
+            .input('hasta', sql.VarChar, cleanParam(hasta))
+            .input('art', sql.VarChar, cleanParam(articulo))
+            .query(q + " ORDER BY A.FECHA DESC");
         const movs = {};
         result.recordset.forEach(r => {
             const k = `${r.CODCMP}-${r.PREFIJO}-${r.NUMERO}`;
@@ -217,7 +242,11 @@ app.get('/api/reporte/ranking', async (req, res) => {
     let { sucursal, desde, hasta } = req.query;
     try {
         const pool = await poolMainPromise;
-        const result = await pool.request().input('suc', sql.Int, cleanParam(sucursal)).input('desde', sql.VarChar, cleanParam(desde)).input('hasta', sql.VarChar, cleanParam(hasta)).query(`
+        const result = await pool.request()
+            .input('suc', sql.Int, cleanParam(sucursal))
+            .input('desde', sql.VarChar, cleanParam(desde))
+            .input('hasta', sql.VarChar, cleanParam(hasta))
+            .query(`
             SELECT TOP 5 B.CODITM AS ARTICULO, C.DESCRIPCION, SUM(CAST(CASE WHEN A.CODCMP IN ('CA', 'CB') THEN -B.CANTIDAD1 ELSE B.CANTIDAD1 END AS MONEY)) AS UNIDADES, SUM(CAST(CASE WHEN A.CODCMP IN ('CA', 'CB') THEN -B.CANTIDAD1 ELSE B.CANTIDAD1 END * B.PRECIO AS MONEY)) AS RECAUDACION_NETA 
             FROM dbo.QRMVS A INNER JOIN dbo.QRLINEASITEMS B ON A.IdRouter = B.IdRouter INNER JOIN dbo.QRITEMS C ON C.CODITM = B.CODITM 
             WHERE CAST(A.CODSUC AS VARCHAR) LIKE '%' + CAST(@suc AS VARCHAR) AND CAST(A.FECHA AS DATE) BETWEEN @desde AND @hasta AND A.CODCMP IN ('FA', 'FB', 'CA', 'CB') AND A.IDCOMPROBANTE > 0 AND A.ANULADO = 0 
@@ -229,12 +258,11 @@ app.get('/api/reporte/ranking', async (req, res) => {
 
 // --- 10. COMPARATIVO HISTÓRICO (INICIO LUNES + FECHAISO) ---
 app.get('/api/reporte/comparativo-ventas', async (req, res) => {
-    let { sucursal, fechaRef } = req.query; 
+    let { sucursal, fechaRef } = req.query;
     let targetDate = fechaRef ? new Date(fechaRef + 'T12:00:00') : new Date();
 
-    // Calculamos el Lunes de esa semana
     const day = targetDate.getDay();
-    const diff = targetDate.getDate() - day + (day === 0 ? -6 : 1); 
+    const diff = targetDate.getDate() - day + (day === 0 ? -6 : 1);
     const lunesSemana = new Date(targetDate.setDate(diff)).toISOString().split('T')[0];
 
     try {
