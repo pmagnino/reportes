@@ -33,90 +33,69 @@
         .filter-area { background: white; border-bottom: 1px solid var(--slate-200); padding: 12px 20px; flex-shrink: 0; }
         .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; }
 
-        .grid-viewport { 
-            flex-grow: 1; 
-            overflow: auto; 
-            background: #fff;
-            position: relative;
-        }
-
+        .grid-viewport { flex-grow: 1; overflow: auto; background: #fff; position: relative; }
         .table-sabana { border-collapse: separate; border-spacing: 0; width: 100%; }
 
+        /* Cabeceras Sticky */
         .table-sabana thead th { 
-            position: sticky; 
-            top: 0; 
-            background: #f8fafc; 
-            z-index: 10; 
-            padding: 10px;
-            border-bottom: 2px solid var(--slate-200);
-            border-right: 1px solid var(--slate-200);
-            font-family: 'Outfit', sans-serif;
-            font-size: 9px;
-            text-transform: uppercase; 
-            color: var(--slate-500);
-            text-align: center;
-            min-width: 125px; /* Más ancho para el formato moneda completo */
+            position: sticky; top: 0; background: #f8fafc; z-index: 10; 
+            padding: 8px; border-bottom: 2px solid var(--slate-200); border-right: 1px solid var(--slate-200);
+            font-family: 'Outfit', sans-serif; font-size: 9px; text-align: center; min-width: 110px; color: var(--slate-500);
         }
 
         .sticky-suc { 
-            position: sticky; 
-            left: 0; 
-            background: white !important; 
-            z-index: 11; 
-            min-width: 180px;
-            border-right: 2px solid var(--slate-200) !important;
-            font-weight: 700;
-            color: var(--navy);
-            text-align: left !important;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.03);
+            position: sticky; left: 0; background: white !important; z-index: 11; 
+            min-width: 170px; border-right: 2px solid var(--slate-200) !important;
+            font-weight: 700; color: var(--navy); text-align: left !important;
         }
 
         .table-sabana thead th.sticky-suc { z-index: 12; top: 0; }
 
-        .table-sabana td { 
-            padding: 8px 12px; 
-            border-bottom: 1px solid #f1f5f9; 
-            border-right: 1px solid #f1f5f9;
-            text-align: right;
-            font-variant-numeric: tabular-nums;
-        }
+        .table-sabana td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; text-align: right; font-variant-numeric: tabular-nums; }
 
-        .col-total { 
-            background: #f1f5f9 !important; 
-            font-weight: 800; 
-            color: var(--navy); 
-            border-left: 2px solid var(--slate-200) !important; 
-            position: sticky;
-            right: 0;
-            z-index: 9;
-        }
+        .col-total { background: #f1f5f9 !important; font-weight: 800; border-left: 2px solid var(--slate-200) !important; position: sticky; right: 0; z-index: 9; }
 
         .val-zero { color: #cbd5e1; font-weight: 400; }
-        .btn-run { background: var(--navy); color: white; font-size: 10px; font-weight: 700; height: 32px; border: none; padding: 0 20px; border-radius: 4px; transition: 0.2s; }
-        .btn-run:hover { background: #000; transform: scale(1.02); }
+        .btn-run { background: var(--navy); color: white; font-size: 10px; font-weight: 700; height: 32px; border: none; padding: 0 15px; border-radius: 4px; }
+        .btn-pdf { background: #dc2626; color: white; font-size: 10px; font-weight: 700; height: 32px; border: none; padding: 0 15px; border-radius: 4px; margin-left: 10px; }
 
+        /* ============================================================
+           CONFIGURACIÓN PARA IMPRESIÓN / PDF (A4 HORIZONTAL)
+           ============================================================ */
+        @media print {
+            @page { size: A4 landscape; margin: 1cm; }
+            body { overflow: visible !important; height: auto !important; background: white !important; }
+            .header-bar, .filter-area, .btn-run, .btn-pdf { display: none !important; } /* Ocultar interfaz */
+            .grid-viewport { overflow: visible !important; position: static !important; }
+            .table-sabana { width: 100% !important; table-layout: auto !important; border: 1px solid #000; }
+            .table-sabana th, .table-sabana td { font-size: 8pt !important; border: 0.5pt solid #ccc !important; padding: 4pt !important; }
+            .sticky-suc, .col-total { position: static !important; background: white !important; border-right: 1px solid #000 !important; }
+            .val-zero { color: #aaa !important; }
+            .table-sabana thead th { background: #eee !important; color: #000 !important; }
+        }
     </style>
 </head>
 <body onload="init()">
 
 <div class="header-bar">
-    <a href="reporte_index.html">
-        <img src="Logo.png" alt="Mimo">
-        <span class="header-title">Ventas Consolidadas por Día</span>
-    </a>
+    <a href="reporte_index.html"><img src="Logo.png" alt="Mimo"></a>
+    <span class="header-title">Ventas Consolidadas por Día</span>
 </div>
 
 <div class="filter-area shadow-sm">
-    <div class="d-flex align-items-end gap-3">
-        <div style="width: 150px;">
+    <div class="d-flex align-items-end">
+        <div class="me-3" style="width: 130px;">
             <span class="label-sm">Desde</span>
             <input type="date" id="desde" class="form-control form-control-sm shadow-none">
         </div>
-        <div style="width: 150px;">
+        <div class="me-3" style="width: 130px;">
             <span class="label-sm">Hasta</span>
             <input type="date" id="hasta" class="form-control form-control-sm shadow-none">
         </div>
-        <button class="btn-run" onclick="consultar()">PROCESAR RED</button>
+        <button class="btn-run" onclick="consultar()">PROCESAR</button>
+        <button class="btn-pdf" id="btnExport" style="display: none;" onclick="window.print()">
+            <i class="bi bi-file-earmark-pdf me-1"></i> PDF / IMPRIMIR
+        </button>
     </div>
 </div>
 
@@ -141,37 +120,37 @@
     async function consultar() {
         const resBody = document.getElementById('res-body');
         const resHead = document.getElementById('res-head');
-        resBody.innerHTML = `<tr><td colspan="30" class="p-5 text-center"><div class="spinner-border spinner-border-sm text-primary"></div><br>Sincronizando montos...</td></tr>`;
+        const btnPdf = document.getElementById('btnExport');
+        
+        resBody.innerHTML = `<tr><td colspan="30" class="p-5 text-center"><div class="spinner-border spinner-border-sm text-primary"></div><br>Calculando red...</td></tr>`;
 
         try {
             const res = await fetch(`/api/reporte/ventas-grilla-diaria?desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
             const data = await res.json();
 
             if (data.length === 0) {
-                resBody.innerHTML = '<tr><td class="p-4">No se registran ventas en el período.</td></tr>';
+                resBody.innerHTML = '<tr><td class="p-4">No hay datos.</td></tr>';
+                btnPdf.style.display = 'none';
                 return;
             }
 
+            btnPdf.style.display = 'block';
             const keys = Object.keys(data[0]);
             
-            // Header
             resHead.innerHTML = `<tr>${keys.map(k => {
-                let label = k === 'TOTAL_SUCURSAL' ? 'TOTAL ACUM.' : k;
+                let label = k === 'TOTAL_SUCURSAL' ? 'TOTAL' : k;
                 let css = k === 'SUCURSAL' ? 'sticky-suc' : (k === 'TOTAL_SUCURSAL' ? 'col-total' : '');
                 return `<th class="${css}">${label}</th>`;
             }).join('')}</tr>`;
 
-            // Filas
             resBody.innerHTML = data.map(row => `
                 <tr>
                     ${keys.map(k => {
                         const val = row[k];
                         if (k === 'SUCURSAL') return `<td class="sticky-suc">${val}</td>`;
-                        
                         const num = parseFloat(val) || 0;
                         const isTotal = k === 'TOTAL_SUCURSAL';
                         const displayVal = num === 0 ? `<span class="val-zero">${fmt.format(0)}</span>` : fmt.format(num);
-                        
                         return `<td class="${isTotal ? 'col-total' : ''}">${displayVal}</td>`;
                     }).join('')}
                 </tr>

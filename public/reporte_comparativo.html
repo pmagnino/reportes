@@ -22,97 +22,40 @@
             --slate-800: #1e293b;
             --emerald-600: #059669;
             --red-600: #dc2626;
+            --amber-100: #fef3c7;
+            --amber-600: #d97706;
         }
 
-        body { 
-            background-color: #f3f4f6; 
-            font-family: 'Inter', sans-serif; 
-            color: var(--slate-700);
-            -webkit-font-smoothing: antialiased;
-        }
+        body { background-color: #f3f4f6; font-family: 'Inter', sans-serif; color: var(--slate-700); }
         
-        /* Navbar */
-        .nav-header { 
-            background: var(--slate-800); 
-            color: white; 
-            padding: 10px 30px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            height: 60px; 
-        }
+        .nav-header { background: var(--slate-800); color: white; padding: 10px 30px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
         .nav-header a { text-decoration: none; color: white; display: flex; align-items: center; }
         .nav-header img { height: 32px; background-color: white; padding: 4px; border-radius: 4px; }
-        .nav-header span { font-family: 'Outfit', sans-serif; letter-spacing: 0.5px; font-weight: 300; }
 
-        /* Filtros */
-        .filter-container { 
-            background: white; 
-            border-bottom: 1px solid var(--slate-200); 
-            padding: 15px 40px; 
-        }
+        .filter-container { background: white; border-bottom: 1px solid var(--slate-200); padding: 15px 40px; }
         
-        .btn-consultar { 
-            background: var(--slate-800); 
-            color: white; 
-            font-weight: 600; 
-            border: none; 
-            border-radius: 6px; 
-            padding: 8px 20px; 
-            font-family: 'Outfit', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 12px;
-            transition: all 0.2s;
-        }
-        .btn-consultar:hover { background: #000; transform: translateY(-1px); }
+        .btn-nav { background: white; border: 1px solid var(--slate-200); color: var(--slate-600); font-size: 11px; font-weight: 700; padding: 8px 15px; text-transform: uppercase; cursor: pointer; }
+        .btn-nav:hover { background: var(--slate-100); }
+        .current-ref { font-size: 13px; font-weight: 800; color: var(--slate-800); border-top: 1px solid var(--slate-200); border-bottom: 1px solid var(--slate-200); }
 
-        /* Contenido Principal */
+        .btn-consultar { background: var(--slate-800); color: white; font-weight: 600; border-radius: 6px; padding: 8px 20px; font-size: 12px; border: none; }
+
         .main-content { padding: 30px 40px; }
-        .report-card { 
-            background: white; 
-            border-radius: 12px; 
-            border: 1px solid var(--slate-200); 
-            overflow: hidden; 
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); 
-        }
+        .report-card { background: white; border-radius: 12px; border: 1px solid var(--slate-200); overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
         
-        h5 { font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--slate-800); }
-
-        /* Tabla Estilo BI */
         .table-comp { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .table-comp th { 
-            background: var(--slate-50); 
-            border-bottom: 2px solid var(--slate-200); 
-            padding: 18px 10px; 
-            text-align: center; 
-        }
+        .table-comp th { background: var(--slate-50); border-bottom: 2px solid var(--slate-200); padding: 18px 10px; text-align: center; position: relative; }
         .table-comp td { border: 1px solid var(--slate-100); padding: 15px 10px; text-align: center; vertical-align: middle; }
         
         .day-label { display: block; font-weight: 800; color: var(--slate-800); font-size: 15px; }
         .day-sub { font-size: 11px; color: var(--slate-600); font-weight: 500; text-transform: uppercase; }
         
-        .row-header { 
-            text-align: left !important; 
-            font-weight: 700; 
-            background: var(--slate-50); 
-            color: var(--slate-600); 
-            width: 200px; 
-            padding-left: 25px !important;
-            font-family: 'Outfit', sans-serif;
-            font-size: 11px;
-            letter-spacing: 1px;
-        }
+        .row-header { text-align: left !important; font-weight: 700; background: var(--slate-50); color: var(--slate-600); width: 220px; padding-left: 25px !important; font-size: 11px; text-transform: uppercase; }
 
-        /* Valores y Variaciones */
-        .main-value { 
-            font-size: 17px; 
-            font-weight: 700; 
-            color: var(--slate-800); 
-            margin-bottom: 10px; 
-            font-variant-numeric: tabular-nums;
-        }
-        .var-box { display: flex; flex-direction: column; gap: 5px; }
+        .today-highlight { background-color: #fffbeb !important; border: 2px solid #fde68a !important; }
+        .today-badge { position: absolute; top: 2px; left: 50%; transform: translateX(-50%); background: var(--amber-600); color: white; font-size: 8px; padding: 1px 6px; border-radius: 10px; font-weight: 800; }
+
+        .main-value { font-size: 17px; font-weight: 700; color: var(--slate-800); margin-bottom: 10px; }
         .var-row { 
             display: flex; 
             justify-content: center; 
@@ -120,15 +63,15 @@
             gap: 6px; 
             padding: 3px 8px; 
             border-radius: 5px; 
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 10px; 
+            font-weight: 600; 
+            margin-bottom: 3px; 
+            cursor: help; /* Indica que hay información extra al pasar el mouse */
         }
         
         .pos { color: var(--emerald-600); border: 1px solid #d1fae5; background: #f0fdf4; }
         .neg { color: var(--red-600); border: 1px solid #fee2e2; background: #fef2f2; }
-        .neu { color: var(--slate-600); background: var(--slate-50); border: 1px solid var(--slate-200); }
-
-        .spinner-container { padding: 80px; text-align: center; }
+        .neu { color: var(--slate-600); background: var(--slate-100); }
     </style>
 </head>
 <body onload="init()">
@@ -136,18 +79,32 @@
 <div class="nav-header">
     <a href="reporte_index.html">
         <img src="Logo.png" alt="Mimo">
-        <span class="ms-3">BI SYSTEM | <strong>MIMO & CO</strong></span>
+        <span class="ms-3">BI SYSTEM | <strong>COMPARATIVO SEMANAL</strong></span>
     </a>
-    <i class="bi bi-arrow-left-right fs-5"></i>
+    <button class="btn btn-sm btn-outline-light" onclick="irAHoy()">IR A HOY</button>
 </div>
 
 <div class="filter-container">
-    <div class="row g-3 align-items-center">
+    <div class="row g-3 align-items-end">
         <div class="col-md-4">
             <label class="small fw-bold text-secondary mb-1">Sucursal</label>
             <select id="sucursal" class="form-select shadow-none border-secondary-subtle"></select>
         </div>
-        <div class="col-md-2 pt-4">
+        <div class="col-md-5">
+            <label class="small fw-bold text-secondary mb-1">Navegación Semanal (Lunes a Domingo)</label>
+            <div class="d-flex align-items-center">
+                <button class="btn btn-nav rounded-start" onclick="cambiarSemana(-1)">
+                    <i class="bi bi-chevron-left"></i> Anterior
+                </button>
+                <div class="px-3 py-1 bg-light border-top border-bottom flex-grow-1 text-center current-ref" id="txt-referencia">
+                    Cargando...
+                </div>
+                <button class="btn btn-nav rounded-end" onclick="cambiarSemana(1)">
+                    Siguiente <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-md-2">
             <button class="btn-consultar w-100 shadow-sm" onclick="consultar()">
                 <i class="bi bi-arrow-repeat me-2"></i>Actualizar
             </button>
@@ -156,94 +113,116 @@
 </div>
 
 <div class="main-content">
-    <h5 class="mb-4">Comparativo de Rendimiento (7 Días)</h5>
-    
     <div class="report-card">
         <table class="table-comp">
-            <thead id="thead-comp">
-                </thead>
+            <thead id="thead-comp"></thead>
             <tbody id="tbody-comp">
-                <tr><td colspan="8" class="p-5 text-muted text-center">Inicie la consulta para ver los datos históricos.</td></tr>
+                <tr><td colspan="8" class="p-5 text-center"><div class="spinner-border text-primary"></div></td></tr>
             </tbody>
         </table>
-    </div>
-
-    <div class="mt-4 p-3 bg-white border rounded border-info-subtle shadow-sm d-flex align-items-center">
-        <i class="bi bi-info-circle-fill text-info fs-5 me-3"></i>
-        <p class="mb-0 small text-muted">
-            <strong>Cómo leer:</strong> Los porcentajes indican la variación respecto al mismo día de la <strong>Semana Anterior</strong> (arriba) y del <strong>Mes Anterior</strong> (abajo, 28 días atrás).
-        </p>
     </div>
 </div>
 
 <script>
+    let fechaReferencia = new Date();
+
     async function init() {
         const res = await fetch('/api/sucursales');
         const sucs = await res.json();
         document.getElementById('sucursal').innerHTML = sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+        actualizarLabelFecha();
+        consultar();
     }
 
-    function getVarRow(actual, historico, labelFecha) {
-        if (!historico || historico === 0) return `<div class="var-row neu"><span>0.0%</span> <span class="ms-1 fw-normal">vs ${labelFecha}</span></div>`;
+    function irAHoy() {
+        fechaReferencia = new Date();
+        actualizarLabelFecha();
+        consultar();
+    }
+
+    function actualizarLabelFecha() {
+        let d = new Date(fechaReferencia);
+        let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1);
+        let lunes = new Date(d.setDate(diff));
+        document.getElementById('txt-referencia').innerText = `Semana del ${lunes.toLocaleDateString('es-AR')}`;
+    }
+
+    function cambiarSemana(delta) {
+        fechaReferencia.setDate(fechaReferencia.getDate() + (delta * 7));
+        actualizarLabelFecha();
+        consultar();
+    }
+
+    // FUNCIÓN MEJORADA: Ahora recibe el valor del histórico para el tooltip
+    function getVarRow(actual, historico, labelFecha, metrica) {
+        if (!historico || historico === 0) return `<div class="var-row neu" title="Sin datos previos para comparar">0.0% vs ${labelFecha}</div>`;
         
         const diff = ((actual - historico) / historico) * 100;
         const icon = diff >= 0 ? 'bi-caret-up-fill' : 'bi-caret-down-fill';
         const colorClass = diff >= 0 ? 'pos' : 'neg';
         
+        // Formateo del valor histórico para el tooltip
+        const histFormatted = metrica === 'money' 
+            ? '$ ' + historico.toLocaleString('es-AR', {minimumFractionDigits: 2}) 
+            : historico.toLocaleString('es-AR') + ' unidades';
+
+        const tooltipMsg = `Comparando contra: ${histFormatted} el día ${labelFecha}`;
+
         return `
-            <div class="var-row ${colorClass}">
+            <div class="var-row ${colorClass}" title="${tooltipMsg}">
                 <i class="bi ${icon}"></i>
                 <span>${diff > 0 ? '+' : ''}${diff.toFixed(1)}%</span>
-                <span class="ms-1 fw-normal" style="opacity: 0.7">vs ${labelFecha}</span>
+                <span class="ms-1 fw-normal" style="opacity: 0.8">vs ${labelFecha}</span>
             </div>`;
     }
 
     async function consultar() {
         const suc = document.getElementById('sucursal').value;
         const tbody = document.getElementById('tbody-comp');
-        tbody.innerHTML = `<tr><td colspan="8" class="spinner-container"><div class="spinner-border text-primary"></div></td></tr>`;
+        const hoyIso = new Date().toISOString().split('T')[0];
+        const fParam = fechaReferencia.toISOString().split('T')[0];
+        
+        tbody.innerHTML = `<tr><td colspan="8" class="p-5 text-center"><div class="spinner-border text-primary"></div></td></tr>`;
 
         try {
-            const res = await fetch(`/api/reporte/comparativo-ventas?sucursal=${suc}`);
+            const res = await fetch(`/api/reporte/comparativo-ventas?sucursal=${suc}&fechaRef=${fParam}`);
             const data = await res.json();
 
-            // 1. Cabecera dinámica
-            let headHtml = `<tr><th class="row-header">MÉTRICA / FECHA</th>`;
+            let headHtml = `<tr><th class="row-header">MÉTRICA / DÍA</th>`;
             data.forEach(d => {
+                const isToday = d.FechaIso.split('T')[0] === hoyIso;
                 headHtml += `
-                    <th>
+                    <th class="${isToday ? 'today-highlight' : ''}">
+                        ${isToday ? '<span class="today-badge">HOY</span>' : ''}
                         <span class="day-label">${d.FechaLabel}</span>
                         <span class="day-sub">${d.DiaSemana}</span>
                     </th>`;
             });
             document.getElementById('thead-comp').innerHTML = headHtml + `</tr>`;
 
-            // 2. Filas de datos
             const rows = [
-                { label: 'FACTURACIÓN ($)', actStr: 'MontoActStr', valPure: 'MontoAct', sem: 'MontoSem', mes: 'MontoMes', type: 'money' },
-                { label: 'UNIDADES (CANT)', actStr: 'UniAct', valPure: 'UniAct', sem: 'UniSem', mes: 'UniMes', type: 'num' }
+                { label: 'Facturación ($)', actStr: 'MontoActStr', valPure: 'MontoAct', sem: 'MontoSem', mes: 'MontoMes', type: 'money' },
+                { label: 'Unidades (Cant)', actStr: 'UniAct', valPure: 'UniAct', sem: 'UniSem', mes: 'UniMes', type: 'num' }
             ];
 
             let bodyHtml = "";
             rows.forEach(row => {
                 bodyHtml += `<tr><td class="row-header">${row.label}</td>`;
                 data.forEach(d => {
-                    // Si es número, aplicamos formato de miles; si es money usamos el string que ya viene con $ de SQL
+                    const isToday = d.FechaIso.split('T')[0] === hoyIso;
                     const displayVal = row.type === 'num' ? d[row.actStr].toLocaleString('es-AR') : d[row.actStr];
-                    const valActual = d[row.valPure];
-
+                    
                     bodyHtml += `
-                        <td>
+                        <td class="${isToday ? 'today-highlight' : ''}">
                             <div class="main-value">${displayVal}</div>
                             <div class="var-box">
-                                ${getVarRow(valActual, d[row.sem], d.LabelSem)}
-                                ${getVarRow(valActual, d[row.mes], d.LabelMes)}
+                                ${getVarRow(d[row.valPure], d[row.sem], d.LabelSem, row.type)}
+                                ${getVarRow(d[row.valPure], d[row.mes], d.LabelMes, row.type)}
                             </div>
                         </td>`;
                 });
                 bodyHtml += `</tr>`;
             });
-
             tbody.innerHTML = bodyHtml;
 
         } catch (err) {

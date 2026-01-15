@@ -227,25 +227,31 @@ app.get('/api/reporte/ranking', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// --- 10. COMPARATIVO HISTÓRICO ---
+// --- 10. COMPARATIVO HISTÓRICO (INICIO LUNES + FECHAISO) ---
 app.get('/api/reporte/comparativo-ventas', async (req, res) => {
-    let { sucursal } = req.query; 
-    const hoy = new Date().toISOString().split('T')[0];
+    let { sucursal, fechaRef } = req.query; 
+    let targetDate = fechaRef ? new Date(fechaRef + 'T12:00:00') : new Date();
+
+    // Calculamos el Lunes de esa semana
+    const day = targetDate.getDay();
+    const diff = targetDate.getDate() - day + (day === 0 ? -6 : 1); 
+    const lunesSemana = new Date(targetDate.setDate(diff)).toISOString().split('T')[0];
+
     try {
         const pool = await poolMainPromise;
         const result = await pool.request()
             .input('suc', sql.VarChar, sucursal)
-            .input('fechaRef', sql.Date, hoy)
+            .input('fechaRef', sql.Date, lunesSemana)
             .query(`
                 SET LANGUAGE Spanish;
                 WITH Calendario AS (
                     SELECT CAST(@fechaRef AS DATE) as FechaAct, DATEADD(DAY, -7, @fechaRef) as FechaSemAnt, DATEADD(DAY, -28, @fechaRef) as FechaMesAnt, 0 as Orden
-                    UNION ALL SELECT DATEADD(DAY, -1, @fechaRef), DATEADD(DAY, -8, @fechaRef), DATEADD(DAY, -29, @fechaRef), 1
-                    UNION ALL SELECT DATEADD(DAY, -2, @fechaRef), DATEADD(DAY, -9, @fechaRef), DATEADD(DAY, -30, @fechaRef), 2
-                    UNION ALL SELECT DATEADD(DAY, -3, @fechaRef), DATEADD(DAY, -10, @fechaRef), DATEADD(DAY, -31, @fechaRef), 3
-                    UNION ALL SELECT DATEADD(DAY, -4, @fechaRef), DATEADD(DAY, -11, @fechaRef), DATEADD(DAY, -32, @fechaRef), 4
-                    UNION ALL SELECT DATEADD(DAY, -5, @fechaRef), DATEADD(DAY, -12, @fechaRef), DATEADD(DAY, -33, @fechaRef), 5
-                    UNION ALL SELECT DATEADD(DAY, -6, @fechaRef), DATEADD(DAY, -13, @fechaRef), DATEADD(DAY, -34, @fechaRef), 6
+                    UNION ALL SELECT DATEADD(DAY, 1, @fechaRef), DATEADD(DAY, -6, @fechaRef), DATEADD(DAY, -27, @fechaRef), 1
+                    UNION ALL SELECT DATEADD(DAY, 2, @fechaRef), DATEADD(DAY, -5, @fechaRef), DATEADD(DAY, -26, @fechaRef), 2
+                    UNION ALL SELECT DATEADD(DAY, 3, @fechaRef), DATEADD(DAY, -4, @fechaRef), DATEADD(DAY, -25, @fechaRef), 3
+                    UNION ALL SELECT DATEADD(DAY, 4, @fechaRef), DATEADD(DAY, -3, @fechaRef), DATEADD(DAY, -24, @fechaRef), 4
+                    UNION ALL SELECT DATEADD(DAY, 5, @fechaRef), DATEADD(DAY, -2, @fechaRef), DATEADD(DAY, -23, @fechaRef), 5
+                    UNION ALL SELECT DATEADD(DAY, 6, @fechaRef), DATEADD(DAY, -1, @fechaRef), DATEADD(DAY, -22, @fechaRef), 6
                 ),
                 VentasBase AS (
                     SELECT 
@@ -259,7 +265,6 @@ app.get('/api/reporte/comparativo-ventas', async (req, res) => {
                               AND CAST(M2.CODSUC AS VARCHAR) LIKE '%' + @suc
                               AND M2.CODCMP IN ('FA', 'FB', 'CA', 'CB') AND M2.ANULADO = 0 AND M2.IDCOMPROBANTE > 0
                               AND I.CODITM NOT LIKE 'DC%'
-                              AND I.CODITM NOT IN ('AJUCEN', 'SEÑA', 'VALE')
                         ), 0) as UnidadesDia
                     FROM dbo.QRMVS M
                     WHERE CAST(M.CODSUC AS VARCHAR) LIKE '%' + @suc
@@ -277,7 +282,8 @@ app.get('/api/reporte/comparativo-ventas', async (req, res) => {
                     CAST(ISNULL(V3.MontoDia, 0) AS FLOAT) as MontoMes,
                     CAST(ISNULL(V1.UnidadesDia, 0) AS INT) as UniAct,
                     CAST(ISNULL(V2.UnidadesDia, 0) AS INT) as UniSem,
-                    CAST(ISNULL(V3.UnidadesDia, 0) AS INT) as UniMes
+                    CAST(ISNULL(V3.UnidadesDia, 0) AS INT) as UniMes,
+                    CONVERT(VARCHAR, C.FechaAct, 126) as FechaIso
                 FROM Calendario C
                 LEFT JOIN VentasBase V1 ON V1.F = C.FechaAct
                 LEFT JOIN VentasBase V2 ON V2.F = C.FechaSemAnt
@@ -312,7 +318,6 @@ app.get('/api/reporte/rubros', async (req, res) => {
                       AND A.ANULADO = 0 AND B.IDCOMPROBANTE > 0
                       AND A.CODCMP IN ('FA', 'FB', 'CA', 'CB')
                       AND B.CODITM NOT LIKE 'DC%'
-                      AND B.CODITM NOT IN ('AJUCEN', 'SEÑA', 'VALE', 'DIFPRECIO')
                 )
                 SELECT 
                     RubroNombre AS Rubro,
@@ -361,13 +366,13 @@ app.get('/api/reporte/auditoria-descuentos', async (req, res) => {
         const detalle = result.recordset.filter(r => r.TipoFila === 'DETALLE');
         const formatMoney = (val) => '$ ' + val.toLocaleString('es-AR', { minimumFractionDigits: 2 });
         res.json({
-            resumen: { bruto: formatMoney(resumen.ValBruto), descuento: formatMoney(resumen.ValDcto), neto: formatMoney(resumen.ValNeto), porcentaje: resumen.Porcentaje, tickets: resumen.CantTickets },
+            resumen: { bruto: formatMoney(resumen.ValBruto || 0), descuento: formatMoney(resumen.ValDcto || 0), neto: formatMoney(resumen.ValNeto || 0), porcentaje: resumen.Porcentaje || 0, tickets: resumen.CantTickets || 0 },
             detalle: detalle.map(d => ({ codigo: d.Codigo, concepto: d.Concepto, monto: formatMoney(d.ValDcto), porcentaje: d.Porcentaje, tickets: d.CantTickets }))
         });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// --- 13. GRILLA DIARIA CONSOLIDADA (CORREGIDO PRECISIÓN) ---
+// --- 13. GRILLA DIARIA CONSOLIDADA ---
 app.get('/api/reporte/ventas-grilla-diaria', async (req, res) => {
     let { desde, hasta } = req.query;
     try {
