@@ -2,22 +2,26 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mimo & Co | Venta Consolidada Canal Franquicias</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mimo & Co | Consolidado</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
-        :root { --navy: #1e293b; --slate-100: #f1f5f9; --slate-200: #e2e8f0; --slate-500: #64748b; }
+        :root { 
+            --navy: #0f172a; 
+            --accent: #3b82f6;
+            --slate-100: #f1f5f9; 
+            --slate-200: #e2e8f0; 
+            --slate-500: #64748b; 
+        }
         
         body { 
             background-color: #f8fafc; 
             font-family: 'Inter', sans-serif; 
-            font-size: 11px; 
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -25,86 +29,171 @@
             overflow: hidden; 
         }
         
-        .header-bar { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; min-height: 50px; flex-shrink: 0; }
-        .header-bar a { text-decoration: none; color: white; display: flex; align-items: center; }
-        .header-bar img { height: 24px; background: white; padding: 2px; border-radius: 4px; margin-right: 12px; }
-        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        /* Navbar estilizada */
+        .header-bar { 
+            background: var(--navy); 
+            padding: 10px 15px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            flex-shrink: 0; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header-bar img { height: 24px; background: white; padding: 3px; border-radius: 5px; }
+        .header-title { font-family: 'Outfit', sans-serif; color: white; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin-left: 10px; }
 
-        .filter-area { background: white; border-bottom: 1px solid var(--slate-200); padding: 12px 20px; flex-shrink: 0; }
-        .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; }
+        /* Filtros compactos para pulgar */
+        .filter-area { 
+            background: white; 
+            border-bottom: 1px solid var(--slate-200); 
+            padding: 12px; 
+            flex-shrink: 0; 
+        }
+        .input-group-custom {
+            display: grid;
+            grid-template-columns: 1fr 1fr 80px;
+            gap: 8px;
+            align-items: end;
+        }
+        .label-sm { font-size: 8px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 3px; }
 
-        .grid-viewport { flex-grow: 1; overflow: auto; background: #fff; position: relative; }
-        .table-sabana { border-collapse: separate; border-spacing: 0; width: 100%; }
+        /* CONTENEDOR MAESTRO DE SCROLL */
+        .grid-viewport { 
+            flex-grow: 1; 
+            overflow: auto; 
+            position: relative;
+            background: white;
+            -webkit-overflow-scrolling: touch; 
+        }
+        
+        table { border-collapse: separate; border-spacing: 0; width: 100%; }
 
-        /* Cabeceras Sticky */
-        .table-sabana thead th { 
-            position: sticky; top: 0; background: #f8fafc; z-index: 10; 
-            padding: 10px; border-bottom: 2px solid var(--slate-200); border-right: 1px solid var(--slate-200);
-            font-family: 'Outfit', sans-serif; font-size: 9px; text-align: center; min-width: 120px; color: var(--slate-500);
+        /* Cabeceras Sticky Superiores */
+        thead th { 
+            position: sticky; 
+            top: 0; 
+            z-index: 20; 
+            background: #f8fafc; 
+            padding: 12px 10px; 
+            font-family: 'Outfit', sans-serif; 
+            font-size: 10px; 
+            color: var(--slate-500);
+            border-bottom: 2px solid var(--slate-200);
+            border-right: 1px solid var(--slate-100);
+            text-align: center;
         }
 
-        /* Sucursal Sticky Izquierda */
+        /* COLUMNA SUCURSAL FIJA (Z-INDEX 30 para estar arriba de todo) */
         .sticky-suc { 
-            position: sticky; left: 0; background: white !important; z-index: 11; 
-            min-width: 200px; border-right: 2px solid var(--slate-200) !important;
-            font-weight: 700; color: var(--navy); text-align: left !important;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.03);
+            position: sticky; 
+            left: 0; 
+            z-index: 30; 
+            background: white !important; 
+            min-width: 130px; 
+            max-width: 130px;
+            padding-left: 15px !important;
+            font-weight: 700; 
+            color: var(--navy); 
+            text-align: left !important;
+            border-right: 2px solid var(--slate-200) !important;
+            box-shadow: 4px 0 8px rgba(0,0,0,0.05); /* Sombra lateral al scrollear */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .table-sabana thead th.sticky-suc { z-index: 12; top: 0; }
+        /* Cuando la sucursal es cabecera, necesita más prioridad */
+        thead th.sticky-suc { z-index: 40; background: #f8fafc !important; }
 
-        .table-sabana td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; text-align: right; font-variant-numeric: tabular-nums; }
+        /* Celdas de datos */
+        td { 
+            padding: 10px 12px; 
+            font-size: 11px; 
+            border-bottom: 1px solid var(--slate-100); 
+            border-right: 1px solid var(--slate-100);
+            text-align: right; 
+            font-variant-numeric: tabular-nums; 
+        }
 
-        /* Columna Total Acumulado */
-        .col-total { background: #f1f5f9 !important; font-weight: 800; border-left: 2px solid var(--slate-200) !important; position: sticky; right: 0; z-index: 9; }
+        /* Columna Total Final */
+        .col-total { 
+            position: sticky; 
+            right: 0; 
+            z-index: 10;
+            background: #eff6ff !important; 
+            font-weight: 800; 
+            color: var(--accent);
+            border-left: 2px solid var(--slate-200) !important;
+        }
 
-        /* FILA DE PIE (TOTAL FRANQUICIAS) */
-        .table-sabana tfoot td {
+        /* PIE DE TABLA FIJO */
+        tfoot td {
             position: sticky;
             bottom: 0;
+            z-index: 25;
             background: var(--navy) !important;
             color: white !important;
-            font-weight: 800;
-            z-index: 13;
+            font-weight: 700;
+            padding: 12px;
             border-top: 2px solid #000;
-            padding: 10px 12px;
         }
-        .table-sabana tfoot td.sticky-suc { background: var(--navy) !important; z-index: 14; }
+        tfoot td.sticky-suc { z-index: 35; background: var(--navy) !important; }
+
+        .btn-run { 
+            background: var(--navy); 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            height: 38px; 
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .btn-run:active { transform: scale(0.95); background: black; }
 
         .val-zero { color: #cbd5e1; font-weight: 400; }
-        .btn-run { background: var(--navy); color: white; font-size: 10px; font-weight: 700; height: 32px; border: none; padding: 0 20px; border-radius: 4px; transition: 0.2s; }
-        .btn-run:hover { background: #000; transform: scale(1.02); }
 
+        /* Ajuste específico iPhone 12 Pro */
+        @media (max-width: 430px) {
+            .input-group-custom { grid-template-columns: 1fr 1fr; }
+            .btn-container { grid-column: span 2; }
+            .sticky-suc { min-width: 110px; max-width: 110px; font-size: 10px; }
+            td { font-size: 10px; padding: 12px 8px; }
+        }
     </style>
 </head>
 <body onload="init()">
 
 <div class="header-bar">
-    <a href="reporte_index.html">
+    <div class="d-flex align-items-center">
         <img src="Logo.png" alt="Mimo">
-        <span class="header-title">Ventas Consolidadas Canal Franquicias</span>
-    </a>
+        <span class="header-title">Consolidado Red</span>
+    </div>
+    <i class="bi bi-person-circle text-white fs-5"></i>
 </div>
 
 <div class="filter-area shadow-sm">
-    <div class="d-flex align-items-end gap-3">
-        <div style="width: 140px;">
+    <div class="input-group-custom">
+        <div>
             <span class="label-sm">Desde</span>
             <input type="date" id="desde" class="form-control form-control-sm shadow-none">
         </div>
-        <div style="width: 140px;">
+        <div>
             <span class="label-sm">Hasta</span>
             <input type="date" id="hasta" class="form-control form-control-sm shadow-none">
         </div>
-        <button class="btn-run" onclick="consultar()">CONSULTAR</button>
-        <div class="ms-auto text-muted small italic">
-            * Valores con IVA incluido.
+        <div class="btn-container">
+            <button class="btn-run" onclick="consultar()">
+                <i class="bi bi-search"></i>
+            </button>
         </div>
     </div>
 </div>
 
 <div class="grid-viewport">
-    <table class="table-sabana" id="tabla-datos">
+    <table id="tabla-datos">
         <thead id="res-head"></thead>
         <tbody id="res-body"></tbody>
         <tfoot id="res-foot"></tfoot>
@@ -112,14 +201,28 @@
 </div>
 
 <script>
-    const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 });
+    const fmt = new Intl.NumberFormat('es-AR', { 
+        style: 'currency', 
+        currency: 'ARS', 
+        minimumFractionDigits: 0 // Quitamos decimales para ganar espacio en iPhone
+    });
+
+    function getHoyArgentina() {
+        return new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'America/Argentina/Buenos_Aires',
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        }).format(new Date());
+    }
 
     function init() {
-        let hoy = new Date();
-        let inicio = new Date();
-        inicio.setDate(hoy.getDate() - 7);
-        document.getElementById('desde').value = inicio.toISOString().split('T')[0];
-        document.getElementById('hasta').value = hoy.toISOString().split('T')[0];
+        const hoy = getHoyArgentina();
+        let d = new Date(hoy + 'T12:00:00');
+        let day = d.getDay();
+        let diff = d.getDate() - day + (day == 0 ? -6 : 1);
+        let lunes = new Date(d.setDate(diff)).toISOString().split('T')[0];
+
+        document.getElementById('desde').value = lunes;
+        document.getElementById('hasta').value = hoy;
     }
 
     async function consultar() {
@@ -127,28 +230,30 @@
         const resHead = document.getElementById('res-head');
         const resFoot = document.getElementById('res-foot');
         
-        resBody.innerHTML = `<tr><td colspan="30" class="p-5 text-center"><div class="spinner-border spinner-border-sm text-primary"></div><br>Consolidando Red...</td></tr>`;
-        resFoot.innerHTML = "";
+        const desde = document.getElementById('desde').value;
+        const hasta = document.getElementById('hasta').value;
+
+        resBody.innerHTML = `<tr><td colspan="10" class="p-5 text-center"><div class="spinner-border text-primary"></div></td></tr>`;
 
         try {
-            const res = await fetch(`/api/reporte/ventas-grilla-diaria?desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
+            const res = await fetch(`/api/reporte/ventas-grilla-diaria?desde=${desde}&hasta=${hasta}`);
             const data = await res.json();
 
             if (data.length === 0) {
-                resBody.innerHTML = '<tr><td class="p-4">No se registran movimientos.</td></tr>';
+                resBody.innerHTML = '<tr><td class="p-4 text-center">Sin datos.</td></tr>';
                 return;
             }
 
             const keys = Object.keys(data[0]);
             
-            // 1. Renderizar Cabecera
+            // 1. Cabecera
             resHead.innerHTML = `<tr>${keys.map(k => {
-                let label = k === 'TOTAL_SUCURSAL' ? 'TOTAL SUC.' : k;
+                let label = k === 'TOTAL_SUCURSAL' ? 'TOTAL' : k.substring(0, 5); // Cortamos fechas
                 let css = k === 'SUCURSAL' ? 'sticky-suc' : (k === 'TOTAL_SUCURSAL' ? 'col-total' : '');
                 return `<th class="${css}">${label}</th>`;
             }).join('')}</tr>`;
 
-            // 2. Renderizar Cuerpo
+            // 2. Cuerpo
             resBody.innerHTML = data.map(row => `
                 <tr>
                     ${keys.map(k => {
@@ -156,30 +261,24 @@
                         if (k === 'SUCURSAL') return `<td class="sticky-suc">${val}</td>`;
                         const num = parseFloat(val) || 0;
                         const isTotal = k === 'TOTAL_SUCURSAL';
-                        const displayVal = num === 0 ? `<span class="val-zero">${fmt.format(0)}</span>` : fmt.format(num);
+                        const displayVal = num === 0 ? `<span class="val-zero">$0</span>` : fmt.format(num);
                         return `<td class="${isTotal ? 'col-total' : ''}">${displayVal}</td>`;
                     }).join('')}
                 </tr>
             `).join('');
 
-            // 3. CÁLCULO DE FILA "TOTAL FRANQUICIAS"
-            let footHtml = `<tr><td class="sticky-suc">TOTAL FRANQUICIAS (${data.length})</td>`;
-            
+            // 3. Pie
+            let footHtml = `<tr><td class="sticky-suc">RED</td>`;
             keys.forEach((k, index) => {
-                if (index === 0) return; // Saltear nombre sucursal
-
+                if (index === 0) return; 
                 const totalColumna = data.reduce((acc, row) => acc + (parseFloat(row[k]) || 0), 0);
                 const isTotalFinal = k === 'TOTAL_SUCURSAL';
-                const cssClass = isTotalFinal ? 'col-total' : '';
-
-                footHtml += `<td class="${cssClass}">${fmt.format(totalColumna)}</td>`;
+                footHtml += `<td class="${isTotalFinal ? 'col-total' : ''}">${fmt.format(totalColumna)}</td>`;
             });
-
-            footHtml += `</tr>`;
-            resFoot.innerHTML = footHtml;
+            resFoot.innerHTML = footHtml + `</tr>`;
 
         } catch (err) {
-            resBody.innerHTML = `<tr><td class="alert alert-danger">Error: ${err.message}</td></tr>`;
+            resBody.innerHTML = `<tr><td class="p-4 text-danger">Error: ${err.message}</td></tr>`;
         }
     }
 </script>

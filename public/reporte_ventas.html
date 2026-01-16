@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mimo & Co | Auditoría de Ventas</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,15 +21,14 @@
         .header-bar img { height: 26px; background: white; padding: 3px; border-radius: 4px; margin-right: 12px; }
         .header-title { font-family: 'Outfit', sans-serif; font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
 
-        /* Contenedor Principal Adaptable */
         .main-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 15px; }
         
         .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         
         .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
-        .form-select, .form-control { font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; height: 38px; }
+        .form-select, .form-control { font-size: 13px; border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; }
         
-        /* KPIs Responsivos: Saltan de fila automáticamente */
+        /* KPIs Responsivos */
         .kpi-row-compact { 
             display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
@@ -47,14 +46,13 @@
             background: #f8fafc; 
             padding: 10px 15px; 
             display: flex; 
-            flex-wrap: wrap; /* Permite que el precio baje en pantallas muy chicas */
+            flex-wrap: wrap; 
             justify-content: space-between; 
             align-items: center; 
             gap: 10px;
             border-bottom: 1px solid #f1f5f9; 
         }
         
-        /* Grilla de Items Fluida */
         .item-grid { 
             padding: 8px 15px; 
             display: grid; 
@@ -66,18 +64,14 @@
         
         .obs-text { font-size: 10px; color: #f59e0b; font-style: italic; display: block; line-height: 1.2; }
         
-        /* Colores y Badges */
         .bg-efectivo { background-color: #10b981 !important; }
         .bg-tarjeta { background-color: #3b82f6 !important; }
         .bg-mp { background-color: #f59e0b !important; }
         .badge-payment { font-weight: 700; font-size: 9px; text-transform: uppercase; padding: 3px 7px; border-radius: 4px; color: white; white-space: nowrap; }
 
-        .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 6px; height: 38px; border: none; transition: 0.2s; }
-        .btn-consultar:hover { background: #000; }
+        .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 8px; height: 40px; border: none; width: 100%; }
 
-        /* Ajustes para Móviles */
         @media (max-width: 576px) {
-            .header-title { font-size: 0.7rem; }
             .ticket-header { flex-direction: column; align-items: flex-start; }
             .ticket-header div:last-child { width: 100%; justify-content: space-between; display: flex; align-items: center; }
             .item-grid { grid-template-columns: 1fr 30px 80px; padding: 8px 10px; }
@@ -96,8 +90,8 @@
 
 <div class="main-content">
     <div class="card-pro">
-        <div class="row g-3 align-items-end">
-            <div class="col-6 col-md-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-12 col-md-3">
                 <span class="label-sm">Sucursal</span>
                 <select id="sucursal" class="form-select shadow-none"></select>
             </div>
@@ -109,12 +103,12 @@
                 <span class="label-sm">Hasta</span>
                 <input type="date" id="hasta" class="form-control shadow-none">
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-12 col-md-3">
                 <span class="label-sm">Artículo</span>
                 <input type="text" id="articulo" class="form-control shadow-none" placeholder="Buscar...">
             </div>
             <div class="col-12 col-md-2">
-                <button class="btn btn-consultar w-100" onclick="consultar()">CONSULTAR</button>
+                <button class="btn btn-consultar" onclick="consultar()">CONSULTAR</button>
             </div>
         </div>
     </div>
@@ -129,19 +123,29 @@
     let datosMemoria = [];
     const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
 
+    // FUNCIÓN DE FECHA BLINDADA
+    function getHoyArgentina() {
+        return new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'America/Argentina/Buenos_Aires',
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        }).format(new Date());
+    }
+
     async function init() {
         const res = await fetch('/api/sucursales');
         const data = await res.json();
         document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-        const hoy = new Date().toISOString().split('T')[0];
+        
+        const hoy = getHoyArgentina();
         document.getElementById('desde').value = document.getElementById('hasta').value = hoy;
     }
 
     async function consultar() {
         const suc = document.getElementById('sucursal').value;
         const art = document.getElementById('articulo').value;
-        const d = document.getElementById('desde').value;
-        const h = document.getElementById('hasta').value;
+        // Limpieza de parámetros por si el iPhone agrega ":1"
+        const d = document.getElementById('desde').value.split(':')[0];
+        const h = document.getElementById('hasta').value.split(':')[0];
 
         const res = await fetch(`/api/facturas?sucursal=${suc}&desde=${d}&hasta=${h}&articulo=${art}&medioPago=TODOS`);
         const result = await res.json();
@@ -149,7 +153,6 @@
         datosMemoria = result.datos || [];
         document.getElementById('cont-resultados').style.display = 'block';
 
-        // KPIs actualizados con diseño responsivo
         document.getElementById('kpi-container').innerHTML = `
             <div class="kpi-card-mini" style="background: var(--navy); color: white;">
                 <span class="label-sm text-white opacity-75">Neto</span>
@@ -177,7 +180,7 @@
             let cls = f.pago === 'EFECTIVO' ? 'bg-efectivo' : (f.pago === 'TARJETAS' ? 'bg-tarjeta' : 'bg-mp');
             
             return `<div class="ticket-wrapper">
-                <div class="ticket-card">
+                <div class="ticket-card shadow-sm">
                     <div class="ticket-header">
                         <div>
                             <span class="fw-bold font-outfit text-uppercase" style="font-size: 11px;">${f.tipo} ${f.prefijo}-${f.numero}</span>

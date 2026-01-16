@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mimo & Co | Comparativo Comercial</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,56 +22,87 @@
             --slate-800: #1e293b;
             --emerald-600: #059669;
             --red-600: #dc2626;
-            --amber-100: #fef3c7;
             --amber-600: #d97706;
         }
 
-        body { background-color: #f3f4f6; font-family: 'Inter', sans-serif; color: var(--slate-700); }
+        body { background-color: #f3f4f6; font-family: 'Inter', sans-serif; color: var(--slate-700); overflow-x: hidden; }
         
-        .nav-header { background: var(--slate-800); color: white; padding: 10px 30px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
-        .nav-header a { text-decoration: none; color: white; display: flex; align-items: center; }
-        .nav-header img { height: 32px; background-color: white; padding: 4px; border-radius: 4px; }
+        .nav-header { background: var(--slate-800); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; min-height: 60px; }
+        .nav-header img { height: 26px; background-color: white; padding: 3px; border-radius: 4px; }
+        .nav-header span { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        .filter-container { background: white; border-bottom: 1px solid var(--slate-200); padding: 15px 40px; }
+        .filter-container { background: white; border-bottom: 1px solid var(--slate-200); padding: 15px; }
         
-        .btn-nav { background: white; border: 1px solid var(--slate-200); color: var(--slate-600); font-size: 11px; font-weight: 700; padding: 8px 15px; text-transform: uppercase; cursor: pointer; }
-        .btn-nav:hover { background: var(--slate-100); }
-        .current-ref { font-size: 13px; font-weight: 800; color: var(--slate-800); border-top: 1px solid var(--slate-200); border-bottom: 1px solid var(--slate-200); }
+        .btn-nav { background: white; border: 1px solid var(--slate-200); color: var(--slate-600); font-size: 10px; font-weight: 700; padding: 8px 12px; }
+        .current-ref { font-size: 11px; font-weight: 800; color: var(--slate-800); display: flex; align-items: center; justify-content: center; background: var(--slate-50); }
 
-        .btn-consultar { background: var(--slate-800); color: white; font-weight: 600; border-radius: 6px; padding: 8px 20px; font-size: 12px; border: none; }
+        .btn-consultar { background: var(--slate-800); color: white; font-weight: 700; border-radius: 6px; padding: 10px; font-size: 11px; width: 100%; border: none; text-transform: uppercase; }
 
-        .main-content { padding: 30px 40px; }
-        .report-card { background: white; border-radius: 12px; border: 1px solid var(--slate-200); overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
-        
-        .table-comp { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .table-comp th { background: var(--slate-50); border-bottom: 2px solid var(--slate-200); padding: 18px 10px; text-align: center; position: relative; }
-        .table-comp td { border: 1px solid var(--slate-100); padding: 15px 10px; text-align: center; vertical-align: middle; }
-        
-        .day-label { display: block; font-weight: 800; color: var(--slate-800); font-size: 15px; }
-        .day-sub { font-size: 11px; color: var(--slate-600); font-weight: 500; text-transform: uppercase; }
-        
-        .row-header { text-align: left !important; font-weight: 700; background: var(--slate-50); color: var(--slate-600); width: 220px; padding-left: 25px !important; font-size: 11px; text-transform: uppercase; }
+        .main-content { padding: 10px; }
+        .report-card { background: white; border-radius: 12px; border: 1px solid var(--slate-200); overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
 
-        .today-highlight { background-color: #fffbeb !important; border: 2px solid #fde68a !important; }
-        .today-badge { position: absolute; top: 2px; left: 50%; transform: translateX(-50%); background: var(--amber-600); color: white; font-size: 8px; padding: 1px 6px; border-radius: 10px; font-weight: 800; }
-
-        .main-value { font-size: 17px; font-weight: 700; color: var(--slate-800); margin-bottom: 10px; }
-        .var-row { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 6px; 
-            padding: 3px 8px; 
-            border-radius: 5px; 
-            font-size: 10px; 
-            font-weight: 600; 
-            margin-bottom: 3px; 
-            cursor: help; /* Indica que hay información extra al pasar el mouse */
+        .table-responsive-custom {
+            overflow-x: auto;
+            display: block;
+            -webkit-overflow-scrolling: touch;
         }
         
-        .pos { color: var(--emerald-600); border: 1px solid #d1fae5; background: #f0fdf4; }
-        .neg { color: var(--red-600); border: 1px solid #fee2e2; background: #fef2f2; }
-        .neu { color: var(--slate-600); background: var(--slate-100); }
+        .table-comp { 
+            width: 100%; 
+            min-width: 1050px; 
+            border-collapse: separate; 
+            border-spacing: 0; 
+            table-layout: fixed; 
+        }
+        
+        .table-comp th, .table-comp td { 
+            width: 140px; 
+            padding: 12px 8px; 
+            text-align: center; 
+            border-right: 1px solid var(--slate-100);
+            border-bottom: 1px solid var(--slate-100);
+        }
+
+        .row-header { 
+            position: sticky; 
+            left: 0; 
+            z-index: 10; 
+            background: #f8fafc !important; 
+            width: 110px !important; 
+            min-width: 110px !important;
+            text-align: left !important; 
+            padding-left: 12px !important;
+            font-weight: 800; 
+            font-size: 9px; 
+            text-transform: uppercase;
+            border-right: 2px solid var(--slate-200) !important;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+        }
+
+        .day-label { display: block; font-weight: 800; color: var(--slate-800); font-size: 13px; }
+        .day-sub { font-size: 9px; color: var(--slate-600); font-weight: 500; text-transform: uppercase; }
+
+        .today-highlight { background-color: #fffbeb !important; }
+        .today-badge { 
+            position: absolute; top: 2px; left: 50%; transform: translateX(-50%); 
+            background: var(--amber-600); color: white; font-size: 7px; padding: 1px 5px; border-radius: 10px; font-weight: 800; 
+        }
+
+        .main-value { font-size: 14px; font-weight: 800; color: var(--slate-800); margin-bottom: 6px; white-space: nowrap; }
+        .var-box { display: flex; flex-direction: column; gap: 4px; }
+        
+        .var-row { 
+            display: flex; justify-content: center; align-items: center; gap: 3px; 
+            padding: 2px 4px; border-radius: 4px; font-size: 9px; font-weight: 600; white-space: nowrap;
+        }
+        
+        .pos { color: var(--emerald-600); background: #f0fdf4; border: 1px solid #d1fae5; }
+        .neg { color: var(--red-600); background: #fef2f2; border: 1px solid #fee2e2; }
+        .neu { color: var(--slate-600); background: var(--slate-100); border: 1px solid var(--slate-200); }
+
+        @media (max-width: 768px) {
+            .filter-container .row > div { margin-bottom: 8px; }
+        }
     </style>
 </head>
 <body onload="init()">
@@ -79,54 +110,63 @@
 <div class="nav-header">
     <a href="reporte_index.html">
         <img src="Logo.png" alt="Mimo">
-        <span class="ms-3">BI SYSTEM | <strong>COMPARATIVO SEMANAL</strong></span>
+        <span class="ms-2 fw-bold">BI | COMPARATIVO</span>
     </a>
-    <button class="btn btn-sm btn-outline-light" onclick="irAHoy()">IR A HOY</button>
+    <button class="btn btn-sm btn-outline-light py-1 px-3" onclick="irAHoy()" style="font-size: 9px; font-weight: 800;">HOY</button>
 </div>
 
-<div class="filter-container">
-    <div class="row g-3 align-items-end">
-        <div class="col-md-4">
-            <label class="small fw-bold text-secondary mb-1">Sucursal</label>
-            <select id="sucursal" class="form-select shadow-none border-secondary-subtle"></select>
+<div class="filter-container shadow-sm">
+    <div class="row g-2">
+        <div class="col-12 col-md-4">
+            <span class="small fw-bold text-secondary mb-1 d-block" style="font-size: 9px;">SUCURSAL</span>
+            <select id="sucursal" class="form-select form-select-sm shadow-none"></select>
         </div>
-        <div class="col-md-5">
-            <label class="small fw-bold text-secondary mb-1">Navegación Semanal (Lunes a Domingo)</label>
-            <div class="d-flex align-items-center">
-                <button class="btn btn-nav rounded-start" onclick="cambiarSemana(-1)">
-                    <i class="bi bi-chevron-left"></i> Anterior
+        <div class="col-12 col-md-5">
+            <span class="small fw-bold text-secondary mb-1 d-block" style="font-size: 9px;">NAVEGACIÓN</span>
+            <div class="d-flex align-items-stretch">
+                <button class="btn btn-nav rounded-start border-end-0" onclick="cambiarSemana(-1)">
+                    <i class="bi bi-chevron-left"></i>
                 </button>
-                <div class="px-3 py-1 bg-light border-top border-bottom flex-grow-1 text-center current-ref" id="txt-referencia">
-                    Cargando...
-                </div>
-                <button class="btn btn-nav rounded-end" onclick="cambiarSemana(1)">
-                    Siguiente <i class="bi bi-chevron-right"></i>
+                <div class="px-2 current-ref flex-grow-1 border" id="txt-referencia">...</div>
+                <button class="btn btn-nav rounded-end border-start-0" onclick="cambiarSemana(1)">
+                    <i class="bi bi-chevron-right"></i>
                 </button>
             </div>
         </div>
-        <div class="col-md-2">
-            <button class="btn-consultar w-100 shadow-sm" onclick="consultar()">
-                <i class="bi bi-arrow-repeat me-2"></i>Actualizar
-            </button>
+        <div class="col-12 col-md-3 d-flex align-items-end">
+            <button class="btn-consultar shadow-sm" onclick="consultar()">ACTUALIZAR</button>
         </div>
     </div>
 </div>
 
 <div class="main-content">
     <div class="report-card">
-        <table class="table-comp">
-            <thead id="thead-comp"></thead>
-            <tbody id="tbody-comp">
-                <tr><td colspan="8" class="p-5 text-center"><div class="spinner-border text-primary"></div></td></tr>
-            </tbody>
-        </table>
+        <div class="table-responsive-custom">
+            <table class="table-comp">
+                <thead id="thead-comp"></thead>
+                <tbody id="tbody-comp">
+                    <tr><td colspan="8" class="p-5 text-center"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
-    let fechaReferencia = new Date();
+    let fechaReferencia;
+
+    // FUNCIÓN DE FECHA BLINDADA (GMT-3)
+    function getHoyArgentina() {
+        return new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'America/Argentina/Buenos_Aires',
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        }).format(new Date());
+    }
 
     async function init() {
+        // Seteamos la fecha inicial usando la función blindada
+        fechaReferencia = new Date(getHoyArgentina() + 'T12:00:00');
+        
         const res = await fetch('/api/sucursales');
         const sucs = await res.json();
         document.getElementById('sucursal').innerHTML = sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
@@ -135,7 +175,7 @@
     }
 
     function irAHoy() {
-        fechaReferencia = new Date();
+        fechaReferencia = new Date(getHoyArgentina() + 'T12:00:00');
         actualizarLabelFecha();
         consultar();
     }
@@ -153,47 +193,39 @@
         consultar();
     }
 
-    // FUNCIÓN MEJORADA: Ahora recibe el valor del histórico para el tooltip
     function getVarRow(actual, historico, labelFecha, metrica) {
-        if (!historico || historico === 0) return `<div class="var-row neu" title="Sin datos previos para comparar">0.0% vs ${labelFecha}</div>`;
-        
+        if (!historico || historico === 0) return `<div class="var-row neu">0.0% vs ${labelFecha}</div>`;
         const diff = ((actual - historico) / historico) * 100;
         const icon = diff >= 0 ? 'bi-caret-up-fill' : 'bi-caret-down-fill';
         const colorClass = diff >= 0 ? 'pos' : 'neg';
-        
-        // Formateo del valor histórico para el tooltip
-        const histFormatted = metrica === 'money' 
-            ? '$ ' + historico.toLocaleString('es-AR', {minimumFractionDigits: 2}) 
-            : historico.toLocaleString('es-AR') + ' unidades';
-
-        const tooltipMsg = `Comparando contra: ${histFormatted} el día ${labelFecha}`;
-
         return `
-            <div class="var-row ${colorClass}" title="${tooltipMsg}">
+            <div class="var-row ${colorClass}">
                 <i class="bi ${icon}"></i>
                 <span>${diff > 0 ? '+' : ''}${diff.toFixed(1)}%</span>
-                <span class="ms-1 fw-normal" style="opacity: 0.8">vs ${labelFecha}</span>
+                <span class="ms-1 fw-normal" style="opacity: 0.7">vs ${labelFecha}</span>
             </div>`;
     }
 
     async function consultar() {
         const suc = document.getElementById('sucursal').value;
         const tbody = document.getElementById('tbody-comp');
-        const hoyIso = new Date().toISOString().split('T')[0];
+        
+        // Obtenemos hoy clavado desde el servidor/función blindada
+        const hoyIso = getHoyArgentina();
         const fParam = fechaReferencia.toISOString().split('T')[0];
         
-        tbody.innerHTML = `<tr><td colspan="8" class="p-5 text-center"><div class="spinner-border text-primary"></div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="p-5 text-center"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>`;
 
         try {
             const res = await fetch(`/api/reporte/comparativo-ventas?sucursal=${suc}&fechaRef=${fParam}`);
             const data = await res.json();
 
-            let headHtml = `<tr><th class="row-header">MÉTRICA / DÍA</th>`;
+            let headHtml = `<tr><th class="row-header">MÉTRICA</th>`;
             data.forEach(d => {
-                const isToday = d.FechaIso.split('T')[0] === hoyIso;
+                const esHoy = d.FechaIso.split('T')[0] === hoyIso;
                 headHtml += `
-                    <th class="${isToday ? 'today-highlight' : ''}">
-                        ${isToday ? '<span class="today-badge">HOY</span>' : ''}
+                    <th class="${esHoy ? 'today-highlight' : ''}" style="position: relative;">
+                        ${esHoy ? '<span class="today-badge">HOY</span>' : ''}
                         <span class="day-label">${d.FechaLabel}</span>
                         <span class="day-sub">${d.DiaSemana}</span>
                     </th>`;
@@ -201,19 +233,18 @@
             document.getElementById('thead-comp').innerHTML = headHtml + `</tr>`;
 
             const rows = [
-                { label: 'Facturación ($)', actStr: 'MontoActStr', valPure: 'MontoAct', sem: 'MontoSem', mes: 'MontoMes', type: 'money' },
-                { label: 'Unidades (Cant)', actStr: 'UniAct', valPure: 'UniAct', sem: 'UniSem', mes: 'UniMes', type: 'num' }
+                { label: 'Facturación', actStr: 'MontoActStr', valPure: 'MontoAct', sem: 'MontoSem', mes: 'MontoMes', type: 'money' },
+                { label: 'Unidades', actStr: 'UniAct', valPure: 'UniAct', sem: 'UniSem', mes: 'UniMes', type: 'num' }
             ];
 
             let bodyHtml = "";
             rows.forEach(row => {
                 bodyHtml += `<tr><td class="row-header">${row.label}</td>`;
                 data.forEach(d => {
-                    const isToday = d.FechaIso.split('T')[0] === hoyIso;
+                    const esHoy = d.FechaIso.split('T')[0] === hoyIso;
                     const displayVal = row.type === 'num' ? d[row.actStr].toLocaleString('es-AR') : d[row.actStr];
-                    
                     bodyHtml += `
-                        <td class="${isToday ? 'today-highlight' : ''}">
+                        <td class="${esHoy ? 'today-highlight' : ''}">
                             <div class="main-value">${displayVal}</div>
                             <div class="var-box">
                                 ${getVarRow(d[row.valPure], d[row.sem], d.LabelSem, row.type)}
@@ -224,9 +255,8 @@
                 bodyHtml += `</tr>`;
             });
             tbody.innerHTML = bodyHtml;
-
         } catch (err) {
-            tbody.innerHTML = `<tr><td colspan="8" class="p-5 text-danger text-center">Error: ${err.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-danger">Error de carga.</td></tr>`;
         }
     }
 </script>

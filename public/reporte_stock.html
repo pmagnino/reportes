@@ -2,89 +2,174 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mimo & Co | Stock Físico</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
-        body { background-color: #f1f5f9; font-family: 'Segoe UI', sans-serif; font-size: 13px; color: #334155; margin: 0; }
-        .nav-header { background: #1e293b; color: white; padding: 10px 30px; display: flex; align-items: center; height: 60px; }
-        .nav-header img { height: 35px; background-color: white; padding: 5px; border-radius: 4px; margin-right: 20px; }
-        .nav-header span { font-size: 13px; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
-        .filter-container { background: white; border-bottom: 1px solid #e2e8f0; padding: 25px 40px; margin-bottom: 20px; }
-        .card-pro { background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .label-sm { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
-        .total-card { border-left: 4px solid #3b82f6; }
-        .stat-val { font-size: 22px; font-weight: 700; color: #1e293b; margin-top: 5px; }
-        .btn-execute { background: #1e293b; color: white; font-weight: 700; border: none; border-radius: 6px; font-size: 12px; height: 40px; }
+        :root { --navy: #1e293b; --blue-mimo: #3b82f6; --slate-500: #64748b; }
         
-        .stock-item { border-bottom: 1px solid #f1f5f9; padding: 15px 25px; display: grid; grid-template-columns: 3fr 1fr; align-items: center; background: white; }
-        .stock-item:last-child { border-bottom: none; border-radius: 0 0 8px 8px; }
-        .info-main { font-size: 14px; color: #1e293b; font-weight: 700; }
-        .info-desc { font-size: 11px; color: #64748b; text-transform: uppercase; display: block; }
-        .stock-val { font-size: 20px; font-weight: 800; color: #3b82f6; text-align: right; display: block; }
-        .stock-label { font-size: 9px; color: #94a3b8; font-weight: 700; text-align: right; display: block; }
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 13px; color: #334155; margin: 0; }
+        
+        /* Navbar Responsiva */
+        .nav-header { background: var(--navy); color: white; padding: 10px 20px; display: flex; align-items: center; height: 60px; }
+        .nav-header img { height: 28px; background-color: white; padding: 4px; border-radius: 4px; margin-right: 15px; }
+        .nav-header span { font-family: 'Outfit', sans-serif; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
+
+        /* Contenedor de Filtros */
+        .filter-container { background: white; border-bottom: 1px solid #e2e8f0; padding: 20px; }
+        
+        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block; }
+        
+        /* KPI de Total */
+        .total-card { border-left: 4px solid var(--blue-mimo); background: #f0f9ff; }
+        .stat-val { font-size: 20px; font-weight: 800; color: var(--navy); margin: 0; }
+        
+        .form-select, .form-control { font-size: 13px; border-radius: 8px; height: 42px; border: 1px solid #cbd5e1; }
+        .btn-execute { background: var(--navy); color: white; font-weight: 700; border: none; border-radius: 8px; font-size: 12px; height: 42px; transition: 0.2s; }
+        .btn-execute:hover { background: #000; transform: translateY(-1px); }
+
+        /* Lista de Stock Fluida */
+        .stock-item { 
+            border-bottom: 1px solid #f1f5f9; 
+            padding: 12px 15px; 
+            display: grid; 
+            grid-template-columns: 1fr auto; 
+            align-items: center; 
+            background: white; 
+            gap: 15px;
+        }
+        .stock-item:last-child { border-bottom: none; }
+        
+        .info-main { font-size: 14px; color: var(--navy); font-weight: 700; display: block; }
+        .info-desc { font-size: 10px; color: var(--slate-500); text-transform: uppercase; display: block; line-height: 1.2; margin-top: 2px; }
+        
+        .stock-val { font-size: 18px; font-weight: 800; color: var(--blue-mimo); text-align: right; display: block; }
+        .stock-label { font-size: 8px; color: #94a3b8; font-weight: 700; text-align: right; display: block; text-transform: uppercase; }
+
+        /* Media Queries para iPhone 12 Pro */
+        @media (max-width: 768px) {
+            .nav-header span { font-size: 0.7rem; }
+            .filter-container { padding: 15px; }
+            .stat-val { font-size: 18px; }
+            .stock-item { padding: 12px; }
+            .info-main { font-size: 13px; }
+        }
     </style>
 </head>
 <body onload="init()">
+
 <div class="nav-header">
     <a href="reporte_index.html"><img src="Logo.png" alt="Mimo"></a>
-    <span>CONSULTA DE STOCK FÍSICO</span>
+    <span>Consulta de Stock Físico</span>
 </div>
-<div class="filter-container">
+
+<div class="filter-container shadow-sm">
     <div class="row g-3 align-items-end">
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <span class="label-sm">Sucursal</span>
-            <select id="sucursal" class="form-select border-light-subtle bg-light shadow-none"></select>
+            <select id="sucursal" class="form-select shadow-none"></select>
         </div>
-        <div class="col-md-4">
+        <div class="col-6 col-md-4">
             <span class="label-sm">Buscador</span>
-            <input type="text" id="buscador" class="form-control border-light-subtle bg-light shadow-none" onkeyup="filtrar()">
+            <input type="text" id="buscador" class="form-control shadow-none" placeholder="Cod. o Desc..." onkeyup="filtrar()">
         </div>
-        <div class="col-md-2">
+        <div class="col-12 col-md-2">
             <button class="btn-execute w-100" onclick="consultar()">CONSULTAR</button>
         </div>
-        <div class="col-md-3">
-            <div class="card-pro total-card py-2">
-                <span class="label-sm">Prendas Totales (SUM)</span>
+        <div class="col-12 col-md-3">
+            <div class="card-pro total-card py-2 d-flex justify-content-between align-items-center d-md-block">
+                <span class="label-sm m-0">Prendas en Stock</span>
                 <div id="total-prendas" class="stat-val">0</div>
             </div>
         </div>
     </div>
 </div>
-<div class="container-fluid px-5 pb-5">
+
+<div class="container-fluid p-3 p-md-4">
     <div id="cont-resultados" class="card-pro p-0 overflow-hidden" style="display: none;">
-        <div class="bg-light px-4 py-2 border-bottom d-grid" style="grid-template-columns: 3fr 1fr;">
+        <div class="bg-light px-3 py-2 border-bottom d-grid" style="grid-template-columns: 1fr auto;">
             <span class="label-sm m-0">Producto / Descripción</span>
-            <span class="label-sm m-0 text-end">Existencia Física</span>
+            <span class="label-sm m-0 text-end">Existencia</span>
         </div>
         <div id="res-body"></div>
     </div>
 </div>
+
 <script>
     let datosOriginales = [];
+
     async function init() {
-        const res = await fetch('/api/sucursales');
-        const data = await res.json();
-        document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+        try {
+            const res = await fetch('/api/sucursales');
+            const data = await res.json();
+            document.getElementById('sucursal').innerHTML = data.map(s => 
+                `<option value="${s.CODSUC}">${s.NOMBRE}</option>`
+            ).join('');
+        } catch (e) {
+            console.error("Error cargando sucursales");
+        }
     }
+
     async function consultar() {
+        const btn = document.querySelector('.btn-execute');
         const suc = document.getElementById('sucursal').value;
-        const res = await fetch(`/api/reporte/stock-fisico?sucursal=${suc}`);
-        const data = await res.json();
-        datosOriginales = data;
-        render(data);
+        
+        btn.disabled = true;
+        btn.innerText = "BUSCANDO...";
+
+        try {
+            const res = await fetch(`/api/reporte/stock-fisico?sucursal=${suc}`);
+            const data = await res.json();
+            datosOriginales = data;
+            render(data);
+        } catch (err) {
+            alert("Error al conectar con el servidor");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "CONSULTAR";
+        }
     }
+
     function render(lista) {
+        const body = document.getElementById('res-body');
+        const cont = document.getElementById('cont-resultados');
+        
         document.getElementById('total-prendas').innerText = lista.reduce((acc, r) => acc + r.STOCK, 0).toLocaleString('es-AR');
-        document.getElementById('cont-resultados').style.display = 'block';
-        document.getElementById('res-body').innerHTML = lista.map(r => `
+        cont.style.display = 'block';
+
+        if (lista.length === 0) {
+            body.innerHTML = `<div class="p-5 text-center text-muted">No se encontraron productos con stock.</div>`;
+            return;
+        }
+
+        body.innerHTML = lista.map(r => `
             <div class="stock-item">
-                <div><span class="info-main">${r.CODITM}</span><span class="info-desc">${r.DESCRIPCION || 'SIN DESCRIPCIÓN'}</span></div>
-                <div><span class="stock-val">${r.STOCK}</span><span class="stock-label">UNIDADES</span></div>
+                <div>
+                    <span class="info-main">${r.CODITM}</span>
+                    <span class="info-desc">${r.DESCRIPCION || 'SIN DESCRIPCIÓN'}</span>
+                </div>
+                <div>
+                    <span class="stock-val">${r.STOCK}</span>
+                    <span class="stock-label">Unidades</span>
+                </div>
             </div>`).join('');
     }
+
     function filtrar() {
         const b = document.getElementById('buscador').value.toLowerCase();
-        render(datosOriginales.filter(i => i.CODITM.toLowerCase().includes(b) || (i.DESCRIPCION && i.DESCRIPCION.toLowerCase().includes(b))));
+        const filtrados = datosOriginales.filter(i => 
+            i.CODITM.toLowerCase().includes(b) || 
+            (i.DESCRIPCION && i.DESCRIPCION.toLowerCase().includes(b))
+        );
+        render(filtrados);
     }
 </script>
 </body>

@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mimo & Co | Medios de Pago</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,37 +14,43 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        :root { --navy: #1e293b; --slate-500: #64748b; }
+        :root { --navy: #1e293b; --slate-500: #64748b; --mimo-blue: #3b82f6; }
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; -webkit-font-smoothing: antialiased; }
         
         /* Navbar unificada */
-        .header-bar { background: var(--navy); color: white; padding: 0 30px; display: flex; align-items: center; height: 55px; }
-        .header-bar a { text-decoration: none; color: white; display: flex; align-items: center; }
-        .header-bar img { height: 28px; background: white; padding: 3px; border-radius: 4px; margin-right: 15px; }
-        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.85rem; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; }
+        .header-bar { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; height: 55px; }
+        .header-bar img { height: 26px; background: white; padding: 3px; border-radius: 4px; margin-right: 12px; }
+        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
 
-        .main-content { max-width: 1050px; margin: 0 auto; padding: 25px 20px; }
+        .main-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 15px; }
         
-        /* Filtros idénticos a Franjas */
-        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-        .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
-        .form-select, .form-control { font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; height: 38px; }
+        /* Filtros Responsivos */
+        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; }
+        .form-select, .form-control { font-size: 13px; border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; }
         
-        /* Gráfico */
-        .chart-container { height: 250px; position: relative; }
+        /* Gráfico adaptable */
+        .chart-container { height: 220px; position: relative; width: 100%; }
 
-        /* Tabla Estilo Franjas */
+        /* Tabla Estilizada */
         .table-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
-        .table thead th { background: #f8fafc; font-family: 'Outfit', sans-serif; font-size: 10px; text-transform: uppercase; color: var(--slate-500); padding: 12px 20px; border-bottom: 2px solid #f1f5f9; }
-        .table tbody td { padding: 12px 20px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; font-variant-numeric: tabular-nums; }
+        .table thead th { background: #f8fafc; font-family: 'Outfit', sans-serif; font-size: 9px; text-transform: uppercase; color: var(--slate-500); padding: 12px 15px; border-bottom: 2px solid #f1f5f9; }
+        .table tbody td { padding: 12px 15px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; font-variant-numeric: tabular-nums; }
         
-        /* Acordeón y Totales */
-        .row-group { background-color: #f8fafc; font-weight: 600; color: #3b82f6; cursor: pointer; }
-        .sub-item { color: var(--slate-500); font-size: 11px; padding-left: 40px !important; }
-        .row-total-highlight td { background-color: var(--navy) !important; color: white !important; font-weight: 800 !important; font-size: 14px; }
+        /* Acordeón para móviles */
+        .row-group { background-color: #f8fafc; font-weight: 700; color: var(--mimo-blue); cursor: pointer; }
+        .sub-item { color: var(--slate-500); font-size: 11px; padding-left: 30px !important; background-color: #ffffff; }
         
-        .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 6px; height: 38px; border: none; }
-        .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-bottom: 20px; }
+        .row-total-highlight td { background-color: var(--navy) !important; color: white !important; font-weight: 800 !important; font-size: 13px !important; }
+        
+        .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 8px; height: 40px; border: none; width: 100%; }
+        .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-bottom: 15px; }
+
+        @media (max-width: 576px) {
+            .header-title { font-size: 0.7rem; }
+            .chart-container { height: 200px; }
+            .table tbody td { padding: 10px; font-size: 11px; }
+        }
     </style>
 </head>
 <body onload="init()">
@@ -58,33 +65,44 @@
 <div class="main-content">
     <div class="card-pro">
         <div class="row g-2 align-items-end">
-            <div class="col-md-4"><span class="label-sm">Sucursal</span><select id="sucursal" class="form-select shadow-none"></select></div>
-            <div class="col-md-3"><span class="label-sm">Desde</span><input type="date" id="desde" class="form-control shadow-none"></div>
-            <div class="col-md-3"><span class="label-sm">Hasta</span><input type="date" id="hasta" class="form-control shadow-none"></div>
-            <div class="col-md-2"><button class="btn btn-consultar w-100" onclick="consultar()">EJECUTAR</button></div>
+            <div class="col-12 col-md-4">
+                <span class="label-sm">Sucursal</span>
+                <select id="sucursal" class="form-select shadow-none"></select>
+            </div>
+            <div class="col-6 col-md-3">
+                <span class="label-sm">Desde</span>
+                <input type="date" id="desde" class="form-control shadow-none">
+            </div>
+            <div class="col-6 col-md-3">
+                <span class="label-sm">Hasta</span>
+                <input type="date" id="hasta" class="form-control shadow-none">
+            </div>
+            <div class="col-12 col-md-2">
+                <button class="btn btn-consultar" onclick="consultar()">EJECUTAR</button>
+            </div>
         </div>
     </div>
 
     <div id="cont-resultados" style="display: none;">
         <div class="info-note">
-            <strong>Auditoría de Caja:</strong> Composición de ingresos netos por medio de cobro (incluye tarjetas agrupadas).
+            Composición de ingresos netos por medio de cobro.
         </div>
         
-        <div class="row mb-4">
-            <div class="col-md-12">
+        <div class="row mb-3">
+            <div class="col-12">
                 <div class="card-pro">
-                    <span class="label-sm mb-3 text-center">Distribución de Ingresos</span>
+                    <span class="label-sm mb-2 text-center">Distribución de Ingresos</span>
                     <div class="chart-container"><canvas id="chartPagos"></canvas></div>
                 </div>
             </div>
         </div>
 
-        <div class="table-card shadow-sm">
+        <div class="table-card shadow-sm mb-4">
             <table class="table mb-0">
                 <thead>
                     <tr>
-                        <th>Medio de Pago</th>
-                        <th class="text-center">Tickets</th>
+                        <th>Medio</th>
+                        <th class="text-center">Tks</th>
                         <th class="text-end">Importe Neto</th>
                     </tr>
                 </thead>
@@ -96,42 +114,62 @@
 
 <script>
     let myChart;
-    const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 });
-    const paletaSoft = ['#CDE6B4', '#F9F4C2', '#F9C7C7', '#D1E8FF', '#E2D1FF', '#FFD1F5'];
+    const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 });
+    const paletaSoft = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
     async function init() {
         try {
             const res = await fetch('/api/sucursales');
             const data = await res.json();
             document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-            document.getElementById('desde').value = document.getElementById('hasta').value = new Date().toISOString().split('T')[0];
+            
+            const resF = await fetch('/api/util/fecha-hoy');
+            const { hoy } = await resF.json();
+            document.getElementById('desde').value = document.getElementById('hasta').value = hoy;
         } catch (e) { console.error(e); }
     }
 
     function toggleDetalle() {
         const el = document.getElementById('tbody-detalle');
-        el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'table-row-group' : 'none';
+        const icon = document.getElementById('icon-tarjeta');
+        if (el.style.display === 'none' || el.style.display === '') {
+            el.style.display = 'table-row-group';
+            icon.classList.replace('bi-chevron-right', 'bi-chevron-down');
+        } else {
+            el.style.display = 'none';
+            icon.classList.replace('bi-chevron-down', 'bi-chevron-right');
+        }
     }
 
     async function consultar() {
+        const btn = document.querySelector('.btn-consultar');
         const resBody = document.getElementById('res-body');
+        btn.disabled = true;
+        btn.innerText = "PROCESANDO...";
         resBody.innerHTML = `<tr><td colspan="3" class="text-center p-5"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>`;
 
         try {
-            const res = await fetch(`/api/reporte/medios-pago?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
+            const suc = document.getElementById('sucursal').value;
+            const d = document.getElementById('desde').value;
+            const h = document.getElementById('hasta').value;
+            
+            const res = await fetch(`/api/reporte/medios-pago?sucursal=${suc}&desde=${d}&hasta=${h}`);
             const data = await res.json();
             document.getElementById('cont-resultados').style.display = 'block';
             
-            const otros = data.filter(r => r.CODPAG !== '100');
-            const tarjetas = data.filter(r => r.CODPAG === '100');
+            // Separar Efectivo/MP de Tarjetas (esto asume que el backend manda CODPAG)
+            const otros = data.filter(r => r.MEDIO !== 'TARJETAS');
+            const tarjetas = data.filter(r => r.MEDIO === 'TARJETAS');
+            
             let tT = 0, tI = 0, labels = [], valores = [];
 
             let html = otros.map(r => {
                 tT += r.TICKETS; tI += r.TOTAL_NETO;
                 labels.push(r.MEDIO); valores.push(r.TOTAL_NETO);
-                return `<tr><td>${r.MEDIO}</td><td class="text-center">${r.TICKETS}</td><td class="text-end fw-bold">${fmt.format(r.TOTAL_NETO)}</td></tr>`;
+                return `<tr><td class="fw-semibold">${r.MEDIO}</td><td class="text-center">${r.TICKETS}</td><td class="text-end fw-bold">${fmt.format(r.TOTAL_NETO)}</td></tr>`;
             }).join('');
 
+            // Agrupador de Tarjetas
             if (tarjetas.length > 0) {
                 const sumT = tarjetas.reduce((a, b) => a + b.TICKETS, 0);
                 const sumI = tarjetas.reduce((a, b) => a + b.TOTAL_NETO, 0);
@@ -140,16 +178,16 @@
                 
                 html += `
                     <tr class="row-group" onclick="toggleDetalle()">
-                        <td><i class="bi bi-chevron-down me-2"></i>TARJETAS</td>
+                        <td><i id="icon-tarjeta" class="bi bi-chevron-right me-2"></i>TARJETAS</td>
                         <td class="text-center">${sumT}</td>
                         <td class="text-end">${fmt.format(sumI)}</td>
                     </tr>
                     <tbody id="tbody-detalle" style="display: none; border-top:none;">
                         ${tarjetas.map(t => `
                             <tr>
-                                <td class="sub-item">└ ${t.MEDIO} (${t.PLAN_PAGO})</td>
-                                <td class="text-center text-muted">${t.TICKETS}</td>
-                                <td class="text-end text-muted">${fmt.format(t.TOTAL_NETO)}</td>
+                                <td class="sub-item">└ ${t.MEDIO}</td>
+                                <td class="text-center text-muted small">${t.TICKETS}</td>
+                                <td class="text-end text-muted small">${fmt.format(t.TOTAL_NETO)}</td>
                             </tr>`).join('')}
                     </tbody>`;
             }
@@ -162,26 +200,25 @@
                 type: 'doughnut',
                 data: { 
                     labels: labels, 
-                    datasets: [{ 
-                        data: valores, 
-                        backgroundColor: paletaSoft, 
-                        borderWidth: 2, 
-                        borderColor: '#ffffff' 
-                    }] 
+                    datasets: [{ data: valores, backgroundColor: paletaSoft, borderWidth: 2, borderColor: '#ffffff' }] 
                 },
                 options: { 
                     maintainAspectRatio: false, 
-                    cutout: '75%', 
+                    cutout: '70%', 
                     plugins: { 
                         legend: { 
                             position: 'bottom', 
-                            labels: { boxWidth: 10, font: { size: 11, family: 'Inter' }, padding: 15 } 
+                            labels: { boxWidth: 10, font: { size: 10, family: 'Inter' }, padding: 10 } 
                         } 
                     } 
                 }
             });
 
-        } catch (err) { resBody.innerHTML = `<tr><td colspan="3" class="alert alert-danger">${err.message}</td></tr>`; }
+        } catch (err) { resBody.innerHTML = `<tr><td colspan="3" class="alert alert-danger">Error: ${err.message}</td></tr>`; }
+        finally {
+            btn.disabled = false;
+            btn.innerText = "EJECUTAR";
+        }
     }
 </script>
 </body>

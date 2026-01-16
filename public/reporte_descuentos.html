@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mimo & Co | Auditoría de Descuentos</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,52 +13,78 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
-        :root { --navy: #1e293b; --slate-500: #64748b; }
+        :root { --navy: #1e293b; --slate-500: #64748b; --mimo-red: #dc2626; }
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; -webkit-font-smoothing: antialiased; }
         
-        .header-bar { background: var(--navy); color: white; padding: 0 30px; display: flex; align-items: center; height: 55px; }
-        .header-bar img { height: 28px; background: white; padding: 3px; border-radius: 4px; margin-right: 15px; }
-        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.85rem; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; }
+        .header-bar { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; height: 55px; }
+        .header-bar img { height: 26px; background: white; padding: 3px; border-radius: 4px; margin-right: 12px; }
+        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
 
-        .main-content { max-width: 1050px; margin: 0 auto; padding: 30px 20px; }
+        .main-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 15px; }
         
-        /* Filtros */
-        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        /* Filtros Adaptables */
+        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
-        .form-select, .form-control { font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; }
+        .form-select, .form-control { font-size: 13px; border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; }
         
-        /* KPIs */
-        .kpi-row-compact { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 25px; }
+        /* KPIs Responsivos */
+        .kpi-row-compact { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 10px; 
+            margin-bottom: 20px; 
+        }
         .kpi-card-mini { background: white; padding: 12px 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
         .kpi-val { font-size: 1rem; color: #1e293b; font-weight: 800; font-variant-numeric: tabular-nums; }
         
-        /* Encabezados de "Tabla" simulada */
-        .table-header-labels { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; padding: 0 25px 8px 25px; }
+        /* Tabla Simulada para PC */
+        .table-header-labels { 
+            display: grid; 
+            grid-template-columns: 2fr 1fr 1fr 1fr; 
+            padding: 0 15px 8px 15px; 
+        }
 
-        /* Tarjeta de Promoción compacta en columnas */
-        .promo-wrapper { margin-bottom: 8px; }
+        /* Tarjeta de Promo Adaptable */
+        .promo-wrapper { margin-bottom: 10px; }
         .promo-card { 
             background: white; 
-            border-radius: 8px; 
+            border-radius: 10px; 
             border: 1px solid #e2e8f0; 
             display: grid; 
             grid-template-columns: 2fr 1fr 1fr 1fr; 
             align-items: center;
-            padding: 12px 25px;
-            transition: background 0.2s;
+            padding: 12px 20px;
         }
-        .promo-card:hover { background-color: #f8fafc; }
 
         .promo-identity { display: flex; flex-direction: column; }
-        .promo-code { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--navy); font-size: 13px; line-height: 1; margin-bottom: 4px; }
-        .promo-name { font-size: 11px; color: var(--slate-500); text-transform: uppercase; font-weight: 500; }
+        .promo-code { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--navy); font-size: 13px; margin-bottom: 2px; }
+        .promo-name { font-size: 10px; color: var(--slate-500); text-transform: uppercase; }
         
-        .val-tickets { background: #eff6ff; color: #1d4ed8; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 11px; width: fit-content; margin: 0 auto; }
-        .val-money { font-weight: 800; font-size: 14px; color: #dc2626; text-align: right; }
-        .badge-pct { background: #fff7ed; color: #9a3412; padding: 4px 12px; border-radius: 6px; font-weight: 800; font-size: 12px; border: 1px solid #ffedd5; width: fit-content; margin: 0 auto; }
+        .val-tickets { background: #eff6ff; color: #1d4ed8; padding: 3px 8px; border-radius: 20px; font-weight: 700; font-size: 10px; white-space: nowrap; }
+        .val-money { font-weight: 800; font-size: 14px; color: var(--mimo-red); text-align: right; }
+        .badge-pct { background: #fff7ed; color: #9a3412; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 11px; border: 1px solid #ffedd5; }
 
-        .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 6px; height: 38px; border: none; }
-        .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-top: 25px; }
+        .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 8px; height: 40px; border: none; width: 100%; }
+        .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-top: 20px; }
+
+        /* AJUSTES IPHONE 12 PRO */
+        @media (max-width: 768px) {
+            .table-header-labels { display: none; } /* Ocultar cabeceras planas en móvil */
+            
+            .promo-card {
+                grid-template-columns: 1fr 1fr; /* Dividimos en 2 columnas en lugar de 4 */
+                gap: 12px;
+                padding: 15px;
+            }
+
+            .promo-identity { grid-column: span 2; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
+            .val-money { text-align: left; grid-column: span 1; font-size: 15px; }
+            .val-tickets { justify-self: end; }
+            .badge-pct { justify-self: start; }
+            
+            .header-title { font-size: 0.7rem; }
+            .kpi-val { font-size: 0.9rem; }
+        }
     </style>
 </head>
 <body onload="init()">
@@ -72,10 +99,21 @@
 <div class="main-content">
     <div class="card-pro">
         <div class="row g-2 align-items-end">
-            <div class="col-md-4"><span class="label-sm">Sucursal</span><select id="sucursal" class="form-select shadow-none"></select></div>
-            <div class="col-md-3"><span class="label-sm">Desde</span><input type="date" id="desde" class="form-control shadow-none"></div>
-            <div class="col-md-3"><span class="label-sm">Hasta</span><input type="date" id="hasta" class="form-control shadow-none"></div>
-            <div class="col-md-2"><button class="btn btn-consultar w-100" onclick="consultar()">GENERAR</button></div>
+            <div class="col-12 col-md-4">
+                <span class="label-sm">Sucursal</span>
+                <select id="sucursal" class="form-select shadow-none"></select>
+            </div>
+            <div class="col-6 col-md-3">
+                <span class="label-sm">Desde</span>
+                <input type="date" id="desde" class="form-control shadow-none">
+            </div>
+            <div class="col-6 col-md-3">
+                <span class="label-sm">Hasta</span>
+                <input type="date" id="hasta" class="form-control shadow-none">
+            </div>
+            <div class="col-12 col-md-2">
+                <button class="btn btn-consultar" onclick="consultar()">GENERAR</button>
+            </div>
         </div>
     </div>
 
@@ -85,61 +123,71 @@
         <div class="table-header-labels">
             <span class="label-sm">Concepto / Código</span>
             <span class="label-sm text-center">Tickets</span>
-            <span class="label-sm text-center">Incidencia s/ Bruto</span>
+            <span class="label-sm text-center">Incidencia</span>
             <span class="label-sm text-end">Monto Bonificado</span>
         </div>
 
         <div id="res-body"></div>
 
         <div class="info-note">
-            * Importes en moneda nacional (ARS) con 2 decimales. La incidencia se calcula sobre la venta bruta de la sucursal.
+            * Incidencia calculada sobre la venta bruta.
         </div>
     </div>
 </div>
 
 <script>
-    const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 });
-
     async function init() {
         try {
             const res = await fetch('/api/sucursales');
             const data = await res.json();
             document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-            document.getElementById('desde').value = document.getElementById('hasta').value = new Date().toISOString().split('T')[0];
+            
+            // Sincronización con la hora del servidor
+            const resF = await fetch('/api/util/fecha-hoy');
+            const { hoy } = await resF.json();
+            document.getElementById('desde').value = document.getElementById('hasta').value = hoy;
         } catch (e) { console.error(e); }
     }
 
     async function consultar() {
+        const btn = document.querySelector('.btn-consultar');
         const resBody = document.getElementById('res-body');
+        
+        btn.disabled = true;
+        btn.innerText = "PROCESANDO...";
         resBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>`;
 
         try {
-            const res = await fetch(`/api/reporte/auditoria-descuentos?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
+            const suc = document.getElementById('sucursal').value;
+            const d = document.getElementById('desde').value;
+            const h = document.getElementById('hasta').value;
+
+            const res = await fetch(`/api/reporte/auditoria-descuentos?sucursal=${suc}&desde=${d}&hasta=${h}`);
             const { resumen, detalle } = await res.json();
 
             document.getElementById('cont-resultados').style.display = 'block';
 
             document.getElementById('kpi-container').innerHTML = `
-                <div class="kpi-card-mini" style="border-bottom: 3px solid #e2e8f0"><span class="label-sm">Venta Bruta</span><div class="kpi-val">${resumen.bruto}</div></div>
-                <div class="kpi-card-mini" style="border-bottom: 3px solid #f59e0b"><span class="label-sm">Total Descuentos</span><div class="kpi-val text-warning">${resumen.descuento}</div></div>
-                <div class="kpi-card-mini" style="border-bottom: 3px solid #10b981"><span class="label-sm">Venta Neta</span><div class="kpi-val text-success">${resumen.neto}</div></div>
+                <div class="kpi-card-mini" style="border-bottom: 3px solid #e2e8f0"><span class="label-sm">Bruta</span><div class="kpi-val">${resumen.bruto}</div></div>
+                <div class="kpi-card-mini" style="border-bottom: 3px solid #f59e0b"><span class="label-sm">Bonif.</span><div class="kpi-val text-warning">${resumen.descuento}</div></div>
+                <div class="kpi-card-mini" style="border-bottom: 3px solid #10b981"><span class="label-sm">Neta</span><div class="kpi-val text-success">${resumen.neto}</div></div>
                 <div class="kpi-card-mini" style="border-bottom: 3px solid #dc2626"><span class="label-sm">% Impacto</span><div class="kpi-val text-danger">${resumen.porcentaje}%</div></div>
             `;
 
             resBody.innerHTML = detalle.map(p => `
                 <div class="promo-wrapper">
-                    <div class="promo-card">
+                    <div class="promo-card shadow-sm">
                         <div class="promo-identity">
                             <span class="promo-code">${p.codigo}</span>
                             <span class="promo-name">${p.concepto}</span>
                         </div>
-                        <div class="text-center">
-                            <span class="val-tickets">${p.tickets} tks</span>
-                        </div>
-                        <div class="text-center">
+                        <div class="text-center mobile-order-2">
                             <span class="badge-pct">${p.porcentaje}%</span>
                         </div>
-                        <div class="val-money">
+                        <div class="text-center mobile-order-1">
+                            <span class="val-tickets">${p.tickets} tks</span>
+                        </div>
+                        <div class="val-money mobile-order-3">
                             ${p.monto}
                         </div>
                     </div>
@@ -147,6 +195,10 @@
             `).join('');
 
         } catch (err) { resBody.innerHTML = `<div class="alert alert-danger">${err.message}</div>`; }
+        finally {
+            btn.disabled = false;
+            btn.innerText = "GENERAR";
+        }
     }
 </script>
 </body>

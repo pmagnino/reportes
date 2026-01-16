@@ -2,62 +2,190 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mimo & Co | Ranking de Artículos</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
     <style>
-        body { background-color: #f8f9fa; font-family: 'Calibri', sans-serif; color: #475569; font-size: 14px; }
-        .header-bar { background: #1e293b; color: white; padding: 12px 30px; display: flex; align-items: center; }
-        .header-bar img { height: 35px; margin-right: 20px; }
-        .card-pro { background: white; border-radius: 10px; border: 1px solid #e2e8f0; padding: 25px; margin-bottom: 20px; }
-        .label-sm { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        .info-note { font-size: 12px; color: #94a3b8; font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-bottom: 20px; }
-        .row-total-highlight td { background-color: #64748b !important; color: #ffffff !important; font-weight: 700 !important; border: none !important; padding: 12px 25px !important; }
+        :root { --navy: #1e293b; --slate-500: #64748b; --emerald: #059669; }
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; -webkit-font-smoothing: antialiased; }
+        
+        /* Navbar Responsiva */
+        .header-bar { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; height: 55px; }
+        .header-bar img { height: 26px; background: white; padding: 3px; border-radius: 4px; margin-right: 12px; }
+        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+
+        .main-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 15px; }
+        
+        /* Filtros Adaptables */
+        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
+        .form-select, .form-control { font-size: 13px; border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; }
+        
+        .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 8px; height: 40px; border: none; width: 100%; }
+
+        /* Estilo de Tabla (PC) */
+        .table-responsive-custom { border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; }
+        .table thead th { background: #f8fafc; font-family: 'Outfit', sans-serif; font-size: 10px; text-transform: uppercase; color: var(--slate-500); padding: 12px 20px; }
+        
+        /* Estilo de Cards (Móvil) */
+        .rank-card { 
+            background: white; 
+            border-radius: 10px; 
+            border: 1px solid #e2e8f0; 
+            padding: 15px; 
+            margin-bottom: 10px; 
+            display: none; /* Se activa en media query */
+        }
+        .rank-code { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--navy); font-size: 14px; }
+        .rank-desc { font-size: 11px; color: var(--slate-500); text-transform: uppercase; display: block; margin-bottom: 10px; }
+        .rank-stats { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; pt-10; padding-top: 10px; }
+        
+        .stat-pill { background: #f0f9ff; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 11px; }
+        .stat-money { font-weight: 800; color: var(--emerald); font-size: 14px; }
+
+        .row-total-highlight { background-color: var(--navy); color: white; padding: 15px 20px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; font-weight: 700; margin-top: 15px; }
+
+        @media (max-width: 768px) {
+            .table-pc { display: none; }
+            .rank-card { display: block; }
+            .header-title { font-size: 0.7rem; }
+        }
     </style>
 </head>
 <body onload="init()">
+
 <div class="header-bar shadow-sm">
     <a href="reporte_index.html" style="text-decoration: none; color: white; display: flex; align-items: center;">
-        <img src="Logo.png" alt="Mimo & Co"><span class="ms-2 text-uppercase" style="font-weight: 300; letter-spacing: 1px;">Ranking de Artículos</span>
+        <img src="Logo.png" alt="Mimo & Co">
+        <span class="header-title">Ranking Top Artículos</span>
     </a>
 </div>
-<div class="container-fluid py-4 px-5">
-    <div class="card-pro"><div class="row g-3 align-items-end">
-        <div class="col-md-4"><span class="label-sm">Sucursal</span><select id="sucursal" class="form-select border-0 bg-light shadow-none"></select></div>
-        <div class="col-md-3"><span class="label-sm">Desde</span><input type="date" id="desde" class="form-control border-0 bg-light shadow-none"></div>
-        <div class="col-md-3"><span class="label-sm">Hasta</span><input type="date" id="hasta" class="form-control border-0 bg-light shadow-none"></div>
-        <div class="col-md-2"><button class="btn btn-dark w-100 fw-bold py-2 btn-sm" onclick="consultar()">CONSULTAR</button></div>
-    </div></div>
+
+<div class="main-content">
+    <div class="card-pro">
+        <div class="row g-2 align-items-end">
+            <div class="col-12 col-md-4">
+                <span class="label-sm">Sucursal</span>
+                <select id="sucursal" class="form-select shadow-none"></select>
+            </div>
+            <div class="col-6 col-md-3">
+                <span class="label-sm">Desde</span>
+                <input type="date" id="desde" class="form-control shadow-none">
+            </div>
+            <div class="col-6 col-md-3">
+                <span class="label-sm">Hasta</span>
+                <input type="date" id="hasta" class="form-control shadow-none">
+            </div>
+            <div class="col-12 col-md-2">
+                <button class="btn btn-consultar" onclick="consultar()">CONSULTAR</button>
+            </div>
+        </div>
+    </div>
+
     <div id="cont-resultados" style="display: none;">
-        <div class="info-note">Nota: Muestra el Top 5 físico. Excluye ajustes (DC, ajucen, difprecio, SCAMBIO).</div>
-        <div class="card-pro p-0 overflow-hidden">
+        <div class="info-note mb-3">Top 5 físico. Excluye artículos de ajuste y promocionales internos.</div>
+        
+        <div class="table-responsive-custom table-pc mb-4">
             <table class="table mb-0">
-                <thead class="bg-light"><tr><th class="px-4">Artículo</th><th>Descripción</th><th class="text-center">Unidades</th><th class="text-end px-4">Recaudación Neta</th></tr></thead>
-                <tbody id="res-body"></tbody>
+                <thead>
+                    <tr>
+                        <th class="px-4">Artículo</th>
+                        <th>Descripción</th>
+                        <th class="text-center">Unidades</th>
+                        <th class="text-end px-4">Recaudación</th>
+                    </tr>
+                </thead>
+                <tbody id="res-body-pc"></tbody>
             </table>
+        </div>
+
+        <div id="res-body-mobile"></div>
+
+        <div id="res-total" class="row-total-highlight shadow-sm" style="display: none;">
+            <span>TOTAL TOP 5</span>
+            <div class="text-end">
+                <div id="total-uni" style="font-size: 11px; opacity: 0.8;"></div>
+                <div id="total-rec" style="font-size: 16px;"></div>
+            </div>
         </div>
     </div>
 </div>
+
 <script>
-    const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
+    const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 });
+
     async function init() {
-        const res = await fetch('/api/sucursales');
-        const data = await res.json();
-        document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-        document.getElementById('desde').value = document.getElementById('hasta').value = new Date().toISOString().split('T')[0];
+        try {
+            const res = await fetch('/api/sucursales');
+            const data = await res.json();
+            document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+            
+            const resF = await fetch('/api/util/fecha-hoy');
+            const { hoy } = await resF.json();
+            document.getElementById('desde').value = document.getElementById('hasta').value = hoy;
+        } catch (e) { console.error(e); }
     }
+
     async function consultar() {
+        const btn = document.querySelector('.btn-consultar');
+        const pcBody = document.getElementById('res-body-pc');
+        const mobileBody = document.getElementById('res-body-mobile');
+        
+        btn.disabled = true;
+        btn.innerText = "BUSCANDO...";
+        pcBody.innerHTML = `<tr><td colspan="4" class="text-center p-5"><div class="spinner-border spinner-border-sm"></div></td></tr>`;
+        mobileBody.innerHTML = '';
+
         try {
             const res = await fetch(`/api/reporte/ranking?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
             const result = await res.json();
+            
             document.getElementById('cont-resultados').style.display = 'block';
+            document.getElementById('res-total').style.display = 'flex';
+
             let tU = 0, tR = 0;
-            let html = result.ranking.map(r => {
+            
+            // Generar vista para PC
+            pcBody.innerHTML = result.ranking.map(r => {
                 tU += r.UNIDADES; tR += r.RECAUDACION_NETA;
-                return `<tr><td class="px-4 fw-bold">${r.ARTICULO}</td><td>${r.DESCRIPCION}</td><td class="text-center">${r.UNIDADES}</td><td class="text-end px-4">${fmt.format(r.RECAUDACION_NETA)}</td></tr>`;
+                return `<tr>
+                    <td class="px-4 fw-bold">${r.ARTICULO}</td>
+                    <td>${r.DESCRIPCION}</td>
+                    <td class="text-center">${r.UNIDADES}</td>
+                    <td class="text-end px-4">${fmt.format(r.RECAUDACION_NETA)}</td>
+                </tr>`;
             }).join('');
-            html += `<tr class="row-total-highlight"><td colspan="2" class="px-4">TOTAL TOP 5</td><td class="text-center">${tU}</td><td class="text-end px-4">${fmt.format(tR)}</td></tr>`;
-            document.getElementById('res-body').innerHTML = html;
-        } catch (e) { alert("Error al cargar el ranking."); }
+
+            // Generar vista para Móvil (iPhone 12 Pro)
+            mobileBody.innerHTML = result.ranking.map((r, index) => `
+                <div class="rank-card shadow-sm">
+                    <div class="d-flex justify-content-between">
+                        <span class="rank-code">#${index + 1} ${r.ARTICULO}</span>
+                    </div>
+                    <span class="rank-desc">${r.DESCRIPCION}</span>
+                    <div class="rank-stats">
+                        <span class="stat-pill">${r.UNIDADES} UNIDADES</span>
+                        <span class="stat-money">${fmt.format(r.RECAUDACION_NETA)}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Actualizar Totales
+            document.getElementById('total-uni').innerText = `${tU} Unidades`;
+            document.getElementById('total-rec').innerText = fmt.format(tR);
+
+        } catch (e) { alert("Error al cargar datos."); }
+        finally {
+            btn.disabled = false;
+            btn.innerText = "CONSULTAR";
+        }
     }
 </script>
 </body>

@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mimo & Co | Movimientos de Mercadería</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mimo & Co | Movimientos Logística</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,107 +16,105 @@
         :root { --navy: #1e293b; --slate-500: #64748b; --emerald: #10b981; --amber: #f59e0b; }
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; -webkit-font-smoothing: antialiased; }
         
-        /* Navbar unificada */
-        .header-bar { background: var(--navy); color: white; padding: 0 30px; display: flex; align-items: center; height: 55px; }
-        .header-bar a { text-decoration: none; color: white; display: flex; align-items: center; }
-        .header-bar img { height: 28px; background: white; padding: 3px; border-radius: 4px; margin-right: 15px; }
-        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.85rem; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; }
+        /* Navbar Responsiva */
+        .header-bar { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; height: 55px; }
+        .header-bar img { height: 26px; background: white; padding: 3px; border-radius: 4px; margin-right: 12px; }
+        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
 
-        .main-content { max-width: 950px; margin: 0 auto; padding: 25px 20px; }
+        .main-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 15px; }
         
-        /* Filtros compactos estilo Descuentos */
-        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        /* Filtros Adaptables */
+        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
-        .form-select, .form-control { font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; height: 38px; }
+        .form-select, .form-control { font-size: 13px; border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; }
         
-        /* Cabecera del Movimiento (Tipo Descuento) */
+        /* Movimientos */
         .mov-wrapper { margin-bottom: 10px; }
-        .mov-card { background: white; border-radius: 8px; border: 1px solid #e2e8f0; overflow: hidden; transition: all 0.2s; }
-        .mov-card:hover { border-color: var(--navy); }
+        .mov-card { background: white; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; }
         
         .mov-header { 
             background: #f8fafc; 
-            padding: 10px 20px; 
+            padding: 12px 15px; 
             display: grid; 
-            grid-template-columns: 2fr 1.5fr 1fr; 
+            grid-template-columns: 1.5fr 1fr auto; 
             align-items: center; 
             cursor: pointer;
-            border-bottom: 1px solid #f1f5f9;
+            gap: 10px;
         }
 
-        .mov-id { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--navy); font-size: 13px; }
-        .mov-date { font-size: 11px; color: var(--slate-500); font-weight: 400; margin-left: 10px; }
+        .mov-id { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--navy); font-size: 12px; display: block; }
+        .mov-date { font-size: 10px; color: var(--slate-500); font-weight: 400; }
         
-        .concepto-tag { font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 4px; text-transform: uppercase; width: fit-content; margin: 0 auto; }
-        .tag-ie { background: #ecfdf5; color: #065f46; border: 1px solid #d1fae5; } /* Ingreso */
-        .tag-ee { background: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; } /* Egreso */
+        .concepto-tag { font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; white-space: nowrap; text-align: center; }
+        .tag-ie { background: #ecfdf5; color: #065f46; border: 1px solid #d1fae5; }
+        .tag-ee { background: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; }
         
-        .mov-total { font-weight: 800; font-size: 13px; text-align: right; color: var(--navy); }
+        .mov-total { font-weight: 800; font-size: 14px; text-align: right; color: var(--navy); min-width: 60px; }
 
-        /* Detalle colapsable de artículos */
-        .items-container { display: none; background: #ffffff; padding: 10px 0; }
+        /* Detalle colapsable */
+        .items-container { display: none; background: #ffffff; padding-bottom: 5px; }
         .item-row { 
             display: grid; 
-            grid-template-columns: 3fr 1fr; 
-            padding: 6px 40px; 
+            grid-template-columns: 1fr auto; 
+            padding: 8px 15px; 
             border-bottom: 1px solid #f8fafc; 
             font-size: 12px;
         }
-        .item-row:last-child { border-bottom: none; }
-        .item-code { color: var(--slate-500); font-family: 'Inter', sans-serif; }
+        .item-code { color: var(--slate-500); font-weight: 500; }
         .item-qty { font-weight: 700; text-align: right; color: var(--navy); }
 
-        .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 6px; height: 38px; border: none; }
-        .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-top: 25px; }
+        .btn-consultar { background: var(--navy); color: white; border-radius: 8px; height: 40px; border: none; width: 100%; display: flex; align-items: center; justify-content: center; }
+        .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-bottom: 15px; }
+
+        /* AJUSTES IPHONE 12 PRO */
+        @media (max-width: 576px) {
+            .header-title { font-size: 0.7rem; }
+            .mov-header { grid-template-columns: 1fr auto; } /* Reorganizamos a 2 columnas principales */
+            .mov-header div:nth-child(2) { grid-row: 2; grid-column: 1 / span 2; margin-top: 5px; } /* Concepto abajo */
+            .mov-total { grid-row: 1; grid-column: 2; }
+            .item-row { padding: 10px 15px; font-size: 11px; }
+        }
     </style>
 </head>
 <body onload="init()">
 
 <div class="header-bar shadow-sm">
-    <a href="reporte_index.html">
+    <a href="reporte_index.html" style="text-decoration: none; color: white; display: flex; align-items: center;">
         <img src="Logo.png" alt="Mimo">
-        <span class="header-title">Movimientos de Mercadería (Logística)</span>
+        <span class="header-title">Logística y Movimientos</span>
     </a>
 </div>
 
 <div class="main-content">
     <div class="card-pro">
         <div class="row g-2 align-items-end">
-            <div class="col-md-3">
+            <div class="col-12 col-md-3">
                 <span class="label-sm">Sucursal</span>
                 <select id="sucursal" class="form-select shadow-none"></select>
             </div>
-            <div class="col-md-2">
-                <span class="label-sm">Tipo</span>
+            <div class="col-6 col-md-2">
+                <span class="label-sm">Operación</span>
                 <select id="tipoMov" class="form-select shadow-none">
                     <option value="ALL">TODOS</option>
-                    <option value="IE">INGRESOS (IE)</option>
-                    <option value="EE">EGRESOS (EE)</option>
+                    <option value="IE">INGRESOS</option>
+                    <option value="EE">EGRESOS</option>
                 </select>
             </div>
-            <div class="col-md-2"><span class="label-sm">Desde</span><input type="date" id="desde" class="form-control shadow-none"></div>
-            <div class="col-md-2"><span class="label-sm">Hasta</span><input type="date" id="hasta" class="form-control shadow-none"></div>
-            <div class="col-md-2">
+            <div class="col-6 col-md-2"><span class="label-sm">Desde</span><input type="date" id="desde" class="form-control shadow-none"></div>
+            <div class="col-6 col-md-2"><span class="label-sm">Hasta</span><input type="date" id="hasta" class="form-control shadow-none"></div>
+            <div class="col-6 col-md-2">
                 <span class="label-sm">Artículo</span>
                 <input type="text" id="articulo" class="form-control shadow-none" placeholder="Código...">
             </div>
-            <div class="col-md-1">
-                <button class="btn btn-consultar w-100" onclick="consultar()"><i class="bi bi-search"></i></button>
+            <div class="col-12 col-md-1">
+                <button class="btn btn-consultar" onclick="consultar()"><i class="bi bi-search"></i></button>
             </div>
         </div>
     </div>
 
     <div id="cont-resultados" style="display: none;">
-        <div class="info-note">
-            * Haz clic sobre la cabecera de cualquier movimiento para desplegar el detalle de artículos.
-        </div>
+        <div class="info-note">Toca un movimiento para ver el detalle de prendas.</div>
         
-        <div style="display: grid; grid-template-columns: 2fr 1.5fr 1fr; padding: 0 20px 8px 20px;">
-            <span class="label-sm">Comprobante / Fecha</span>
-            <span class="label-sm text-center">Concepto</span>
-            <span class="label-sm text-end">Total Unidades</span>
-        </div>
-
         <div id="res-body"></div>
     </div>
 </div>
@@ -126,18 +125,27 @@
             const res = await fetch('/api/sucursales');
             const data = await res.json();
             document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-            document.getElementById('desde').value = document.getElementById('hasta').value = new Date().toISOString().split('T')[0];
+            
+            const resF = await fetch('/api/util/fecha-hoy');
+            const { hoy } = await resF.json();
+            document.getElementById('desde').value = document.getElementById('hasta').value = hoy;
         } catch (e) { console.error(e); }
     }
 
     function toggleItems(id) {
         const el = document.getElementById(id);
-        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        const isVisible = el.style.display === 'block';
+        // Cerrar todos antes de abrir el seleccionado (acordeón)
+        document.querySelectorAll('.items-container').forEach(c => c.style.display = 'none');
+        el.style.display = isVisible ? 'none' : 'block';
     }
 
     async function consultar() {
+        const btn = document.querySelector('.btn-consultar');
         const resBody = document.getElementById('res-body');
         const tipo = document.getElementById('tipoMov').value;
+        
+        btn.disabled = true;
         resBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>`;
 
         try {
@@ -145,15 +153,12 @@
             const res = await fetch(url);
             let data = await res.json();
 
-            // Aplicamos filtro de tipo IE/EE en el frontend si no es ALL
-            if (tipo !== 'ALL') {
-                data = data.filter(m => m.tipo === tipo);
-            }
+            if (tipo !== 'ALL') data = data.filter(m => m.tipo === tipo);
 
             document.getElementById('cont-resultados').style.display = 'block';
 
             if (data.length === 0) {
-                resBody.innerHTML = '<div class="card-pro text-center text-muted">No se encontraron movimientos para los filtros aplicados.</div>';
+                resBody.innerHTML = '<div class="alert alert-light text-center border">Sin movimientos para los filtros seleccionados.</div>';
                 return;
             }
 
@@ -164,23 +169,23 @@
 
                 return `
                 <div class="mov-wrapper">
-                    <div class="mov-card">
+                    <div class="mov-card shadow-sm">
                         <div class="mov-header" onclick="toggleItems('${collapseId}')">
                             <div>
                                 <span class="mov-id">${m.tipo} ${m.prefijo}-${m.numero}</span>
                                 <span class="mov-date">${m.fecha}</span>
                             </div>
-                            <div class="text-center">
+                            <div>
                                 <span class="concepto-tag ${tagClass}">${m.concepto}</span>
                             </div>
                             <div class="mov-total">
-                                ${totalCant} <small class="fw-normal text-muted">u.</small>
-                                <i class="bi bi-chevron-down ms-2 small opacity-50"></i>
+                                ${totalCant} <small style="font-size:10px; font-weight:400">uds</small>
+                                <i class="bi bi-chevron-expand ms-1 opacity-50"></i>
                             </div>
                         </div>
                         <div class="items-container" id="${collapseId}">
-                            <div class="item-row" style="background: #fafafa; border-bottom: 1px solid #eee;">
-                                <span class="label-sm">Artículo</span>
+                            <div class="item-row" style="background: #fdfdfd; border-bottom: 2px solid #f1f5f9;">
+                                <span class="label-sm">Cod. Artículo</span>
                                 <span class="label-sm text-end">Cant.</span>
                             </div>
                             ${m.items.map(it => `
@@ -191,11 +196,12 @@
                             `).join('')}
                         </div>
                     </div>
-                </div>
-                `;
+                </div>`;
             }).join('');
         } catch (e) {
-            resBody.innerHTML = `<div class="alert alert-danger">Error al cargar datos.</div>`;
+            resBody.innerHTML = `<div class="alert alert-danger">Error de red.</div>`;
+        } finally {
+            btn.disabled = false;
         }
     }
 </script>

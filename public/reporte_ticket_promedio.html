@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mimo & Co | Ticket Promedio</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,32 +16,53 @@
         :root { --navy: #1e293b; --slate-500: #64748b; --mimo-blue: #3b82f6; }
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; -webkit-font-smoothing: antialiased; }
         
-        .header-bar { background: var(--navy); color: white; padding: 0 30px; display: flex; align-items: center; height: 55px; }
-        .header-bar a { text-decoration: none; color: white; display: flex; align-items: center; }
-        .header-bar img { height: 28px; background: white; padding: 3px; border-radius: 4px; margin-right: 15px; }
-        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.85rem; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; }
+        /* Navbar Responsiva */
+        .header-bar { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; height: 55px; }
+        .header-bar img { height: 26px; background: white; padding: 3px; border-radius: 4px; margin-right: 12px; }
+        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
 
-        .main-content { max-width: 950px; margin: 0 auto; padding: 30px 20px; }
-        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .main-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 15px; }
         
+        /* Filtros Adaptables */
+        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
-        .form-select, .form-control { font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; }
+        .form-select, .form-control { font-size: 13px; border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; }
         
-        .kpi-row-compact { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 25px; }
+        /* KPIs Responsivos */
+        .kpi-row-compact { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 10px; 
+            margin-bottom: 20px; 
+        }
         .kpi-card-mini { background: white; padding: 12px 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
-        .kpi-val { font-size: 1.1rem; color: #1e293b; font-weight: 800; font-variant-numeric: tabular-nums; }
+        .kpi-val { font-size: 1rem; color: #1e293b; font-weight: 800; font-variant-numeric: tabular-nums; }
         
+        /* Tarjetas por Fecha */
         .date-wrapper { margin-bottom: 12px; }
-        .date-card { background: white; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); border-left: 4px solid var(--navy); }
-        .date-header { background: #f8fafc; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; }
-        .date-title { font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--navy); text-transform: uppercase; font-size: 13px; }
+        .date-card { background: white; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; border-left: 4px solid var(--navy); }
+        .date-header { background: #f8fafc; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; }
+        .date-title { font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--navy); text-transform: uppercase; font-size: 12px; }
         
-        /* Grid de 2 columnas para que sea bien legible */
-        .item-grid { padding: 20px 40px; display: grid; grid-template-columns: 1fr 1fr; text-align: center; font-variant-numeric: tabular-nums; }
+        /* Grid de Datos Fluida */
+        .item-grid { padding: 15px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: center; }
+        .badge-tickets { background: #eff6ff; color: #1d4ed8; padding: 3px 10px; border-radius: 20px; font-weight: 700; font-size: 10px; border: 1px solid #dbeafe; }
         
-        .badge-tickets { background: #eff6ff; color: #1d4ed8; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 11px; border: 1px solid #dbeafe; }
-        .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 6px; height: 38px; border: none; }
+        .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 8px; height: 40px; border: none; width: 100%; }
         .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-top: 20px; }
+
+        /* AJUSTES PARA IPHONE 12 PRO */
+        @media (max-width: 576px) {
+            .header-title { font-size: 0.7rem; }
+            .item-grid { 
+                grid-template-columns: 1fr; /* Una sola columna en móvil */
+                padding: 15px; 
+                gap: 10px;
+            }
+            .item-grid > div:first-child { border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
+            .date-header { padding: 10px; }
+            .kpi-val { font-size: 0.9rem; }
+        }
     </style>
 </head>
 <body onload="init()">
@@ -55,11 +77,20 @@
 <div class="main-content">
     <div class="card-pro">
         <div class="row g-2 align-items-end">
-            <div class="col-md-4"><span class="label-sm">Sucursal</span><select id="sucursal" class="form-select shadow-none"></select></div>
-            <div class="col-md-3"><span class="label-sm">Desde</span><input type="date" id="desde" class="form-control shadow-none"></div>
-            <div class="col-md-3"><span class="label-sm">Hasta</span><input type="date" id="hasta" class="form-control shadow-none"></div>
-            <div class="col-md-2">
-                <button class="btn btn-consultar w-100" onclick="consultar()">EJECUTAR</button>
+            <div class="col-12 col-md-4">
+                <span class="label-sm">Sucursal</span>
+                <select id="sucursal" class="form-select shadow-none"></select>
+            </div>
+            <div class="col-6 col-md-3">
+                <span class="label-sm">Desde</span>
+                <input type="date" id="desde" class="form-control shadow-none">
+            </div>
+            <div class="col-6 col-md-3">
+                <span class="label-sm">Hasta</span>
+                <input type="date" id="hasta" class="form-control shadow-none">
+            </div>
+            <div class="col-12 col-md-2">
+                <button class="btn btn-consultar" onclick="consultar()">EJECUTAR</button>
             </div>
         </div>
     </div>
@@ -68,7 +99,7 @@
         <div class="kpi-row-compact" id="kpi-container"></div>
         <div id="res-body"></div>
         <div class="info-note">
-            <b>Nota Auditoría:</b> El cálculo se realiza sobre venta final neta de devoluciones dividida por tickets emitidos.
+            * Cálculo: Venta final neta / tickets emitidos.
         </div>
     </div>
 </div>
@@ -81,16 +112,27 @@
             const res = await fetch('/api/sucursales');
             const data = await res.json();
             document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-            document.getElementById('desde').value = document.getElementById('hasta').value = new Date().toISOString().split('T')[0];
+            
+            // Sincronización con fecha de servidor
+            const resF = await fetch('/api/util/fecha-hoy');
+            const { hoy } = await resF.json();
+            document.getElementById('desde').value = document.getElementById('hasta').value = hoy;
         } catch (e) { console.error(e); }
     }
 
     async function consultar() {
+        const btn = document.querySelector('.btn-consultar');
         const resBody = document.getElementById('res-body');
+        btn.disabled = true;
+        btn.innerText = "CALCULANDO...";
         resBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>`;
 
         try {
-            const res = await fetch(`/api/reporte/ticket-promedio?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}`);
+            const suc = document.getElementById('sucursal').value;
+            const d = document.getElementById('desde').value;
+            const h = document.getElementById('hasta').value;
+
+            const res = await fetch(`/api/reporte/ticket-promedio?sucursal=${suc}&desde=${d}&hasta=${h}`);
             const result = await res.json();
 
             document.getElementById('cont-resultados').style.display = 'block';
@@ -98,52 +140,54 @@
             // KPIs Superiores
             document.getElementById('kpi-container').innerHTML = `
                 <div class="kpi-card-mini" style="background: var(--navy); color: white;">
-                    <span class="label-sm text-white opacity-75">Promedio Período</span>
+                    <span class="label-sm text-white opacity-75">Promedio</span>
                     <div class="kpi-val text-white">${fmt.format(result.resumen.promedio || 0)}</div>
                 </div>
                 <div class="kpi-card-mini">
-                    <span class="label-sm">Venta Neta Total</span>
+                    <span class="label-sm text-success">Venta Neta</span>
                     <div class="kpi-val text-success">${fmt.format(result.resumen.venta || 0)}</div>
                 </div>
                 <div class="kpi-card-mini">
-                    <span class="label-sm">Tickets Totales</span>
+                    <span class="label-sm">Total Tickets</span>
                     <div class="kpi-val">${result.resumen.tickets || 0}</div>
                 </div>
                 <div class="kpi-card-mini">
-                    <span class="label-sm">Días Operados</span>
+                    <span class="label-sm">Días</span>
                     <div class="kpi-val text-primary">${result.datos.length}</div>
                 </div>
             `;
 
-            // Render Tarjetas Diarias - Corregido cálculo de promedio
             resBody.innerHTML = result.datos.map(r => {
-                // Forzamos el cálculo por si el servidor manda 0
                 const venta = parseFloat(r.VENTA_NETA) || 0;
                 const tickets = parseInt(r.TICKETS) || 0;
                 const promedio = tickets > 0 ? (venta / tickets) : 0;
 
                 return `
                 <div class="date-wrapper">
-                    <div class="date-card">
+                    <div class="date-card shadow-sm">
                         <div class="date-header">
-                            <span class="date-title">Fecha: ${r.FECHA}</span>
+                            <span class="date-title">${r.FECHA}</span>
                             <span class="badge-tickets">${tickets} tickets</span>
                         </div>
                         <div class="item-grid bg-white">
                             <div>
-                                <span class="label-sm">Venta del Día</span>
-                                <span class="fw-bold" style="font-size:16px">${fmt.format(venta)}</span>
+                                <span class="label-sm">Recaudado</span>
+                                <span class="fw-bold" style="font-size:15px">${fmt.format(venta)}</span>
                             </div>
                             <div>
-                                <span class="label-sm">Promedio por Ticket</span>
-                                <span class="fw-800 text-primary" style="font-size:18px">${fmt.format(promedio)}</span>
+                                <span class="label-sm text-primary">Promedio Ticket</span>
+                                <span class="fw-800 text-primary" style="font-size:17px">${fmt.format(promedio)}</span>
                             </div>
                         </div>
                     </div>
-                </div>
-            `}).join('');
+                </div>`;
+            }).join('');
 
         } catch (err) { resBody.innerHTML = `<div class="alert alert-danger">${err.message}</div>`; }
+        finally {
+            btn.disabled = false;
+            btn.innerText = "EJECUTAR";
+        }
     }
 </script>
 </body>
