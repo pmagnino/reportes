@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mimo & Co | Auditoría de Ventas</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,41 +16,73 @@
         :root { --navy: #1e293b; --slate-500: #64748b; }
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; -webkit-font-smoothing: antialiased; }
         
-        /* Navbar */
-        .header-bar { background: var(--navy); color: white; padding: 0 30px; display: flex; align-items: center; height: 55px; }
-        .header-bar img { height: 28px; background: white; padding: 3px; border-radius: 4px; margin-right: 15px; }
-        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.85rem; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; }
+        /* Navbar Responsiva */
+        .header-bar { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; height: 55px; }
+        .header-bar img { height: 26px; background: white; padding: 3px; border-radius: 4px; margin-right: 12px; }
+        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
 
-        /* Filtros y Contenedor Principal */
-        .main-content { max-width: 950px; margin: 0 auto; padding: 30px 20px; }
-        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        /* Contenedor Principal Adaptable */
+        .main-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 15px; }
+        
+        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         
         .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
-        .form-select, .form-control { font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; }
+        .form-select, .form-control { font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1; height: 38px; }
         
-        /* KPIs Compactos (5 labels) */
-        .kpi-row-compact { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 25px; }
-        .kpi-card-mini { background: white; padding: 12px 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .kpi-val { font-size: 1rem; color: #1e293b; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        /* KPIs Responsivos: Saltan de fila automáticamente */
+        .kpi-row-compact { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 10px; 
+            margin-bottom: 20px; 
+        }
+        .kpi-card-mini { background: white; padding: 12px 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
+        .kpi-val { font-size: 1rem; color: #1e293b; font-weight: 800; font-variant-numeric: tabular-nums; }
         
-        /* VISTA DE COMPROBANTE OPTIMIZADA */
-        .ticket-wrapper { margin-bottom: 15px; }
-        .ticket-card { background: white; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .ticket-header { background: #f8fafc; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; }
-        .font-outfit { font-family: 'Outfit', sans-serif; }
+        /* TICKETS Responsivos */
+        .ticket-wrapper { margin-bottom: 15px; width: 100%; }
+        .ticket-card { background: white; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; }
         
-        .item-grid { padding: 8px 20px; display: grid; grid-template-columns: 1.5fr 60px 100px; align-items: center; font-size: 12px; border-bottom: 1px solid #f8fafc; font-variant-numeric: tabular-nums; }
-        .obs-text { font-size: 10.5px; color: #f59e0b; font-style: italic; display: block; }
+        .ticket-header { 
+            background: #f8fafc; 
+            padding: 10px 15px; 
+            display: flex; 
+            flex-wrap: wrap; /* Permite que el precio baje en pantallas muy chicas */
+            justify-content: space-between; 
+            align-items: center; 
+            gap: 10px;
+            border-bottom: 1px solid #f1f5f9; 
+        }
         
-        /* Colores Estado */
+        /* Grilla de Items Fluida */
+        .item-grid { 
+            padding: 8px 15px; 
+            display: grid; 
+            grid-template-columns: 1fr 40px 90px; 
+            align-items: center; 
+            font-size: 11px; 
+            border-bottom: 1px solid #f8fafc; 
+        }
+        
+        .obs-text { font-size: 10px; color: #f59e0b; font-style: italic; display: block; line-height: 1.2; }
+        
+        /* Colores y Badges */
         .bg-efectivo { background-color: #10b981 !important; }
         .bg-tarjeta { background-color: #3b82f6 !important; }
         .bg-mp { background-color: #f59e0b !important; }
-        .badge-payment { font-weight: 700; font-size: 9px; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; color: white; }
+        .badge-payment { font-weight: 700; font-size: 9px; text-transform: uppercase; padding: 3px 7px; border-radius: 4px; color: white; white-space: nowrap; }
 
-        .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 6px; height: 38px; border: none; }
+        .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 6px; height: 38px; border: none; transition: 0.2s; }
         .btn-consultar:hover { background: #000; }
-        .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-bottom: 20px; }
+
+        /* Ajustes para Móviles */
+        @media (max-width: 576px) {
+            .header-title { font-size: 0.7rem; }
+            .ticket-header { flex-direction: column; align-items: flex-start; }
+            .ticket-header div:last-child { width: 100%; justify-content: space-between; display: flex; align-items: center; }
+            .item-grid { grid-template-columns: 1fr 30px 80px; padding: 8px 10px; }
+            .kpi-val { font-size: 0.9rem; }
+        }
     </style>
 </head>
 <body onload="init()">
@@ -57,28 +90,37 @@
 <div class="header-bar shadow-sm">
     <a href="reporte_index.html" style="text-decoration: none; color: white; display: flex; align-items: center;">
         <img src="Logo.png" alt="Mimo & Co">
-        <span class="header-title">Auditoría de Ventas Detallada</span>
+        <span class="header-title">Auditoría de Ventas</span>
     </a>
 </div>
 
 <div class="main-content">
     <div class="card-pro">
-        <div class="row g-2 align-items-end">
-            <div class="col-md-3"><span class="label-sm">Sucursal</span><select id="sucursal" class="form-select shadow-none"></select></div>
-            <div class="col-md-2"><span class="label-sm">Desde</span><input type="date" id="desde" class="form-control shadow-none"></div>
-            <div class="col-md-2"><span class="label-sm">Hasta</span><input type="date" id="hasta" class="form-control shadow-none"></div>
-            <div class="col-md-3"><span class="label-sm">Artículo</span><input type="text" id="articulo" class="form-control shadow-none" placeholder="Buscar..."></div>
-            <div class="col-md-2">
+        <div class="row g-3 align-items-end">
+            <div class="col-6 col-md-3">
+                <span class="label-sm">Sucursal</span>
+                <select id="sucursal" class="form-select shadow-none"></select>
+            </div>
+            <div class="col-6 col-md-2">
+                <span class="label-sm">Desde</span>
+                <input type="date" id="desde" class="form-control shadow-none">
+            </div>
+            <div class="col-6 col-md-2">
+                <span class="label-sm">Hasta</span>
+                <input type="date" id="hasta" class="form-control shadow-none">
+            </div>
+            <div class="col-6 col-md-3">
+                <span class="label-sm">Artículo</span>
+                <input type="text" id="articulo" class="form-control shadow-none" placeholder="Buscar...">
+            </div>
+            <div class="col-12 col-md-2">
                 <button class="btn btn-consultar w-100" onclick="consultar()">CONSULTAR</button>
             </div>
         </div>
     </div>
 
     <div id="cont-resultados" style="display: none;">
-        <div class="info-note">Análisis consolidado de recaudación por medio de pago.</div>
-        
         <div class="kpi-row-compact" id="kpi-container"></div>
-        
         <div id="res-body"></div>
     </div>
 </div>
@@ -107,10 +149,10 @@
         datosMemoria = result.datos || [];
         document.getElementById('cont-resultados').style.display = 'block';
 
-        // KPIs actualizados con Mercado Pago
+        // KPIs actualizados con diseño responsivo
         document.getElementById('kpi-container').innerHTML = `
             <div class="kpi-card-mini" style="background: var(--navy); color: white;">
-                <span class="label-sm text-white opacity-75">Total Neto</span>
+                <span class="label-sm text-white opacity-75">Neto</span>
                 <div class="kpi-val text-white">${fmt.format(result.totales.general || 0)}</div>
             </div>
             <div class="kpi-card-mini" style="border-bottom: 3px solid #10b981">
@@ -122,7 +164,7 @@
                 <div class="kpi-val" style="color: #3b82f6">${fmt.format(result.totales.tarjeta || 0)}</div>
             </div>
             <div class="kpi-card-mini" style="border-bottom: 3px solid #f59e0b">
-                <span class="label-sm">Mercado Pago</span>
+                <span class="label-sm">M. Pago</span>
                 <div class="kpi-val" style="color: #f59e0b">${fmt.format(result.totales.mp || 0)}</div>
             </div>
             <div class="kpi-card-mini">
@@ -138,12 +180,12 @@
                 <div class="ticket-card">
                     <div class="ticket-header">
                         <div>
-                            <span class="fw-bold font-outfit text-uppercase" style="font-size: 11.5px; letter-spacing:0.5px;">${f.tipo} ${f.prefijo}-${f.numero}</span>
-                            <span class="text-muted ms-2" style="font-size: 10.5px;">${f.fecha}</span>
+                            <span class="fw-bold font-outfit text-uppercase" style="font-size: 11px;">${f.tipo} ${f.prefijo}-${f.numero}</span>
+                            <span class="text-muted ms-1" style="font-size: 10px;">${f.fecha}</span>
                         </div>
-                        <div class="d-flex align-items-center">
-                            <span class="badge-payment ${cls} me-3">${f.pago}</span>
-                            <span class="fw-800 color-navy" style="font-size: 13.5px;">${fmt.format(f.totalTicket)}</span>
+                        <div>
+                            <span class="badge-payment ${cls} me-2">${f.pago}</span>
+                            <span class="fw-800" style="color: var(--navy); font-size: 13px;">${fmt.format(f.totalTicket)}</span>
                         </div>
                     </div>
                     <div class="py-1 bg-white">
