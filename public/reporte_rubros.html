@@ -1,195 +1,269 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mimo & Co | Unidades por Rubro</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    <style>
-        :root { --navy: #1e293b; --slate-500: #64748b; --soft-emerald: #059669; }
-        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; -webkit-font-smoothing: antialiased; }
-        
-        /* Navbar Responsiva */
-        .header-bar { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; height: 55px; }
-        .header-bar img { height: 26px; background: white; padding: 3px; border-radius: 4px; margin-right: 12px; }
-        .header-title { font-family: 'Outfit', sans-serif; font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mimo & Co | Unidades por Rubro</title>
 
-        .main-content { width: 100%; max-width: 900px; margin: 0 auto; padding: 15px; }
-        
-        /* Filtros Adaptables */
-        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
-        .form-select, .form-control { font-size: 13px; border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; }
-        
-        /* Tarjetas de Rubro */
-        .rubro-wrapper { margin-bottom: 10px; }
-        .rubro-card { 
-            background: white; 
-            border-radius: 10px; 
-            border: 1px solid #e2e8f0; 
-            overflow: hidden; 
-            border-left: 4px solid var(--navy);
-            transition: transform 0.1s;
-        }
-        
-        .rubro-header { 
-            padding: 12px 15px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            gap: 10px;
-        }
-        
-        .rubro-name { 
-            font-family: 'Outfit', sans-serif; 
-            font-weight: 700; 
-            color: var(--navy); 
-            text-transform: uppercase; 
-            font-size: 12px; 
-            letter-spacing: 0.3px;
-            flex-grow: 1;
-        }
-        
-        .unidades-badge { 
-            background: #ecfdf5; 
-            color: var(--soft-emerald); 
-            padding: 4px 12px; 
-            border-radius: 6px; 
-            font-weight: 800; 
-            font-size: 14px; 
-            border: 1px solid #d1fae5;
-            min-width: 60px;
-            text-align: center;
-        }
-        
-        .btn-consultar { 
-            background: var(--navy); 
-            color: white; 
-            font-size: 11px; 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            border-radius: 8px; 
-            height: 40px; 
-            border: none; 
-            width: 100%;
-        }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
 
-        .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 12px; margin-top: 20px; }
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-        /* AJUSTES IPHONE 12 PRO */
-        @media (max-width: 576px) {
-            .header-title { font-size: 0.7rem; }
-            .rubro-header { padding: 15px 12px; }
-            .rubro-name { font-size: 11px; }
-            .unidades-badge { font-size: 13px; padding: 4px 8px; }
-            .label-sm.d-mobile-none { display: none; } /* Ocultamos etiquetas redundantes en móvil */
-        }
-    </style>
+  <!-- AUTH (debe exponer: protectPage(), getUser(), authFetch(), logout()) -->
+  <script src="auth.js"></script>
+
+  <style>
+    :root { --navy: #1e293b; --slate-500: #64748b; --soft-emerald: #059669; }
+    body { background-color: #f8fafc; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; -webkit-font-smoothing: antialiased; }
+
+    .header-bar { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; height: 55px; }
+    .header-bar img { height: 26px; background: white; padding: 3px; border-radius: 4px; margin-right: 12px; }
+    .header-title { font-family: 'Outfit', sans-serif; font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+
+    .main-content { width: 100%; max-width: 900px; margin: 0 auto; padding: 15px; }
+
+    .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
+    .form-select, .form-control { font-size: 13px; border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; }
+
+    .rubro-wrapper { margin-bottom: 10px; }
+    .rubro-card {
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+      border-left: 4px solid var(--navy);
+      transition: transform 0.1s;
+    }
+
+    .rubro-header {
+      padding: 12px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .rubro-name {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      color: var(--navy);
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.3px;
+      flex-grow: 1;
+    }
+
+    .unidades-badge {
+      background: #ecfdf5;
+      color: var(--soft-emerald);
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 14px;
+      border: 1px solid #d1fae5;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .btn-consultar {
+      background: var(--navy);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      border-radius: 8px;
+      height: 40px;
+      border: none;
+      width: 100%;
+    }
+
+    .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 12px; margin-top: 20px; }
+
+    /* Bloque "mi sucursal" (cuando no es admin) */
+    #miSucursalBox { display:none; }
+    #miSucursalBox .pill {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    @media (max-width: 576px) {
+      .header-title { font-size: 0.7rem; }
+      .rubro-header { padding: 15px 12px; }
+      .rubro-name { font-size: 11px; }
+      .unidades-badge { font-size: 13px; padding: 4px 8px; }
+      .label-sm.d-mobile-none { display: none; }
+    }
+  </style>
 </head>
+
 <body onload="init()">
 
 <div class="header-bar shadow-sm">
-    <a href="reporte_index.html" style="text-decoration: none; color: white; display: flex; align-items: center;">
-        <img src="Logo.png" alt="Mimo">
-        <span class="header-title">Ranking Unidades por Rubro</span>
-    </a>
+  <a href="reporte_index.html" style="text-decoration: none; color: white; display: flex; align-items: center;">
+    <img src="Logo.png" alt="Mimo">
+    <span class="header-title">Ranking Unidades por Rubro</span>
+  </a>
+
+  <div class="ms-auto">
+    <button class="btn btn-sm btn-outline-light" onclick="logout()">Salir</button>
+  </div>
 </div>
 
 <div class="main-content">
-    <div class="card-pro">
-        <div class="row g-2 align-items-end">
-            <div class="col-12 col-md-4">
-                <span class="label-sm">Sucursal</span>
-                <select id="sucursal" class="form-select shadow-none"></select>
-            </div>
-            <div class="col-6 col-md-3">
-                <span class="label-sm">Desde</span>
-                <input type="date" id="desde" class="form-control shadow-none">
-            </div>
-            <div class="col-6 col-md-3">
-                <span class="label-sm">Hasta</span>
-                <input type="date" id="hasta" class="form-control shadow-none">
-            </div>
-            <div class="col-12 col-md-2">
-                <button class="btn btn-consultar" onclick="consultar()">EJECUTAR</button>
-            </div>
-        </div>
-    </div>
+  <div class="card-pro">
+    <div class="row g-2 align-items-end">
 
-    <div id="cont-resultados" style="display: none;">
-        <div id="res-body"></div>
+      <!-- Admin ve selector -->
+      <div class="col-12 col-md-4" id="sucursalSelectBox">
+        <span class="label-sm">Sucursal</span>
+        <select id="sucursal" class="form-select shadow-none"></select>
+      </div>
 
-        <div class="info-note">
-            <strong>Auditoría:</strong><br>
-            • Conteo refleja flujo neto (Ventas - Devoluciones).
-        </div>
+      <!-- Usuario ve "Mi sucursal" -->
+      <div class="col-12 col-md-4" id="miSucursalBox">
+        <span class="label-sm">Sucursal</span>
+        <div class="pill" id="miSucursalNombre">Mi sucursal</div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <span class="label-sm">Desde</span>
+        <input type="date" id="desde" class="form-control shadow-none">
+      </div>
+
+      <div class="col-6 col-md-3">
+        <span class="label-sm">Hasta</span>
+        <input type="date" id="hasta" class="form-control shadow-none">
+      </div>
+
+      <div class="col-12 col-md-2">
+        <button class="btn btn-consultar" onclick="consultar()">EJECUTAR</button>
+      </div>
     </div>
+  </div>
+
+  <div id="cont-resultados" style="display: none;">
+    <div id="res-body"></div>
+
+    <div class="info-note">
+      <strong>Auditoria:</strong><br>
+      • Conteo refleja flujo neto (Ventas - Devoluciones).
+    </div>
+  </div>
 </div>
 
 <script>
-    async function init() {
-        try {
-            const res = await fetch('/api/sucursales');
-            const sucs = await res.json();
-            document.getElementById('sucursal').innerHTML = sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-            
-            // Usamos la fecha del servidor para evitar desfases
-            const resF = await fetch('/api/util/fecha-hoy');
-            const { hoy } = await resF.json();
-            document.getElementById('desde').value = document.getElementById('hasta').value = hoy;
-        } catch (e) { console.error(e); }
+  async function init() {
+    // protege la pagina (si no hay token, redirige a login)
+    if (!protectPage()) return;
+
+    const user = getUser();
+
+    try {
+      // /api/sucursales tiene que devolver:
+      // - admin: todas
+      // - usuario: solo su sucursal (1 registro)
+      const res = await authFetch('/api/sucursales');
+      const sucs = await res.json();
+
+      if (user.rol === 'admin') {
+        document.getElementById('sucursalSelectBox').style.display = 'block';
+        document.getElementById('miSucursalBox').style.display = 'none';
+
+        document.getElementById('sucursal').innerHTML =
+          sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+      } else {
+        document.getElementById('sucursalSelectBox').style.display = 'none';
+        document.getElementById('miSucursalBox').style.display = 'block';
+
+        const s = Array.isArray(sucs) && sucs.length > 0 ? sucs[0] : null;
+        document.getElementById('miSucursalNombre').innerText =
+          s ? `${s.NOMBRE} (Suc. ${s.CODSUC})` : `Sucursal ${user.sucursal}`;
+      }
+
+      // Fecha hoy (endpoint protegido)
+      const resF = await authFetch('/api/util/fecha-hoy');
+      const jsonF = await resF.json();
+      const hoy = jsonF && jsonF.hoy ? jsonF.hoy : '';
+
+      if (hoy) {
+        document.getElementById('desde').value = hoy;
+        document.getElementById('hasta').value = hoy;
+      }
+    } catch (e) {
+      console.error(e);
     }
+  }
 
-    async function consultar() {
-        const btn = document.querySelector('.btn-consultar');
-        const resBody = document.getElementById('res-body');
-        
-        btn.disabled = true;
-        btn.innerText = "PROCESANDO...";
-        resBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border spinner-border-sm text-secondary"></div></div>`;
+  async function consultar() {
+    const btn = document.querySelector('.btn-consultar');
+    const resBody = document.getElementById('res-body');
 
-        try {
-            const suc = document.getElementById('sucursal').value;
-            const d = document.getElementById('desde').value;
-            const h = document.getElementById('hasta').value;
-            
-            const res = await fetch(`/api/reporte/rubros?sucursal=${suc}&desde=${d}&hasta=${h}`);
-            const data = await res.json();
+    btn.disabled = true;
+    btn.innerText = "PROCESANDO...";
+    resBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border spinner-border-sm text-secondary"></div></div>`;
 
-            document.getElementById('cont-resultados').style.display = 'block';
+    try {
+      const user = getUser();
+      const d = document.getElementById('desde').value;
+      const h = document.getElementById('hasta').value;
 
-            if (data.length === 0) {
-                resBody.innerHTML = `<div class="text-center p-5 text-muted">Sin datos para el período.</div>`;
-                return;
-            }
+      // Admin puede elegir sucursal; usuario NO
+      let url = `/api/reporte/rubros?desde=${encodeURIComponent(d)}&hasta=${encodeURIComponent(h)}`;
+      if (user.rol === 'admin') {
+        const suc = document.getElementById('sucursal').value;
+        url += `&sucursal=${encodeURIComponent(suc)}`;
+      }
 
-            resBody.innerHTML = data.map(r => `
-                <div class="rubro-wrapper">
-                    <div class="rubro-card">
-                        <div class="rubro-header">
-                            <span class="rubro-name">${r.Rubro}</span>
-                            <div class="d-flex align-items-center">
-                                <span class="label-sm me-2 d-mobile-none" style="margin-bottom:0">UNIDADES</span>
-                                <span class="unidades-badge">${r.TotalUnidades}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        } catch (err) { 
-            resBody.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`; 
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "EJECUTAR";
-        }
+      const res = await authFetch(url);
+
+      // si el backend devolvio HTML por error, esto evita romper con "<!DOCTYPE"
+      const ct = (res.headers.get('content-type') || '').toLowerCase();
+      if (!ct.includes('application/json')) {
+        const text = await res.text();
+        throw new Error('Respuesta no JSON. Probable redirect a login o error de ruta. Primeros caracteres: ' + text.slice(0, 20));
+      }
+
+      const data = await res.json();
+
+      document.getElementById('cont-resultados').style.display = 'block';
+
+      if (!Array.isArray(data) || data.length === 0) {
+        resBody.innerHTML = `<div class="text-center p-5 text-muted">Sin datos para el periodo.</div>`;
+        return;
+      }
+
+      resBody.innerHTML = data.map(r => `
+        <div class="rubro-wrapper">
+          <div class="rubro-card">
+            <div class="rubro-header">
+              <span class="rubro-name">${r.Rubro}</span>
+              <div class="d-flex align-items-center">
+                <span class="label-sm me-2 d-mobile-none" style="margin-bottom:0">UNIDADES</span>
+                <span class="unidades-badge">${r.TotalUnidades}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      resBody.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.innerText = "EJECUTAR";
     }
+  }
 </script>
+
 </body>
 </html>

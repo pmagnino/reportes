@@ -3,67 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mimo & Co | Auditoría de Ventas</title>
-    
+    <title>Mimo & Co | Auditoria de Ventas</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
-    
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
+
+    <!-- AUTH (mismo patron que reporte_rubro) -->
+    <script src="auth.js"></script>
+
     <style>
         :root { --navy: #1e293b; --slate-500: #64748b; }
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; -webkit-font-smoothing: antialiased; }
-        
-        /* Navbar Responsiva */
-        .header-bar { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; height: 55px; }
+
+        /* Navbar */
+        .header-bar { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 55px; }
+        .header-left { text-decoration: none; color: white; display: flex; align-items: center; }
         .header-bar img { height: 26px; background: white; padding: 3px; border-radius: 4px; margin-right: 12px; }
         .header-title { font-family: 'Outfit', sans-serif; font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
 
         .main-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 15px; }
-        
+
         .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-        
+
         .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
         .form-select, .form-control { font-size: 13px; border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; }
-        
-        /* KPIs Responsivos */
-        .kpi-row-compact { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
-            gap: 10px; 
-            margin-bottom: 20px; 
+
+        /* KPIs */
+        .kpi-row-compact {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
         }
         .kpi-card-mini { background: white; padding: 12px 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
         .kpi-val { font-size: 1rem; color: #1e293b; font-weight: 800; font-variant-numeric: tabular-nums; }
-        
-        /* TICKETS Responsivos */
+
+        /* Tickets */
         .ticket-wrapper { margin-bottom: 15px; width: 100%; }
         .ticket-card { background: white; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; }
-        
-        .ticket-header { 
-            background: #f8fafc; 
-            padding: 10px 15px; 
-            display: flex; 
-            flex-wrap: wrap; 
-            justify-content: space-between; 
-            align-items: center; 
+
+        .ticket-header {
+            background: #f8fafc;
+            padding: 10px 15px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
             gap: 10px;
-            border-bottom: 1px solid #f1f5f9; 
+            border-bottom: 1px solid #f1f5f9;
         }
-        
-        .item-grid { 
-            padding: 8px 15px; 
-            display: grid; 
-            grid-template-columns: 1fr 40px 90px; 
-            align-items: center; 
-            font-size: 11px; 
-            border-bottom: 1px solid #f8fafc; 
+
+        .item-grid {
+            padding: 8px 15px;
+            display: grid;
+            grid-template-columns: 1fr 40px 90px;
+            align-items: center;
+            font-size: 11px;
+            border-bottom: 1px solid #f8fafc;
         }
-        
+
         .obs-text { font-size: 10px; color: #f59e0b; font-style: italic; display: block; line-height: 1.2; }
-        
+
         .bg-efectivo { background-color: #10b981 !important; }
         .bg-tarjeta { background-color: #3b82f6 !important; }
         .bg-mp { background-color: #f59e0b !important; }
@@ -71,30 +75,60 @@
 
         .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 8px; height: 40px; border: none; width: 100%; }
 
+        /* Admin vs User sucursal UI */
+        #miSucursalBox { display:none; }
+        #miSucursalBox .pill {
+            height: 40px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            background: #f1f5f9;
+            font-weight: 800;
+            color: var(--navy);
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
         @media (max-width: 576px) {
             .ticket-header { flex-direction: column; align-items: flex-start; }
             .ticket-header div:last-child { width: 100%; justify-content: space-between; display: flex; align-items: center; }
             .item-grid { grid-template-columns: 1fr 30px 80px; padding: 8px 10px; }
             .kpi-val { font-size: 0.9rem; }
+            .header-title { font-size: 0.7rem; }
         }
     </style>
 </head>
+
 <body onload="init()">
 
 <div class="header-bar shadow-sm">
-    <a href="reporte_index.html" style="text-decoration: none; color: white; display: flex; align-items: center;">
+    <a class="header-left" href="reporte_index.html">
         <img src="Logo.png" alt="Mimo & Co">
-        <span class="header-title">Auditoría de Ventas</span>
+        <span class="header-title">Auditoria de Ventas</span>
     </a>
+    <button class="btn btn-sm btn-outline-light py-1 px-3" onclick="logout()" style="font-size: 10px; font-weight: 800;">
+        SALIR
+    </button>
 </div>
 
 <div class="main-content">
     <div class="card-pro">
         <div class="row g-2 align-items-end">
-            <div class="col-12 col-md-3">
+            <!-- Admin -->
+            <div class="col-12 col-md-3" id="sucursalSelectBox">
                 <span class="label-sm">Sucursal</span>
                 <select id="sucursal" class="form-select shadow-none"></select>
             </div>
+
+            <!-- Usuario -->
+            <div class="col-12 col-md-3" id="miSucursalBox">
+                <span class="label-sm">Sucursal</span>
+                <div class="pill" id="miSucursalNombre">Mi sucursal</div>
+            </div>
+
             <div class="col-6 col-md-2">
                 <span class="label-sm">Desde</span>
                 <input type="date" id="desde" class="form-control shadow-none">
@@ -104,7 +138,7 @@
                 <input type="date" id="hasta" class="form-control shadow-none">
             </div>
             <div class="col-12 col-md-3">
-                <span class="label-sm">Artículo</span>
+                <span class="label-sm">Articulo</span>
                 <input type="text" id="articulo" class="form-control shadow-none" placeholder="Buscar...">
             </div>
             <div class="col-12 col-md-2">
@@ -123,90 +157,130 @@
     let datosMemoria = [];
     const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
 
-    // FUNCIÓN DE FECHA BLINDADA
-    function getHoyArgentina() {
-        return new Intl.DateTimeFormat('en-CA', {
-            timeZone: 'America/Argentina/Buenos_Aires',
-            year: 'numeric', month: '2-digit', day: '2-digit'
-        }).format(new Date());
-    }
-
     async function init() {
-        const res = await fetch('/api/sucursales');
-        const data = await res.json();
-        document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-        
-        const hoy = getHoyArgentina();
-        document.getElementById('desde').value = document.getElementById('hasta').value = hoy;
+        if (!protectPage()) return;
+
+        try {
+            const user = getUser();
+
+            // Sucursales (protegido)
+            const res = await authFetch('/api/sucursales');
+            const data = await res.json();
+
+            if (user.rol === 'admin') {
+                document.getElementById('sucursalSelectBox').style.display = 'block';
+                document.getElementById('miSucursalBox').style.display = 'none';
+                document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+            } else {
+                document.getElementById('sucursalSelectBox').style.display = 'none';
+                document.getElementById('miSucursalBox').style.display = 'block';
+                const s = data[0];
+                document.getElementById('miSucursalNombre').innerText =
+                    s ? `${s.NOMBRE} (Suc. ${s.CODSUC})` : `Sucursal ${user.sucursal}`;
+            }
+
+            // Fecha (mejor: usar endpoint del server para evitar desfases)
+            const resF = await authFetch('/api/util/fecha-hoy');
+            const js = await resF.json();
+            const hoy = js && js.hoy ? js.hoy : new Date().toISOString().slice(0, 10);
+
+            document.getElementById('desde').value = hoy;
+            document.getElementById('hasta').value = hoy;
+
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     async function consultar() {
-        const suc = document.getElementById('sucursal').value;
-        const art = document.getElementById('articulo').value;
-        // Limpieza de parámetros por si el iPhone agrega ":1"
-        const d = document.getElementById('desde').value.split(':')[0];
-        const h = document.getElementById('hasta').value.split(':')[0];
+        const btn = document.querySelector('.btn-consultar');
+        btn.disabled = true;
+        btn.innerText = "BUSCANDO...";
 
-        const res = await fetch(`/api/facturas?sucursal=${suc}&desde=${d}&hasta=${h}&articulo=${art}&medioPago=TODOS`);
-        const result = await res.json();
-        
-        datosMemoria = result.datos || [];
-        document.getElementById('cont-resultados').style.display = 'block';
+        const art = (document.getElementById('articulo').value || '').trim();
+        const d = (document.getElementById('desde').value || '').split(':')[0];
+        const h = (document.getElementById('hasta').value || '').split(':')[0];
 
-        document.getElementById('kpi-container').innerHTML = `
-            <div class="kpi-card-mini" style="background: var(--navy); color: white;">
-                <span class="label-sm text-white opacity-75">Neto</span>
-                <div class="kpi-val text-white">${fmt.format(result.totales.general || 0)}</div>
-            </div>
-            <div class="kpi-card-mini" style="border-bottom: 3px solid #10b981">
-                <span class="label-sm">Efectivo</span>
-                <div class="kpi-val" style="color: #10b981">${fmt.format(result.totales.efectivo || 0)}</div>
-            </div>
-            <div class="kpi-card-mini" style="border-bottom: 3px solid #3b82f6">
-                <span class="label-sm">Tarjetas</span>
-                <div class="kpi-val" style="color: #3b82f6">${fmt.format(result.totales.tarjeta || 0)}</div>
-            </div>
-            <div class="kpi-card-mini" style="border-bottom: 3px solid #f59e0b">
-                <span class="label-sm">M. Pago</span>
-                <div class="kpi-val" style="color: #f59e0b">${fmt.format(result.totales.mp || 0)}</div>
-            </div>
-            <div class="kpi-card-mini">
-                <span class="label-sm">Tickets</span>
-                <div class="kpi-val">${result.totales.facturas || 0}</div>
-            </div>
-        `;
+        try {
+            const user = getUser();
 
-        document.getElementById('res-body').innerHTML = datosMemoria.map(f => {
-            let cls = f.pago === 'EFECTIVO' ? 'bg-efectivo' : (f.pago === 'TARJETAS' ? 'bg-tarjeta' : 'bg-mp');
-            
-            return `<div class="ticket-wrapper">
-                <div class="ticket-card shadow-sm">
-                    <div class="ticket-header">
-                        <div>
-                            <span class="fw-bold font-outfit text-uppercase" style="font-size: 11px;">${f.tipo} ${f.prefijo}-${f.numero}</span>
-                            <span class="text-muted ms-1" style="font-size: 10px;">${f.fecha}</span>
-                        </div>
-                        <div>
-                            <span class="badge-payment ${cls} me-2">${f.pago}</span>
-                            <span class="fw-800" style="color: var(--navy); font-size: 13px;">${fmt.format(f.totalTicket)}</span>
-                        </div>
-                    </div>
-                    <div class="py-1 bg-white">
-                        ${f.items.map(it => `
-                            <div class="item-grid">
-                                <span>
-                                    <span class="fw-semibold">${it.cod}</span>
-                                    ${it.cod.startsWith('DC') ? `<span class="obs-text">${it.obs}</span>` : ''}
-                                </span>
-                                <span class="text-center text-muted">${it.cant}</span>
-                                <span class="text-end fw-bold">${fmt.format(it.pre)}</span>
-                            </div>
-                        `).join('')}
-                    </div>
+            // Usuario: no manda sucursal. Admin: si manda.
+            let url = `/api/facturas?desde=${encodeURIComponent(d)}&hasta=${encodeURIComponent(h)}&articulo=${encodeURIComponent(art)}&medioPago=TODOS`;
+            if (user.rol === 'admin') {
+                const suc = document.getElementById('sucursal').value;
+                url = `/api/facturas?sucursal=${encodeURIComponent(suc)}&desde=${encodeURIComponent(d)}&hasta=${encodeURIComponent(h)}&articulo=${encodeURIComponent(art)}&medioPago=TODOS`;
+            }
+
+            const res = await authFetch(url);
+            const result = await res.json();
+
+            datosMemoria = result.datos || [];
+            document.getElementById('cont-resultados').style.display = 'block';
+
+            document.getElementById('kpi-container').innerHTML = `
+                <div class="kpi-card-mini" style="background: var(--navy); color: white;">
+                    <span class="label-sm text-white opacity-75">Neto</span>
+                    <div class="kpi-val text-white">${fmt.format((result.totales && result.totales.general) || 0)}</div>
                 </div>
-            </div>`;
-        }).join('');
+                <div class="kpi-card-mini" style="border-bottom: 3px solid #10b981">
+                    <span class="label-sm">Efectivo</span>
+                    <div class="kpi-val" style="color: #10b981">${fmt.format((result.totales && result.totales.efectivo) || 0)}</div>
+                </div>
+                <div class="kpi-card-mini" style="border-bottom: 3px solid #3b82f6">
+                    <span class="label-sm">Tarjetas</span>
+                    <div class="kpi-val" style="color: #3b82f6">${fmt.format((result.totales && result.totales.tarjeta) || 0)}</div>
+                </div>
+                <div class="kpi-card-mini" style="border-bottom: 3px solid #f59e0b">
+                    <span class="label-sm">Medios</span>
+                    <div class="kpi-val" style="color: #f59e0b">${fmt.format((result.totales && result.totales.mp) || 0)}</div>
+                </div>
+                <div class="kpi-card-mini">
+                    <span class="label-sm">Tickets</span>
+                    <div class="kpi-val">${((result.totales && result.totales.facturas) || 0)}</div>
+                </div>
+            `;
+
+            document.getElementById('res-body').innerHTML = datosMemoria.map(f => {
+                const pago = (f.pago || '').toUpperCase();
+                const cls = pago === 'EFECTIVO' ? 'bg-efectivo' : (pago === 'TARJETAS' ? 'bg-tarjeta' : 'bg-mp');
+
+                return `<div class="ticket-wrapper">
+                    <div class="ticket-card shadow-sm">
+                        <div class="ticket-header">
+                            <div>
+                                <span class="fw-bold text-uppercase" style="font-size: 11px;">${f.tipo} ${f.prefijo}-${f.numero}</span>
+                                <span class="text-muted ms-1" style="font-size: 10px;">${f.fecha}</span>
+                            </div>
+                            <div>
+                                <span class="badge-payment ${cls} me-2">${pago || 'PAGO'}</span>
+                                <span class="fw-bold" style="color: var(--navy); font-size: 13px;">${fmt.format(f.totalTicket || 0)}</span>
+                            </div>
+                        </div>
+                        <div class="py-1 bg-white">
+                            ${(f.items || []).map(it => `
+                                <div class="item-grid">
+                                    <span>
+                                        <span class="fw-semibold">${it.cod || ''}</span>
+                                        ${(it.cod && it.cod.startsWith('DC')) ? `<span class="obs-text">${it.obs || ''}</span>` : ''}
+                                    </span>
+                                    <span class="text-center text-muted">${it.cant || 0}</span>
+                                    <span class="text-end fw-bold">${fmt.format(it.pre || 0)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+        } catch (e) {
+            console.error(e);
+            alert("Error al cargar datos.");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "CONSULTAR";
+        }
     }
 </script>
+
 </body>
 </html>

@@ -3,61 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mimo & Co | Movimientos Logística</title>
-    
+    <title>Mimo & Co | Movimientos Logistica</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
-    
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
+
+    <!-- AUTH -->
+    <script src="auth.js"></script>
+
     <style>
         :root { --navy: #1e293b; --slate-500: #64748b; --emerald: #10b981; --amber: #f59e0b; }
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; -webkit-font-smoothing: antialiased; }
-        
-        /* Navbar Responsiva */
-        .header-bar { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; height: 55px; }
-        .header-bar img { height: 26px; background: white; padding: 3px; border-radius: 4px; margin-right: 12px; }
+
+        .header-bar { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 55px; }
+        .header-left { display:flex; align-items:center; gap: 12px; text-decoration:none; color:white; }
+        .header-bar img { height: 26px; background: white; padding: 3px; border-radius: 4px; }
         .header-title { font-family: 'Outfit', sans-serif; font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
 
         .main-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 15px; }
-        
-        /* Filtros Adaptables */
+
         .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
         .form-select, .form-control { font-size: 13px; border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; }
-        
-        /* Movimientos */
+
         .mov-wrapper { margin-bottom: 10px; }
         .mov-card { background: white; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; }
-        
-        .mov-header { 
-            background: #f8fafc; 
-            padding: 12px 15px; 
-            display: grid; 
-            grid-template-columns: 1.5fr 1fr auto; 
-            align-items: center; 
+
+        .mov-header {
+            background: #f8fafc;
+            padding: 12px 15px;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr auto;
+            align-items: center;
             cursor: pointer;
             gap: 10px;
         }
 
         .mov-id { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--navy); font-size: 12px; display: block; }
         .mov-date { font-size: 10px; color: var(--slate-500); font-weight: 400; }
-        
+
         .concepto-tag { font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; white-space: nowrap; text-align: center; }
         .tag-ie { background: #ecfdf5; color: #065f46; border: 1px solid #d1fae5; }
         .tag-ee { background: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; }
-        
+
         .mov-total { font-weight: 800; font-size: 14px; text-align: right; color: var(--navy); min-width: 60px; }
 
-        /* Detalle colapsable */
         .items-container { display: none; background: #ffffff; padding-bottom: 5px; }
-        .item-row { 
-            display: grid; 
-            grid-template-columns: 1fr auto; 
-            padding: 8px 15px; 
-            border-bottom: 1px solid #f8fafc; 
+        .item-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            padding: 8px 15px;
+            border-bottom: 1px solid #f8fafc;
             font-size: 12px;
         }
         .item-code { color: var(--slate-500); font-weight: 500; }
@@ -66,11 +66,24 @@
         .btn-consultar { background: var(--navy); color: white; border-radius: 8px; height: 40px; border: none; width: 100%; display: flex; align-items: center; justify-content: center; }
         .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-bottom: 15px; }
 
-        /* AJUSTES IPHONE 12 PRO */
+        /* Bloque "mi sucursal" (cuando no es admin) */
+        #miSucursalBox { display:none; }
+        #miSucursalBox .pill {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px 12px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            color: var(--navy);
+        }
+
         @media (max-width: 576px) {
             .header-title { font-size: 0.7rem; }
-            .mov-header { grid-template-columns: 1fr auto; } /* Reorganizamos a 2 columnas principales */
-            .mov-header div:nth-child(2) { grid-row: 2; grid-column: 1 / span 2; margin-top: 5px; } /* Concepto abajo */
+            .mov-header { grid-template-columns: 1fr auto; }
+            .mov-header div:nth-child(2) { grid-row: 2; grid-column: 1 / span 2; margin-top: 5px; }
             .mov-total { grid-row: 1; grid-column: 2; }
             .item-row { padding: 10px 15px; font-size: 11px; }
         }
@@ -79,33 +92,56 @@
 <body onload="init()">
 
 <div class="header-bar shadow-sm">
-    <a href="reporte_index.html" style="text-decoration: none; color: white; display: flex; align-items: center;">
+    <a class="header-left" href="reporte_index.html">
         <img src="Logo.png" alt="Mimo">
-        <span class="header-title">Logística y Movimientos</span>
+        <span class="header-title">Logistica y Movimientos</span>
     </a>
+
+    <div class="ms-auto">
+        <button class="btn btn-sm btn-outline-light" onclick="logout()">Salir</button>
+    </div>
 </div>
 
 <div class="main-content">
     <div class="card-pro">
         <div class="row g-2 align-items-end">
-            <div class="col-12 col-md-3">
+
+            <!-- Admin ve selector -->
+            <div class="col-12 col-md-3" id="sucursalSelectBox">
                 <span class="label-sm">Sucursal</span>
                 <select id="sucursal" class="form-select shadow-none"></select>
             </div>
+
+            <!-- Usuario ve "Mi sucursal" -->
+            <div class="col-12 col-md-3" id="miSucursalBox">
+                <span class="label-sm">Sucursal</span>
+                <div class="pill" id="miSucursalNombre">Mi sucursal</div>
+            </div>
+
             <div class="col-6 col-md-2">
-                <span class="label-sm">Operación</span>
+                <span class="label-sm">Operacion</span>
                 <select id="tipoMov" class="form-select shadow-none">
                     <option value="ALL">TODOS</option>
                     <option value="IE">INGRESOS</option>
                     <option value="EE">EGRESOS</option>
                 </select>
             </div>
-            <div class="col-6 col-md-2"><span class="label-sm">Desde</span><input type="date" id="desde" class="form-control shadow-none"></div>
-            <div class="col-6 col-md-2"><span class="label-sm">Hasta</span><input type="date" id="hasta" class="form-control shadow-none"></div>
+
             <div class="col-6 col-md-2">
-                <span class="label-sm">Artículo</span>
-                <input type="text" id="articulo" class="form-control shadow-none" placeholder="Código...">
+                <span class="label-sm">Desde</span>
+                <input type="date" id="desde" class="form-control shadow-none">
             </div>
+
+            <div class="col-6 col-md-2">
+                <span class="label-sm">Hasta</span>
+                <input type="date" id="hasta" class="form-control shadow-none">
+            </div>
+
+            <div class="col-6 col-md-2">
+                <span class="label-sm">Articulo</span>
+                <input type="text" id="articulo" class="form-control shadow-none" placeholder="Codigo...">
+            </div>
+
             <div class="col-12 col-md-1">
                 <button class="btn btn-consultar" onclick="consultar()"><i class="bi bi-search"></i></button>
             </div>
@@ -114,28 +150,46 @@
 
     <div id="cont-resultados" style="display: none;">
         <div class="info-note">Toca un movimiento para ver el detalle de prendas.</div>
-        
         <div id="res-body"></div>
     </div>
 </div>
 
 <script>
     async function init() {
+        if (!protectPage()) return;
+
+        const user = getUser();
+
         try {
-            const res = await fetch('/api/sucursales');
-            const data = await res.json();
-            document.getElementById('sucursal').innerHTML = data.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-            
-            const resF = await fetch('/api/util/fecha-hoy');
+            const res = await authFetch('/api/sucursales');
+            const sucs = await res.json();
+
+            if (user.rol === 'admin') {
+                document.getElementById('sucursalSelectBox').style.display = 'block';
+                document.getElementById('miSucursalBox').style.display = 'none';
+
+                document.getElementById('sucursal').innerHTML =
+                    sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+            } else {
+                document.getElementById('sucursalSelectBox').style.display = 'none';
+                document.getElementById('miSucursalBox').style.display = 'block';
+
+                const s = sucs[0];
+                document.getElementById('miSucursalNombre').innerText =
+                    s ? `${s.NOMBRE} (Suc. ${s.CODSUC})` : `Sucursal ${user.sucursal}`;
+            }
+
+            const resF = await authFetch('/api/util/fecha-hoy');
             const { hoy } = await resF.json();
             document.getElementById('desde').value = document.getElementById('hasta').value = hoy;
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     function toggleItems(id) {
         const el = document.getElementById(id);
         const isVisible = el.style.display === 'block';
-        // Cerrar todos antes de abrir el seleccionado (acordeón)
         document.querySelectorAll('.items-container').forEach(c => c.style.display = 'none');
         el.style.display = isVisible ? 'none' : 'block';
     }
@@ -144,15 +198,26 @@
         const btn = document.querySelector('.btn-consultar');
         const resBody = document.getElementById('res-body');
         const tipo = document.getElementById('tipoMov').value;
-        
+
         btn.disabled = true;
         resBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>`;
 
         try {
-            const url = `/api/reporte/logistica?sucursal=${document.getElementById('sucursal').value}&desde=${document.getElementById('desde').value}&hasta=${document.getElementById('hasta').value}&articulo=${document.getElementById('articulo').value}`;
-            const res = await fetch(url);
+            const user = getUser();
+            const d = document.getElementById('desde').value;
+            const h = document.getElementById('hasta').value;
+            const art = document.getElementById('articulo').value || '';
+
+            let url = `/api/reporte/logistica?desde=${encodeURIComponent(d)}&hasta=${encodeURIComponent(h)}&articulo=${encodeURIComponent(art)}`;
+            if (user.rol === 'admin') {
+                const suc = document.getElementById('sucursal').value;
+                url += `&sucursal=${encodeURIComponent(suc)}`;
+            }
+
+            const res = await authFetch(url);
             let data = await res.json();
 
+            if (!Array.isArray(data)) data = [];
             if (tipo !== 'ALL') data = data.filter(m => m.tipo === tipo);
 
             document.getElementById('cont-resultados').style.display = 'block';
@@ -164,7 +229,8 @@
 
             resBody.innerHTML = data.map((m, idx) => {
                 const collapseId = `items-${idx}`;
-                const totalCant = m.items.reduce((acc, curr) => acc + curr.cant, 0);
+                const items = Array.isArray(m.items) ? m.items : [];
+                const totalCant = items.reduce((acc, curr) => acc + (curr.cant || 0), 0);
                 const tagClass = m.tipo === 'IE' ? 'tag-ie' : 'tag-ee';
 
                 return `
@@ -172,11 +238,11 @@
                     <div class="mov-card shadow-sm">
                         <div class="mov-header" onclick="toggleItems('${collapseId}')">
                             <div>
-                                <span class="mov-id">${m.tipo} ${m.prefijo}-${m.numero}</span>
-                                <span class="mov-date">${m.fecha}</span>
+                                <span class="mov-id">${m.tipo || ''} ${m.prefijo || ''}-${m.numero || ''}</span>
+                                <span class="mov-date">${m.fecha || ''}</span>
                             </div>
                             <div>
-                                <span class="concepto-tag ${tagClass}">${m.concepto}</span>
+                                <span class="concepto-tag ${tagClass}">${m.concepto || ''}</span>
                             </div>
                             <div class="mov-total">
                                 ${totalCant} <small style="font-size:10px; font-weight:400">uds</small>
@@ -185,13 +251,13 @@
                         </div>
                         <div class="items-container" id="${collapseId}">
                             <div class="item-row" style="background: #fdfdfd; border-bottom: 2px solid #f1f5f9;">
-                                <span class="label-sm">Cod. Artículo</span>
+                                <span class="label-sm">Cod. Articulo</span>
                                 <span class="label-sm text-end">Cant.</span>
                             </div>
-                            ${m.items.map(it => `
+                            ${items.map(it => `
                                 <div class="item-row">
-                                    <span class="item-code">${it.cod}</span>
-                                    <span class="item-qty">${it.cant}</span>
+                                    <span class="item-code">${it.cod || ''}</span>
+                                    <span class="item-qty">${it.cant || 0}</span>
                                 </div>
                             `).join('')}
                         </div>

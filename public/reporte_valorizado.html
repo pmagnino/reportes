@@ -4,91 +4,122 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mimo & Co | Stock Valorizado</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
-    
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+    <!-- AUTH (mismo patron que reporte_rubro) -->
+    <script src="auth.js"></script>
+
     <style>
         :root { --navy: #1e293b; --emerald: #10b981; --mimo-blue: #3b82f6; --slate-500: #64748b; }
-        
+
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; font-size: 13px; color: #334155; margin: 0; -webkit-font-smoothing: antialiased; }
-        
-        /* Navbar Responsiva */
-        .nav-header { background: var(--navy); color: white; padding: 10px 20px; display: flex; align-items: center; height: 60px; }
-        .nav-header img { height: 26px; background-color: white; padding: 3px; border-radius: 4px; margin-right: 15px; }
+
+        /* Navbar */
+        .nav-header { background: var(--navy); color: white; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+        .nav-left { display:flex; align-items:center; gap: 12px; text-decoration:none; color:white; }
+        .nav-header img { height: 26px; background-color: white; padding: 3px; border-radius: 4px; }
         .nav-header span { font-family: 'Outfit', sans-serif; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
 
         /* Contenedor de Filtros */
         .filter-container { background: white; border-bottom: 1px solid #e2e8f0; padding: 20px; }
-        
+
         .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 6px; display: block; }
-        
+
         .form-select, .form-control { font-size: 13px; border-radius: 8px; height: 42px; border: 1px solid #cbd5e1; }
         .btn-execute { background: var(--navy); color: white; font-weight: 700; border: none; border-radius: 8px; font-size: 12px; height: 42px; transition: 0.2s; }
+
+        /* Admin vs User sucursal UI */
+        #miSucursalBox { display:none; }
+        #miSucursalBox .pill {
+            height: 42px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            background: #f1f5f9;
+            font-weight: 800;
+            color: var(--navy);
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
 
         /* KPI Cards */
         .total-card { border-left: 4px solid var(--emerald); background: #f0fdf4; }
         .stat-val { font-size: 18px; font-weight: 800; color: var(--navy); line-height: 1.2; }
-        
-        /* Lista de Items Adaptable */
-        .val-item { 
-            border-bottom: 1px solid #f1f5f9; 
-            padding: 15px 20px; 
-            display: grid; 
-            grid-template-columns: 2fr 1fr 1fr; 
-            align-items: center; 
-            background: white; 
+
+        /* Lista */
+        .val-item {
+            border-bottom: 1px solid #f1f5f9;
+            padding: 15px 20px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            align-items: center;
+            background: white;
             gap: 10px;
         }
         .val-item:last-child { border-bottom: none; }
-        
+
         .info-main { font-size: 14px; color: var(--navy); font-weight: 700; }
         .info-desc { font-size: 10px; color: var(--slate-500); text-transform: uppercase; display: block; margin-top: 2px; }
         .badge-rubro { background-color: #f1f5f9; color: #475569; font-size: 8px; padding: 2px 8px; border-radius: 12px; margin-left: 8px; border: 1px solid #e2e8f0; font-weight: 700; white-space: nowrap; }
-        
+
         .stock-val { font-size: 18px; font-weight: 800; color: var(--navy); text-align: center; display: block; }
         .stock-label { font-size: 8px; color: #94a3b8; font-weight: 700; text-align: center; display: block; text-transform: uppercase; }
-        
+
         .price-total { color: var(--emerald); font-size: 16px; font-weight: 800; text-align: right; display: block; }
         .price-label { font-size: 8px; color: #94a3b8; font-weight: 700; text-align: right; display: block; text-transform: uppercase; }
 
-        /* AJUSTES PARA IPHONE 12 PRO */
         @media (max-width: 768px) {
             .filter-container { padding: 15px; }
             .nav-header span { font-size: 0.7rem; }
-            
-            /* Reorganización del item en móvil */
-            .val-item { 
-                grid-template-columns: 1fr 1fr; /* Pasamos de 3 a 2 columnas */
+
+            .val-item {
+                grid-template-columns: 1fr 1fr;
                 padding: 15px;
             }
             .val-item > div:first-child { grid-column: span 2; border-bottom: 1px solid #f8fafc; padding-bottom: 8px; }
-            .stock-val { text-align: left; }
-            .stock-label { text-align: left; }
-            .price-total { font-size: 18px; } /* Cifras más grandes para el pulgar */
-
+            .stock-val, .stock-label { text-align: left; }
+            .price-total { font-size: 18px; }
             .stat-val { font-size: 16px; }
         }
     </style>
 </head>
+
 <body onload="init()">
 
 <div class="nav-header shadow-sm">
-    <a href="reporte_index.html"><img src="Logo.png" alt="Mimo"></a>
-    <span>Stock Valorizado de Cartera</span>
+    <a class="nav-left" href="reporte_index.html">
+        <img src="Logo.png" alt="Mimo">
+        <span>Stock Valorizado de Cartera</span>
+    </a>
+    <button class="btn btn-sm btn-outline-light py-1 px-3" onclick="logout()" style="font-size: 10px; font-weight: 800;">
+        SALIR
+    </button>
 </div>
 
 <div class="filter-container shadow-sm">
     <div class="row g-2 align-items-end">
-        <div class="col-12 col-md-3">
+        <!-- Admin -->
+        <div class="col-12 col-md-3" id="sucursalSelectBox">
             <span class="label-sm">Sucursal</span>
             <select id="sucursal" class="form-select shadow-none"></select>
         </div>
+
+        <!-- Usuario -->
+        <div class="col-12 col-md-3" id="miSucursalBox">
+            <span class="label-sm">Sucursal</span>
+            <div class="pill" id="miSucursalNombre">Mi sucursal</div>
+        </div>
+
         <div class="col-12 col-md-3">
             <span class="label-sm">Buscar Producto</span>
             <input type="text" id="buscador" class="form-control shadow-none" placeholder="Cod. o Nombre..." onkeyup="filtrar()">
@@ -121,26 +152,55 @@
     const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
 
     async function init() {
+        if (!protectPage()) return;
+
         try {
-            const res = await fetch('/api/sucursales');
+            const user = getUser();
+
+            // Sucursales (protegido)
+            const res = await authFetch('/api/sucursales');
             const data = await res.json();
-            document.getElementById('sucursal').innerHTML = data.map(s => 
-                `<option value="${s.CODSUC}">${s.NOMBRE}</option>`
-            ).join('');
-        } catch (e) { console.error(e); }
+
+            if (user.rol === 'admin') {
+                document.getElementById('sucursalSelectBox').style.display = 'block';
+                document.getElementById('miSucursalBox').style.display = 'none';
+                document.getElementById('sucursal').innerHTML = data.map(s =>
+                    `<option value="${s.CODSUC}">${s.NOMBRE}</option>`
+                ).join('');
+            } else {
+                document.getElementById('sucursalSelectBox').style.display = 'none';
+                document.getElementById('miSucursalBox').style.display = 'block';
+                const s = data[0];
+                document.getElementById('miSucursalNombre').innerText =
+                    s ? `${s.NOMBRE} (Suc. ${s.CODSUC})` : `Sucursal ${user.sucursal}`;
+            }
+
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     async function consultar() {
         const btn = document.querySelector('.btn-execute');
-        const suc = document.getElementById('sucursal').value;
         btn.disabled = true;
         btn.innerText = "VALORIZANDO...";
 
         try {
-            const res = await fetch(`/api/reporte/stock-valorizado?sucursal=${suc}`);
+            const user = getUser();
+
+            // Usuario: NO manda sucursal. Admin: si.
+            let url = `/api/reporte/stock-valorizado`;
+            if (user.rol === 'admin') {
+                const suc = document.getElementById('sucursal').value;
+                url += `?sucursal=${encodeURIComponent(suc)}`;
+            }
+
+            const res = await authFetch(url);
             const data = await res.json();
-            datosOriginales = data.detalles || [];
+
+            datosOriginales = (data && data.detalles) ? data.detalles : [];
             render(datosOriginales);
+
         } catch (err) {
             alert("Error de conexión");
         } finally {
@@ -150,12 +210,14 @@
     }
 
     function render(lista) {
-        document.getElementById('total-cartera').innerText = fmt.format(lista.reduce((acc, r) => acc + r.TOTAL_VALORIZADO, 0));
-        document.getElementById('total-stock-kpi').innerText = lista.reduce((acc, r) => acc + r.STKACTUAL, 0).toLocaleString('es-AR');
-        
+        const totalCartera = lista.reduce((acc, r) => acc + (Number(r.TOTAL_VALORIZADO) || 0), 0);
+        const totalUnidades = lista.reduce((acc, r) => acc + (Number(r.STKACTUAL) || 0), 0);
+
+        document.getElementById('total-cartera').innerText = fmt.format(totalCartera);
+        document.getElementById('total-stock-kpi').innerText = totalUnidades.toLocaleString('es-AR');
+
         const cont = document.getElementById('cont-resultados');
         const body = document.getElementById('res-body');
-        
         cont.style.display = 'block';
 
         if (lista.length === 0) {
@@ -168,24 +230,32 @@
                 <div>
                     <div class="d-flex align-items-center mb-1">
                         <span class="info-main">${r.CODITM}</span>
-                        <span class="badge-rubro">${r.RUBRO}</span>
+                        <span class="badge-rubro">${r.RUBRO || ''}</span>
                     </div>
                     <span class="info-desc">${r.DESCRIPCION || 'SIN DESCRIPCIÓN'}</span>
                 </div>
-                <div><span class="stock-val">${r.STKACTUAL}</span><span class="stock-label">Unidades</span></div>
-                <div><span class="price-total">${fmt.format(r.TOTAL_VALORIZADO)}</span><span class="price-label">Valor Total</span></div>
-            </div>`).join('');
+                <div>
+                    <span class="stock-val">${Number(r.STKACTUAL) || 0}</span>
+                    <span class="stock-label">Unidades</span>
+                </div>
+                <div>
+                    <span class="price-total">${fmt.format(Number(r.TOTAL_VALORIZADO) || 0)}</span>
+                    <span class="price-label">Valor Total</span>
+                </div>
+            </div>
+        `).join('');
     }
 
     function filtrar() {
         const b = document.getElementById('buscador').value.toLowerCase();
-        const filtrados = datosOriginales.filter(i => 
-            i.CODITM.toLowerCase().includes(b) || 
+        const filtrados = datosOriginales.filter(i =>
+            (i.CODITM && i.CODITM.toLowerCase().includes(b)) ||
             (i.DESCRIPCION && i.DESCRIPCION.toLowerCase().includes(b)) ||
             (i.RUBRO && i.RUBRO.toLowerCase().includes(b))
         );
         render(filtrados);
     }
 </script>
+
 </body>
 </html>

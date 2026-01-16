@@ -4,50 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mimo & Co | Consolidado</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
+
+    <!-- AUTH -->
+    <script src="auth.js"></script>
+
     <style>
-        :root { 
-            --navy: #0f172a; 
+        :root {
+            --navy: #0f172a;
             --accent: #3b82f6;
-            --slate-100: #f1f5f9; 
-            --slate-200: #e2e8f0; 
-            --slate-500: #64748b; 
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-500: #64748b;
         }
-        
-        body { 
-            background-color: #f8fafc; 
-            font-family: 'Inter', sans-serif; 
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
             margin: 0;
-            overflow: hidden; 
+            overflow: hidden;
         }
-        
-        /* Navbar estilizada */
-        .header-bar { 
-            background: var(--navy); 
-            padding: 10px 15px; 
-            display: flex; 
-            align-items: center; 
+
+        .header-bar {
+            background: var(--navy);
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
             justify-content: space-between;
-            flex-shrink: 0; 
+            flex-shrink: 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         .header-bar img { height: 24px; background: white; padding: 3px; border-radius: 5px; }
         .header-title { font-family: 'Outfit', sans-serif; color: white; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin-left: 10px; }
 
-        /* Filtros compactos para pulgar */
-        .filter-area { 
-            background: white; 
-            border-bottom: 1px solid var(--slate-200); 
-            padding: 12px; 
-            flex-shrink: 0; 
+        .filter-area {
+            background: white;
+            border-bottom: 1px solid var(--slate-200);
+            padding: 12px;
+            flex-shrink: 0;
         }
         .input-group-custom {
             display: grid;
@@ -57,76 +58,69 @@
         }
         .label-sm { font-size: 8px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 3px; }
 
-        /* CONTENEDOR MAESTRO DE SCROLL */
-        .grid-viewport { 
-            flex-grow: 1; 
-            overflow: auto; 
+        .grid-viewport {
+            flex-grow: 1;
+            overflow: auto;
             position: relative;
             background: white;
-            -webkit-overflow-scrolling: touch; 
+            -webkit-overflow-scrolling: touch;
         }
-        
+
         table { border-collapse: separate; border-spacing: 0; width: 100%; }
 
-        /* Cabeceras Sticky Superiores */
-        thead th { 
-            position: sticky; 
-            top: 0; 
-            z-index: 20; 
-            background: #f8fafc; 
-            padding: 12px 10px; 
-            font-family: 'Outfit', sans-serif; 
-            font-size: 10px; 
+        thead th {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: #f8fafc;
+            padding: 12px 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 10px;
             color: var(--slate-500);
             border-bottom: 2px solid var(--slate-200);
             border-right: 1px solid var(--slate-100);
             text-align: center;
         }
 
-        /* COLUMNA SUCURSAL FIJA (Z-INDEX 30 para estar arriba de todo) */
-        .sticky-suc { 
-            position: sticky; 
-            left: 0; 
-            z-index: 30; 
-            background: white !important; 
-            min-width: 130px; 
+        .sticky-suc {
+            position: sticky;
+            left: 0;
+            z-index: 30;
+            background: white !important;
+            min-width: 130px;
             max-width: 130px;
             padding-left: 15px !important;
-            font-weight: 700; 
-            color: var(--navy); 
+            font-weight: 700;
+            color: var(--navy);
             text-align: left !important;
             border-right: 2px solid var(--slate-200) !important;
-            box-shadow: 4px 0 8px rgba(0,0,0,0.05); /* Sombra lateral al scrollear */
+            box-shadow: 4px 0 8px rgba(0,0,0,0.05);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        /* Cuando la sucursal es cabecera, necesita más prioridad */
         thead th.sticky-suc { z-index: 40; background: #f8fafc !important; }
 
-        /* Celdas de datos */
-        td { 
-            padding: 10px 12px; 
-            font-size: 11px; 
-            border-bottom: 1px solid var(--slate-100); 
+        td {
+            padding: 10px 12px;
+            font-size: 11px;
+            border-bottom: 1px solid var(--slate-100);
             border-right: 1px solid var(--slate-100);
-            text-align: right; 
-            font-variant-numeric: tabular-nums; 
+            text-align: right;
+            font-variant-numeric: tabular-nums;
         }
 
-        /* Columna Total Final */
-        .col-total { 
-            position: sticky; 
-            right: 0; 
+        .col-total {
+            position: sticky;
+            right: 0;
             z-index: 10;
-            background: #eff6ff !important; 
-            font-weight: 800; 
+            background: #eff6ff !important;
+            font-weight: 800;
             color: var(--accent);
             border-left: 2px solid var(--slate-200) !important;
         }
 
-        /* PIE DE TABLA FIJO */
         tfoot td {
             position: sticky;
             bottom: 0;
@@ -139,12 +133,12 @@
         }
         tfoot td.sticky-suc { z-index: 35; background: var(--navy) !important; }
 
-        .btn-run { 
-            background: var(--navy); 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            height: 38px; 
+        .btn-run {
+            background: var(--navy);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            height: 38px;
             width: 100%;
             display: flex;
             align-items: center;
@@ -155,7 +149,6 @@
 
         .val-zero { color: #cbd5e1; font-weight: 400; }
 
-        /* Ajuste específico iPhone 12 Pro */
         @media (max-width: 430px) {
             .input-group-custom { grid-template-columns: 1fr 1fr; }
             .btn-container { grid-column: span 2; }
@@ -168,10 +161,16 @@
 
 <div class="header-bar">
     <div class="d-flex align-items-center">
-        <img src="Logo.png" alt="Mimo">
-        <span class="header-title">Consolidado Red</span>
+        <a href="reporte_index.html" style="text-decoration:none; color:white; display:flex; align-items:center;">
+            <img src="Logo.png" alt="Mimo">
+            <span class="header-title">Consolidado Red</span>
+        </a>
     </div>
-    <i class="bi bi-person-circle text-white fs-5"></i>
+
+    <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-person-circle text-white fs-5"></i>
+        <button class="btn btn-sm btn-outline-light py-1 px-3" onclick="logout()" style="font-size: 9px; font-weight: 800;">SALIR</button>
+    </div>
 </div>
 
 <div class="filter-area shadow-sm">
@@ -201,10 +200,10 @@
 </div>
 
 <script>
-    const fmt = new Intl.NumberFormat('es-AR', { 
-        style: 'currency', 
-        currency: 'ARS', 
-        minimumFractionDigits: 0 // Quitamos decimales para ganar espacio en iPhone
+    const fmt = new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'ARS',
+        minimumFractionDigits: 0
     });
 
     function getHoyArgentina() {
@@ -215,6 +214,8 @@
     }
 
     function init() {
+        if (!protectPage()) return;
+
         const hoy = getHoyArgentina();
         let d = new Date(hoy + 'T12:00:00');
         let day = d.getDay();
@@ -229,31 +230,33 @@
         const resBody = document.getElementById('res-body');
         const resHead = document.getElementById('res-head');
         const resFoot = document.getElementById('res-foot');
-        
+
         const desde = document.getElementById('desde').value;
         const hasta = document.getElementById('hasta').value;
 
         resBody.innerHTML = `<tr><td colspan="10" class="p-5 text-center"><div class="spinner-border text-primary"></div></td></tr>`;
 
         try {
-            const res = await fetch(`/api/reporte/ventas-grilla-diaria?desde=${desde}&hasta=${hasta}`);
+            const res = await authFetch(`/api/reporte/ventas-grilla-diaria?desde=${encodeURIComponent(desde)}&hasta=${encodeURIComponent(hasta)}`);
             const data = await res.json();
 
-            if (data.length === 0) {
+            if (!Array.isArray(data) || data.length === 0) {
                 resBody.innerHTML = '<tr><td class="p-4 text-center">Sin datos.</td></tr>';
+                resHead.innerHTML = '';
+                resFoot.innerHTML = '';
                 return;
             }
 
             const keys = Object.keys(data[0]);
-            
-            // 1. Cabecera
+
+            // 1) Cabecera
             resHead.innerHTML = `<tr>${keys.map(k => {
-                let label = k === 'TOTAL_SUCURSAL' ? 'TOTAL' : k.substring(0, 5); // Cortamos fechas
+                let label = k === 'TOTAL_SUCURSAL' ? 'TOTAL' : k.substring(0, 5);
                 let css = k === 'SUCURSAL' ? 'sticky-suc' : (k === 'TOTAL_SUCURSAL' ? 'col-total' : '');
                 return `<th class="${css}">${label}</th>`;
             }).join('')}</tr>`;
 
-            // 2. Cuerpo
+            // 2) Cuerpo
             resBody.innerHTML = data.map(row => `
                 <tr>
                     ${keys.map(k => {
@@ -267,10 +270,10 @@
                 </tr>
             `).join('');
 
-            // 3. Pie
+            // 3) Pie
             let footHtml = `<tr><td class="sticky-suc">RED</td>`;
             keys.forEach((k, index) => {
-                if (index === 0) return; 
+                if (index === 0) return;
                 const totalColumna = data.reduce((acc, row) => acc + (parseFloat(row[k]) || 0), 0);
                 const isTotalFinal = k === 'TOTAL_SUCURSAL';
                 footHtml += `<td class="${isTotalFinal ? 'col-total' : ''}">${fmt.format(totalColumna)}</td>`;

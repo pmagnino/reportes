@@ -4,14 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mimo & Co | Comparativo Comercial</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@300;600;700&display=swap" rel="stylesheet">
-    
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
+
+    <!-- AUTH -->
+    <script src="auth.js"></script>
+
     <style>
         :root {
             --slate-50: #f8fafc;
@@ -26,13 +29,13 @@
         }
 
         body { background-color: #f3f4f6; font-family: 'Inter', sans-serif; color: var(--slate-700); overflow-x: hidden; }
-        
+
         .nav-header { background: var(--slate-800); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; min-height: 60px; }
         .nav-header img { height: 26px; background-color: white; padding: 3px; border-radius: 4px; }
         .nav-header span { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
         .filter-container { background: white; border-bottom: 1px solid var(--slate-200); padding: 15px; }
-        
+
         .btn-nav { background: white; border: 1px solid var(--slate-200); color: var(--slate-600); font-size: 10px; font-weight: 700; padding: 8px 12px; }
         .current-ref { font-size: 11px; font-weight: 800; color: var(--slate-800); display: flex; align-items: center; justify-content: center; background: var(--slate-50); }
 
@@ -46,34 +49,34 @@
             display: block;
             -webkit-overflow-scrolling: touch;
         }
-        
-        .table-comp { 
-            width: 100%; 
-            min-width: 1050px; 
-            border-collapse: separate; 
-            border-spacing: 0; 
-            table-layout: fixed; 
+
+        .table-comp {
+            width: 100%;
+            min-width: 1050px;
+            border-collapse: separate;
+            border-spacing: 0;
+            table-layout: fixed;
         }
-        
-        .table-comp th, .table-comp td { 
-            width: 140px; 
-            padding: 12px 8px; 
-            text-align: center; 
+
+        .table-comp th, .table-comp td {
+            width: 140px;
+            padding: 12px 8px;
+            text-align: center;
             border-right: 1px solid var(--slate-100);
             border-bottom: 1px solid var(--slate-100);
         }
 
-        .row-header { 
-            position: sticky; 
-            left: 0; 
-            z-index: 10; 
-            background: #f8fafc !important; 
-            width: 110px !important; 
+        .row-header {
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            background: #f8fafc !important;
+            width: 110px !important;
             min-width: 110px !important;
-            text-align: left !important; 
+            text-align: left !important;
             padding-left: 12px !important;
-            font-weight: 800; 
-            font-size: 9px; 
+            font-weight: 800;
+            font-size: 9px;
             text-transform: uppercase;
             border-right: 2px solid var(--slate-200) !important;
             box-shadow: 2px 0 5px rgba(0,0,0,0.05);
@@ -83,19 +86,19 @@
         .day-sub { font-size: 9px; color: var(--slate-600); font-weight: 500; text-transform: uppercase; }
 
         .today-highlight { background-color: #fffbeb !important; }
-        .today-badge { 
-            position: absolute; top: 2px; left: 50%; transform: translateX(-50%); 
-            background: var(--amber-600); color: white; font-size: 7px; padding: 1px 5px; border-radius: 10px; font-weight: 800; 
+        .today-badge {
+            position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+            background: var(--amber-600); color: white; font-size: 7px; padding: 1px 5px; border-radius: 10px; font-weight: 800;
         }
 
         .main-value { font-size: 14px; font-weight: 800; color: var(--slate-800); margin-bottom: 6px; white-space: nowrap; }
         .var-box { display: flex; flex-direction: column; gap: 4px; }
-        
-        .var-row { 
-            display: flex; justify-content: center; align-items: center; gap: 3px; 
+
+        .var-row {
+            display: flex; justify-content: center; align-items: center; gap: 3px;
             padding: 2px 4px; border-radius: 4px; font-size: 9px; font-weight: 600; white-space: nowrap;
         }
-        
+
         .pos { color: var(--emerald-600); background: #f0fdf4; border: 1px solid #d1fae5; }
         .neg { color: var(--red-600); background: #fef2f2; border: 1px solid #fee2e2; }
         .neu { color: var(--slate-600); background: var(--slate-100); border: 1px solid var(--slate-200); }
@@ -103,24 +106,51 @@
         @media (max-width: 768px) {
             .filter-container .row > div { margin-bottom: 8px; }
         }
+
+        /* Bloque "mi sucursal" (cuando no es admin) */
+        #miSucursalBox { display:none; }
+        #miSucursalBox .pill {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px 12px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            font-weight: 800;
+            color: var(--slate-800);
+            font-size: 12px;
+        }
     </style>
 </head>
 <body onload="init()">
 
 <div class="nav-header">
-    <a href="reporte_index.html">
+    <a href="reporte_index.html" style="text-decoration:none; color:white; display:flex; align-items:center; gap:10px;">
         <img src="Logo.png" alt="Mimo">
         <span class="ms-2 fw-bold">BI | COMPARATIVO</span>
     </a>
-    <button class="btn btn-sm btn-outline-light py-1 px-3" onclick="irAHoy()" style="font-size: 9px; font-weight: 800;">HOY</button>
+
+    <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-light py-1 px-3" onclick="irAHoy()" style="font-size: 9px; font-weight: 800;">HOY</button>
+        <button class="btn btn-sm btn-outline-light py-1 px-3" onclick="logout()" style="font-size: 9px; font-weight: 800;">SALIR</button>
+    </div>
 </div>
 
 <div class="filter-container shadow-sm">
     <div class="row g-2">
-        <div class="col-12 col-md-4">
+        <!-- Admin ve selector -->
+        <div class="col-12 col-md-4" id="sucursalSelectBox">
             <span class="small fw-bold text-secondary mb-1 d-block" style="font-size: 9px;">SUCURSAL</span>
             <select id="sucursal" class="form-select form-select-sm shadow-none"></select>
         </div>
+
+        <!-- Usuario ve "Mi sucursal" -->
+        <div class="col-12 col-md-4" id="miSucursalBox">
+            <span class="small fw-bold text-secondary mb-1 d-block" style="font-size: 9px;">SUCURSAL</span>
+            <div class="pill" id="miSucursalNombre">Mi sucursal</div>
+        </div>
+
         <div class="col-12 col-md-5">
             <span class="small fw-bold text-secondary mb-1 d-block" style="font-size: 9px;">NAVEGACIÓN</span>
             <div class="d-flex align-items-stretch">
@@ -133,6 +163,7 @@
                 </button>
             </div>
         </div>
+
         <div class="col-12 col-md-3 d-flex align-items-end">
             <button class="btn-consultar shadow-sm" onclick="consultar()">ACTUALIZAR</button>
         </div>
@@ -155,7 +186,7 @@
 <script>
     let fechaReferencia;
 
-    // FUNCIÓN DE FECHA BLINDADA (GMT-3)
+    // FECHA BLINDADA (GMT-3)
     function getHoyArgentina() {
         return new Intl.DateTimeFormat('en-CA', {
             timeZone: 'America/Argentina/Buenos_Aires',
@@ -164,14 +195,39 @@
     }
 
     async function init() {
+        if (!protectPage()) return;
+
         // Seteamos la fecha inicial usando la función blindada
         fechaReferencia = new Date(getHoyArgentina() + 'T12:00:00');
-        
-        const res = await fetch('/api/sucursales');
-        const sucs = await res.json();
-        document.getElementById('sucursal').innerHTML = sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-        actualizarLabelFecha();
-        consultar();
+
+        const user = getUser();
+
+        try {
+            // Sucursales (protegido)
+            const res = await authFetch('/api/sucursales');
+            const sucs = await res.json();
+
+            if (user.rol === 'admin') {
+                document.getElementById('sucursalSelectBox').style.display = 'block';
+                document.getElementById('miSucursalBox').style.display = 'none';
+                document.getElementById('sucursal').innerHTML =
+                    sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+            } else {
+                // Usuario: NO elige sucursal
+                document.getElementById('sucursalSelectBox').style.display = 'none';
+                document.getElementById('miSucursalBox').style.display = 'block';
+
+                // /api/sucursales para usuario idealmente devuelve SOLO la suya (1 item)
+                const s = sucs && sucs.length ? sucs[0] : null;
+                document.getElementById('miSucursalNombre').innerText =
+                    s ? `${s.NOMBRE} (Suc. ${s.CODSUC})` : `Sucursal ${user.sucursal}`;
+            }
+
+            actualizarLabelFecha();
+            consultar();
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     function irAHoy() {
@@ -193,8 +249,8 @@
         consultar();
     }
 
-    function getVarRow(actual, historico, labelFecha, metrica) {
-        if (!historico || historico === 0) return `<div class="var-row neu">0.0% vs ${labelFecha}</div>`;
+    function getVarRow(actual, historico, labelFecha) {
+        if (!historico || historico === 0) return `<div class="var-row neu">0.0% <span class="ms-1 fw-normal" style="opacity:0.7">vs ${labelFecha}</span></div>`;
         const diff = ((actual - historico) / historico) * 100;
         const icon = diff >= 0 ? 'bi-caret-up-fill' : 'bi-caret-down-fill';
         const colorClass = diff >= 0 ? 'pos' : 'neg';
@@ -207,22 +263,30 @@
     }
 
     async function consultar() {
-        const suc = document.getElementById('sucursal').value;
         const tbody = document.getElementById('tbody-comp');
-        
-        // Obtenemos hoy clavado desde el servidor/función blindada
         const hoyIso = getHoyArgentina();
         const fParam = fechaReferencia.toISOString().split('T')[0];
-        
+
         tbody.innerHTML = `<tr><td colspan="8" class="p-5 text-center"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>`;
 
         try {
-            const res = await fetch(`/api/reporte/comparativo-ventas?sucursal=${suc}&fechaRef=${fParam}`);
+            const user = getUser();
+
+            // Admin: manda sucursal elegida
+            // Usuario: NO manda sucursal (o si la manda, el backend la pisa)
+            let url = `/api/reporte/comparativo-ventas?fechaRef=${encodeURIComponent(fParam)}`;
+
+            if (user.rol === 'admin') {
+                const suc = document.getElementById('sucursal').value;
+                url += `&sucursal=${encodeURIComponent(suc)}`;
+            }
+
+            const res = await authFetch(url);
             const data = await res.json();
 
-            let headHtml = `<tr><th class="row-header">MÉTRICA</th>`;
+            let headHtml = `<tr><th class="row-header">METRICA</th>`;
             data.forEach(d => {
-                const esHoy = d.FechaIso.split('T')[0] === hoyIso;
+                const esHoy = (d.FechaIso || '').split('T')[0] === hoyIso;
                 headHtml += `
                     <th class="${esHoy ? 'today-highlight' : ''}" style="position: relative;">
                         ${esHoy ? '<span class="today-badge">HOY</span>' : ''}
@@ -233,7 +297,7 @@
             document.getElementById('thead-comp').innerHTML = headHtml + `</tr>`;
 
             const rows = [
-                { label: 'Facturación', actStr: 'MontoActStr', valPure: 'MontoAct', sem: 'MontoSem', mes: 'MontoMes', type: 'money' },
+                { label: 'Facturacion', actStr: 'MontoActStr', valPure: 'MontoAct', sem: 'MontoSem', mes: 'MontoMes', type: 'money' },
                 { label: 'Unidades', actStr: 'UniAct', valPure: 'UniAct', sem: 'UniSem', mes: 'UniMes', type: 'num' }
             ];
 
@@ -241,14 +305,20 @@
             rows.forEach(row => {
                 bodyHtml += `<tr><td class="row-header">${row.label}</td>`;
                 data.forEach(d => {
-                    const esHoy = d.FechaIso.split('T')[0] === hoyIso;
-                    const displayVal = row.type === 'num' ? d[row.actStr].toLocaleString('es-AR') : d[row.actStr];
+                    const esHoy = (d.FechaIso || '').split('T')[0] === hoyIso;
+
+                    // si viene string, lo dejamos; si viene number, lo formateamos
+                    const valNum = d[row.valPure];
+                    const displayVal = row.type === 'num'
+                        ? (typeof d[row.actStr] === 'number' ? d[row.actStr].toLocaleString('es-AR') : d[row.actStr])
+                        : d[row.actStr];
+
                     bodyHtml += `
                         <td class="${esHoy ? 'today-highlight' : ''}">
                             <div class="main-value">${displayVal}</div>
                             <div class="var-box">
-                                ${getVarRow(d[row.valPure], d[row.sem], d.LabelSem, row.type)}
-                                ${getVarRow(d[row.valPure], d[row.mes], d.LabelMes, row.type)}
+                                ${getVarRow(valNum, d[row.sem], d.LabelSem)}
+                                ${getVarRow(valNum, d[row.mes], d.LabelMes)}
                             </div>
                         </td>`;
                 });
