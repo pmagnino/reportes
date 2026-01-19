@@ -12,7 +12,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-  <!-- AUTH (debe exponer: protectPage(), getUser(), authFetch(), logout()) -->
   <script src="auth.js"></script>
 
   <style>
@@ -31,78 +30,27 @@
 
     .rubro-wrapper { margin-bottom: 10px; }
     .rubro-card {
-      background: white;
-      border-radius: 10px;
-      border: 1px solid #e2e8f0;
-      overflow: hidden;
-      border-left: 4px solid var(--navy);
-      transition: transform 0.1s;
+      background: white; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden;
+      border-left: 4px solid var(--navy); transition: transform 0.1s;
     }
 
-    .rubro-header {
-      padding: 12px 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
+    .rubro-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .rubro-name { font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--navy); text-transform: uppercase; font-size: 12px; letter-spacing: 0.3px; flex-grow: 1; }
 
-    .rubro-name {
-      font-family: 'Outfit', sans-serif;
-      font-weight: 700;
-      color: var(--navy);
-      text-transform: uppercase;
-      font-size: 12px;
-      letter-spacing: 0.3px;
-      flex-grow: 1;
-    }
+    .unidades-badge { background: #ecfdf5; color: var(--soft-emerald); padding: 4px 12px; border-radius: 6px; font-weight: 800; font-size: 14px; border: 1px solid #d1fae5; min-width: 60px; text-align: center; }
 
-    .unidades-badge {
-      background: #ecfdf5;
-      color: var(--soft-emerald);
-      padding: 4px 12px;
-      border-radius: 6px;
-      font-weight: 800;
-      font-size: 14px;
-      border: 1px solid #d1fae5;
-      min-width: 60px;
-      text-align: center;
-    }
-
-    .btn-consultar {
-      background: var(--navy);
-      color: white;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      border-radius: 8px;
-      height: 40px;
-      border: none;
-      width: 100%;
-    }
+    .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 8px; height: 40px; border: none; width: 100%; }
 
     .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 12px; margin-top: 20px; }
 
-    /* Bloque "mi sucursal" (cuando no es admin) */
     #miSucursalBox { display:none; }
-    #miSucursalBox .pill {
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 10px 12px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      font-weight: 700;
-      color: var(--navy);
-    }
+    #miSucursalBox .pill { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; height: 40px; display: flex; align-items: center; font-weight: 700; color: var(--navy); }
 
     @media (max-width: 576px) {
       .header-title { font-size: 0.7rem; }
       .rubro-header { padding: 15px 12px; }
       .rubro-name { font-size: 11px; }
       .unidades-badge { font-size: 13px; padding: 4px 8px; }
-      .label-sm.d-mobile-none { display: none; }
     }
   </style>
 </head>
@@ -124,13 +72,11 @@
   <div class="card-pro">
     <div class="row g-2 align-items-end">
 
-      <!-- Admin ve selector -->
       <div class="col-12 col-md-4" id="sucursalSelectBox">
         <span class="label-sm">Sucursal</span>
         <select id="sucursal" class="form-select shadow-none"></select>
       </div>
 
-      <!-- Usuario ve "Mi sucursal" -->
       <div class="col-12 col-md-4" id="miSucursalBox">
         <span class="label-sm">Sucursal</span>
         <div class="pill" id="miSucursalNombre">Mi sucursal</div>
@@ -163,43 +109,53 @@
 </div>
 
 <script>
+  function getHoyLocal() {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(new Date());
+  }
+
   async function init() {
-    // protege la pagina (si no hay token, redirige a login)
     if (!protectPage()) return;
+
+    // 1. Establecer fecha hoy inmediatamente
+    const hoy = getHoyLocal();
+    document.getElementById('desde').value = hoy;
+    document.getElementById('hasta').value = hoy;
 
     const user = getUser();
 
     try {
-      // /api/sucursales tiene que devolver:
-      // - admin: todas
-      // - usuario: solo su sucursal (1 registro)
       const res = await authFetch('/api/sucursales');
       const sucs = await res.json();
 
       if (user.rol === 'admin') {
         document.getElementById('sucursalSelectBox').style.display = 'block';
         document.getElementById('miSucursalBox').style.display = 'none';
-
         document.getElementById('sucursal').innerHTML =
           sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
       } else {
         document.getElementById('sucursalSelectBox').style.display = 'none';
         document.getElementById('miSucursalBox').style.display = 'block';
-
         const s = Array.isArray(sucs) && sucs.length > 0 ? sucs[0] : null;
         document.getElementById('miSucursalNombre').innerText =
           s ? `${s.NOMBRE} (Suc. ${s.CODSUC})` : `Sucursal ${user.sucursal}`;
       }
 
-      // Fecha hoy (endpoint protegido)
-      const resF = await authFetch('/api/util/fecha-hoy');
-      const jsonF = await resF.json();
-      const hoy = jsonF && jsonF.hoy ? jsonF.hoy : '';
-
-      if (hoy) {
-        document.getElementById('desde').value = hoy;
-        document.getElementById('hasta').value = hoy;
+      // 2. Intento opcional por servidor
+      const resF = await authFetch('/api/util/fecha-hoy').catch(() => null);
+      if (resF && resF.ok) {
+        const jsonF = await resF.json();
+        if (jsonF && jsonF.hoy) {
+          document.getElementById('desde').value = jsonF.hoy;
+          document.getElementById('hasta').value = jsonF.hoy;
+        }
       }
+
+      // --- AUTO-EJECUCIÓN AL ENTRAR ---
+      consultar();
+      
     } catch (e) {
       console.error(e);
     }
@@ -218,7 +174,6 @@
       const d = document.getElementById('desde').value;
       const h = document.getElementById('hasta').value;
 
-      // Admin puede elegir sucursal; usuario NO
       let url = `/api/reporte/rubros?desde=${encodeURIComponent(d)}&hasta=${encodeURIComponent(h)}`;
       if (user.rol === 'admin') {
         const suc = document.getElementById('sucursal').value;
@@ -226,16 +181,12 @@
       }
 
       const res = await authFetch(url);
-
-      // si el backend devolvio HTML por error, esto evita romper con "<!DOCTYPE"
       const ct = (res.headers.get('content-type') || '').toLowerCase();
       if (!ct.includes('application/json')) {
-        const text = await res.text();
-        throw new Error('Respuesta no JSON. Probable redirect a login o error de ruta. Primeros caracteres: ' + text.slice(0, 20));
+        throw new Error('La sesión ha expirado o el servidor devolvió un error.');
       }
 
       const data = await res.json();
-
       document.getElementById('cont-resultados').style.display = 'block';
 
       if (!Array.isArray(data) || data.length === 0) {

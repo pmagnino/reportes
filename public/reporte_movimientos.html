@@ -12,7 +12,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <!-- AUTH -->
     <script src="auth.js"></script>
 
     <style>
@@ -34,31 +33,26 @@
         .mov-card { background: white; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; }
 
         .mov-header {
-            background: #f8fafc;
-            padding: 12px 15px;
-            display: grid;
-            grid-template-columns: 1.5fr 1fr auto;
-            align-items: center;
-            cursor: pointer;
-            gap: 10px;
+            background: #f8fafc; padding: 12px 15px; display: grid; grid-template-columns: 1.5fr 1fr auto;
+            align-items: center; cursor: pointer; gap: 10px;
         }
 
         .mov-id { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--navy); font-size: 12px; display: block; }
         .mov-date { font-size: 10px; color: var(--slate-500); font-weight: 400; }
 
-        .concepto-tag { font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; white-space: nowrap; text-align: center; }
-        .tag-ie { background: #ecfdf5; color: #065f46; border: 1px solid #d1fae5; }
-        .tag-ee { background: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; }
+        .concepto-tag { font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; white-space: nowrap; text-align: center; border: 1px solid transparent; }
+        .tag-ie { background: #ecfdf5; color: #065f46; border-color: #d1fae5; }
+        .tag-ee { background: #fff7ed; color: #9a3412; border-color: #ffedd5; }
+        .tag-venta { background: #eff6ff; color: #1e40af; border-color: #dbeafe; } 
+        .tag-devo { background: #fff1f2; color: #9f1239; border-color: #ffe4e6; }  
+        .tag-default { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
 
         .mov-total { font-weight: 800; font-size: 14px; text-align: right; color: var(--navy); min-width: 60px; }
 
         .items-container { display: none; background: #ffffff; padding-bottom: 5px; }
         .item-row {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            padding: 8px 15px;
-            border-bottom: 1px solid #f8fafc;
-            font-size: 12px;
+            display: grid; grid-template-columns: 1fr auto; padding: 8px 15px;
+            border-bottom: 1px solid #f8fafc; font-size: 12px;
         }
         .item-code { color: var(--slate-500); font-weight: 500; }
         .item-qty { font-weight: 700; text-align: right; color: var(--navy); }
@@ -66,18 +60,10 @@
         .btn-consultar { background: var(--navy); color: white; border-radius: 8px; height: 40px; border: none; width: 100%; display: flex; align-items: center; justify-content: center; }
         .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-bottom: 15px; }
 
-        /* Bloque "mi sucursal" (cuando no es admin) */
         #miSucursalBox { display:none; }
         #miSucursalBox .pill {
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 10px 12px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            font-weight: 700;
-            color: var(--navy);
+            background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px;
+            height: 40px; display: flex; align-items: center; font-weight: 700; color: var(--navy);
         }
 
         @media (max-width: 576px) {
@@ -96,7 +82,6 @@
         <img src="Logo.png" alt="Mimo">
         <span class="header-title">Logistica y Movimientos</span>
     </a>
-
     <div class="ms-auto">
         <button class="btn btn-sm btn-outline-light" onclick="logout()">Salir</button>
     </div>
@@ -105,14 +90,11 @@
 <div class="main-content">
     <div class="card-pro">
         <div class="row g-2 align-items-end">
-
-            <!-- Admin ve selector -->
             <div class="col-12 col-md-3" id="sucursalSelectBox">
                 <span class="label-sm">Sucursal</span>
                 <select id="sucursal" class="form-select shadow-none"></select>
             </div>
 
-            <!-- Usuario ve "Mi sucursal" -->
             <div class="col-12 col-md-3" id="miSucursalBox">
                 <span class="label-sm">Sucursal</span>
                 <div class="pill" id="miSucursalNombre">Mi sucursal</div>
@@ -122,8 +104,10 @@
                 <span class="label-sm">Operacion</span>
                 <select id="tipoMov" class="form-select shadow-none">
                     <option value="ALL">TODOS</option>
-                    <option value="IE">INGRESOS</option>
-                    <option value="EE">EGRESOS</option>
+                    <option value="IE">INGRESOS (IE)</option>
+                    <option value="EE">EGRESOS (EE)</option>
+                    <option value="FACT">FACTURACION (FA/FB)</option>
+                    <option value="DEVO">DEVOLUCIONES (CA/CB)</option>
                 </select>
             </div>
 
@@ -155,8 +139,19 @@
 </div>
 
 <script>
+    function getHoyLocal() {
+        return new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'America/Argentina/Buenos_Aires',
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        }).format(new Date());
+    }
+
     async function init() {
         if (!protectPage()) return;
+
+        const hoyLocal = getHoyLocal();
+        document.getElementById('desde').value = hoyLocal;
+        document.getElementById('hasta').value = hoyLocal;
 
         const user = getUser();
 
@@ -167,24 +162,20 @@
             if (user.rol === 'admin') {
                 document.getElementById('sucursalSelectBox').style.display = 'block';
                 document.getElementById('miSucursalBox').style.display = 'none';
-
-                document.getElementById('sucursal').innerHTML =
-                    sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+                document.getElementById('sucursal').innerHTML = sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
             } else {
                 document.getElementById('sucursalSelectBox').style.display = 'none';
                 document.getElementById('miSucursalBox').style.display = 'block';
-
                 const s = sucs[0];
-                document.getElementById('miSucursalNombre').innerText =
-                    s ? `${s.NOMBRE} (Suc. ${s.CODSUC})` : `Sucursal ${user.sucursal}`;
+                document.getElementById('miSucursalNombre').innerText = s ? `${s.NOMBRE} (Suc. ${s.CODSUC})` : `Sucursal ${user.sucursal}`;
             }
 
-            const resF = await authFetch('/api/util/fecha-hoy');
-            const { hoy } = await resF.json();
-            document.getElementById('desde').value = document.getElementById('hasta').value = hoy;
-        } catch (e) {
-            console.error(e);
-        }
+            const resF = await authFetch('/api/util/fecha-hoy').catch(() => null);
+            if (resF && resF.ok) {
+                const { hoy } = await resF.json();
+                if (hoy) { document.getElementById('desde').value = document.getElementById('hasta').value = hoy; }
+            }
+        } catch (e) { console.error(e); }
     }
 
     function toggleItems(id) {
@@ -197,7 +188,7 @@
     async function consultar() {
         const btn = document.querySelector('.btn-consultar');
         const resBody = document.getElementById('res-body');
-        const tipo = document.getElementById('tipoMov').value;
+        const tipoFiltro = document.getElementById('tipoMov').value;
 
         btn.disabled = true;
         resBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>`;
@@ -210,20 +201,27 @@
 
             let url = `/api/reporte/logistica?desde=${encodeURIComponent(d)}&hasta=${encodeURIComponent(h)}&articulo=${encodeURIComponent(art)}`;
             if (user.rol === 'admin') {
-                const suc = document.getElementById('sucursal').value;
-                url += `&sucursal=${encodeURIComponent(suc)}`;
+                url += `&sucursal=${encodeURIComponent(document.getElementById('sucursal').value)}`;
             }
 
             const res = await authFetch(url);
             let data = await res.json();
 
             if (!Array.isArray(data)) data = [];
-            if (tipo !== 'ALL') data = data.filter(m => m.tipo === tipo);
+
+            // Filtrar en el frontend segun el combo de Operacion
+            if (tipoFiltro === 'FACT') {
+                data = data.filter(m => ['FA', 'FB'].includes(m.tipo));
+            } else if (tipoFiltro === 'DEVO') {
+                data = data.filter(m => ['CA', 'CB'].includes(m.tipo));
+            } else if (tipoFiltro !== 'ALL') {
+                data = data.filter(m => m.tipo === tipoFiltro);
+            }
 
             document.getElementById('cont-resultados').style.display = 'block';
 
             if (data.length === 0) {
-                resBody.innerHTML = '<div class="alert alert-light text-center border">Sin movimientos para los filtros seleccionados.</div>';
+                resBody.innerHTML = '<div class="alert alert-light text-center border">Sin movimientos encontrados para este periodo/artículo.</div>';
                 return;
             }
 
@@ -231,7 +229,12 @@
                 const collapseId = `items-${idx}`;
                 const items = Array.isArray(m.items) ? m.items : [];
                 const totalCant = items.reduce((acc, curr) => acc + (curr.cant || 0), 0);
-                const tagClass = m.tipo === 'IE' ? 'tag-ie' : 'tag-ee';
+                
+                let tagClass = 'tag-default';
+                if (m.tipo === 'IE') tagClass = 'tag-ie';
+                else if (m.tipo === 'EE') tagClass = 'tag-ee';
+                else if (['FA', 'FB'].includes(m.tipo)) tagClass = 'tag-venta';
+                else if (['CA', 'CB'].includes(m.tipo)) tagClass = 'tag-devo';
 
                 return `
                 <div class="mov-wrapper">
@@ -265,7 +268,7 @@
                 </div>`;
             }).join('');
         } catch (e) {
-            resBody.innerHTML = `<div class="alert alert-danger">Error de red.</div>`;
+            resBody.innerHTML = `<div class="alert alert-danger">Error al conectar con el servidor o sesión expirada.</div>`;
         } finally {
             btn.disabled = false;
         }

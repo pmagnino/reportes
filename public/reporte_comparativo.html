@@ -185,25 +185,42 @@
 
 <script>
     let fechaReferencia;
+    const TZ = 'America/Argentina/Buenos_Aires';
 
-    // FECHA BLINDADA (GMT-3)
+    // YYYY-MM-DD en TZ Argentina (sin depender del navegador/UTC)
+    function ymdInArgentina(date) {
+        const parts = new Intl.DateTimeFormat('en-CA', {
+            timeZone: TZ,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).formatToParts(date);
+
+        const y = parts.find(p => p.type === 'year').value;
+        const m = parts.find(p => p.type === 'month').value;
+        const d = parts.find(p => p.type === 'day').value;
+        return `${y}-${m}-${d}`;
+    }
+
     function getHoyArgentina() {
-        return new Intl.DateTimeFormat('en-CA', {
-            timeZone: 'America/Argentina/Buenos_Aires',
-            year: 'numeric', month: '2-digit', day: '2-digit'
-        }).format(new Date());
+        return ymdInArgentina(new Date());
+    }
+
+    // Parse seguro de YYYY-MM-DD a Date (anclado a mediodia UTC para evitar corrimientos)
+    function dateUTCFromYMD(ymd) {
+        const [y, m, d] = ymd.split('-').map(Number);
+        return new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
     }
 
     async function init() {
         if (!protectPage()) return;
 
-        // Seteamos la fecha inicial usando la función blindada
-        fechaReferencia = new Date(getHoyArgentina() + 'T12:00:00');
+        // Fecha inicial: HOY de Argentina, convertida a Date estable
+        fechaReferencia = dateUTCFromYMD(getHoyArgentina());
 
         const user = getUser();
 
         try {
-            // Sucursales (protegido)
             const res = await authFetch('/api/sucursales');
             const sucs = await res.json();
 
@@ -213,11 +230,9 @@
                 document.getElementById('sucursal').innerHTML =
                     sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
             } else {
-                // Usuario: NO elige sucursal
                 document.getElementById('sucursalSelectBox').style.display = 'none';
                 document.getElementById('miSucursalBox').style.display = 'block';
 
-                // /api/sucursales para usuario idealmente devuelve SOLO la suya (1 item)
                 const s = sucs && sucs.length ? sucs[0] : null;
                 document.getElementById('miSucursalNombre').innerText =
                     s ? `${s.NOMBRE} (Suc. ${s.CODSUC})` : `Sucursal ${user.sucursal}`;
@@ -231,26 +246,34 @@
     }
 
     function irAHoy() {
-        fechaReferencia = new Date(getHoyArgentina() + 'T12:00:00');
+        fechaReferencia = dateUTCFromYMD(getHoyArgentina());
         actualizarLabelFecha();
         consultar();
     }
 
     function actualizarLabelFecha() {
-        let d = new Date(fechaReferencia);
-        let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1);
-        let lunes = new Date(d.setDate(diff));
-        document.getElementById('txt-referencia').innerText = `Semana del ${lunes.toLocaleDateString('es-AR')}`;
+        // calculamos lunes usando getters UTC para que no baile por zona horaria
+        const d = new Date(fechaReferencia);
+        const day = d.getUTCDay(); // 0 dom .. 6 sab
+        const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1);
+        const lunes = new Date(d);
+        lunes.setUTCDate(diff);
+
+        // label en es-AR (visual). Esto es solo display.
+        document.getElementById('txt-referencia').innerText =
+            `Semana del ${lunes.toLocaleDateString('es-AR')}`;
     }
 
     function cambiarSemana(delta) {
-        fechaReferencia.setDate(fechaReferencia.getDate() + (delta * 7));
+        fechaReferencia.setUTCDate(fechaReferencia.getUTCDate() + (delta * 7));
         actualizarLabelFecha();
         consultar();
     }
 
     function getVarRow(actual, historico, labelFecha) {
-        if (!historico || historico === 0) return `<div class="var-row neu">0.0% <span class="ms-1 fw-normal" style="opacity:0.7">vs ${labelFecha}</span></div>`;
+        if (!historico || historico === 0) {
+            return `<div class="var-row neu">0.0% <span class="ms-1 fw-normal" style="opacity:0.7">vs ${labelFecha}</span></div>`;
+        }
         const diff = ((actual - historico) / historico) * 100;
         const icon = diff >= 0 ? 'bi-caret-up-fill' : 'bi-caret-down-fill';
         const colorClass = diff >= 0 ? 'pos' : 'neg';
@@ -265,15 +288,15 @@
     async function consultar() {
         const tbody = document.getElementById('tbody-comp');
         const hoyIso = getHoyArgentina();
-        const fParam = fechaReferencia.toISOString().split('T')[0];
+
+        // ✅ FIX: NO usar toISOString() (UTC). Usar YYYY-MM-DD en Argentina.
+        const fParam = ymdInArgentina(fechaReferencia);
 
         tbody.innerHTML = `<tr><td colspan="8" class="p-5 text-center"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>`;
 
         try {
             const user = getUser();
 
-            // Admin: manda sucursal elegida
-            // Usuario: NO manda sucursal (o si la manda, el backend la pisa)
             let url = `/api/reporte/comparativo-ventas?fechaRef=${encodeURIComponent(fParam)}`;
 
             if (user.rol === 'admin') {
@@ -286,7 +309,7 @@
 
             let headHtml = `<tr><th class="row-header">METRICA</th>`;
             data.forEach(d => {
-                const esHoy = (d.FechaIso || '').split('T')[0] === hoyIso;
+                const esHoy = (d.FechaYMD || '') === hoyIso;
                 headHtml += `
                     <th class="${esHoy ? 'today-highlight' : ''}" style="position: relative;">
                         ${esHoy ? '<span class="today-badge">HOY</span>' : ''}
@@ -305,12 +328,13 @@
             rows.forEach(row => {
                 bodyHtml += `<tr><td class="row-header">${row.label}</td>`;
                 data.forEach(d => {
-                    const esHoy = (d.FechaIso || '').split('T')[0] === hoyIso;
+                    const esHoy = (d.FechaYMD || '') === hoyIso;
 
-                    // si viene string, lo dejamos; si viene number, lo formateamos
                     const valNum = d[row.valPure];
                     const displayVal = row.type === 'num'
-                        ? (typeof d[row.actStr] === 'number' ? d[row.actStr].toLocaleString('es-AR') : d[row.actStr])
+                        ? (typeof d[row.actStr] === 'number'
+                            ? d[row.actStr].toLocaleString('es-AR')
+                            : d[row.actStr])
                         : d[row.actStr];
 
                     bodyHtml += `
@@ -325,6 +349,7 @@
                 bodyHtml += `</tr>`;
             });
             tbody.innerHTML = bodyHtml;
+
         } catch (err) {
             tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-danger">Error de carga.</td></tr>`;
         }

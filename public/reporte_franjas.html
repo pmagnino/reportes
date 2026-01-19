@@ -4,63 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mimo & Co | Franjas Horarias</title>
-
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
-
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- AUTH -->
+    
     <script src="auth.js"></script>
-
+    
     <style>
         :root { --navy: #1e293b; --slate-500: #64748b; }
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; -webkit-font-smoothing: antialiased; }
-
+        
         .header-bar { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 55px; }
-        .header-left { display:flex; align-items:center; gap: 12px; text-decoration:none; color:white; }
+        .header-left { display: flex; align-items: center; gap: 12px; text-decoration: none; color: white; }
         .header-bar img { height: 26px; background: white; padding: 3px; border-radius: 4px; }
         .header-title { font-family: 'Outfit', sans-serif; font-size: 0.8rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
 
-        .main-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 15px; }
-
-        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .main-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 10px; }
+        .card-pro { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; }
-        .form-select, .form-control { font-size: 13px; border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; }
-
-        .chart-container { height: 200px; position: relative; width: 100%; }
+        
+        .form-select, .form-control { font-size: 13px; border-radius: 8px; height: 40px; border: 1px solid #cbd5e1; }
+        
+        /* Ajuste de tamaño de gráficos */
+        .chart-wrapper { position: relative; height: 180px; width: 100%; margin: 0 auto; }
 
         .table-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
         .table thead th { background: #f8fafc; font-family: 'Outfit', sans-serif; font-size: 9px; text-transform: uppercase; color: var(--slate-500); padding: 12px 15px; border-bottom: 2px solid #f1f5f9; }
-        .table tbody td { padding: 12px 15px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; font-variant-numeric: tabular-nums; font-weight: 400; font-size: 12px; }
-
+        .table tbody td { padding: 10px 15px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; font-variant-numeric: tabular-nums; font-weight: 400; font-size: 12px; }
+        
         .row-total-highlight td { background-color: var(--navy) !important; color: white !important; font-weight: 700 !important; font-size: 13px !important; }
-
         .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 8px; height: 40px; border: none; width: 100%; }
-        .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-bottom: 15px; }
-
-        /* Bloque "mi sucursal" (cuando no es admin) */
-        #miSucursalBox { display:none; }
-        #miSucursalBox .pill {
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 10px 12px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            font-weight: 700;
-            color: var(--navy);
-        }
 
         @media (max-width: 576px) {
             .header-title { font-size: 0.7rem; }
-            .main-content { padding: 10px; }
-            .table tbody td { padding: 10px; font-size: 11px; }
-            .chart-container { height: 180px; }
+            .chart-wrapper { height: 160px; }
+            .main-content { padding: 8px; }
         }
     </style>
 </head>
@@ -71,28 +54,16 @@
         <img src="Logo.png" alt="Mimo">
         <span class="header-title">Ventas por Franja Horaria</span>
     </a>
-
-    <div class="ms-auto">
-        <button class="btn btn-sm btn-outline-light" onclick="logout()">Salir</button>
-    </div>
+    <button class="btn btn-sm btn-outline-light" onclick="logout()" style="font-size: 10px;">Salir</button>
 </div>
 
 <div class="main-content">
     <div class="card-pro">
         <div class="row g-2 align-items-end">
-
-            <!-- Admin ve selector -->
-            <div class="col-12 col-md-4" id="sucursalSelectBox">
+            <div class="col-12 col-md-4">
                 <span class="label-sm">Sucursal</span>
                 <select id="sucursal" class="form-select shadow-none"></select>
             </div>
-
-            <!-- Usuario ve "Mi sucursal" -->
-            <div class="col-12 col-md-4" id="miSucursalBox">
-                <span class="label-sm">Sucursal</span>
-                <div class="pill" id="miSucursalNombre">Mi sucursal</div>
-            </div>
-
             <div class="col-6 col-md-3">
                 <span class="label-sm">Desde</span>
                 <input type="date" id="desde" class="form-control shadow-none">
@@ -108,21 +79,17 @@
     </div>
 
     <div id="cont-resultados" style="display: none;">
-        <div class="info-note">
-            Analisis basado en hora de emision del ticket (Venta Neta).
-        </div>
-
-        <div class="row g-3 mb-3">
+        <div class="row g-2 mb-2">
             <div class="col-12 col-md-6">
-                <div class="card-pro">
-                    <span class="label-sm mb-2 text-center">Tickets por Turno</span>
-                    <div class="chart-container"><canvas id="chartBarras"></canvas></div>
+                <div class="card-pro text-center">
+                    <span class="label-sm mb-2">Tickets por Turno</span>
+                    <div class="chart-wrapper"><canvas id="chartBarras"></canvas></div>
                 </div>
             </div>
             <div class="col-12 col-md-6">
-                <div class="card-pro">
-                    <span class="label-sm mb-2 text-center">Facturacion Diaria</span>
-                    <div class="chart-container"><canvas id="chartTorta"></canvas></div>
+                <div class="card-pro text-center">
+                    <span class="label-sm mb-2">Distribución Facturación</span>
+                    <div class="chart-wrapper"><canvas id="chartTorta"></canvas></div>
                 </div>
             </div>
         </div>
@@ -131,9 +98,9 @@
             <table class="table mb-0">
                 <thead>
                     <tr>
-                        <th>Turno</th>
-                        <th class="text-center">Tks</th>
-                        <th class="text-end">Monto Neto</th>
+                        <th>Turno Horario</th>
+                        <th class="text-center">Tickets</th>
+                        <th class="text-end">Venta Neta</th>
                     </tr>
                 </thead>
                 <tbody id="res-body"></tbody>
@@ -145,124 +112,81 @@
 <script>
     let chart1, chart2;
     const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 });
+    const paletaFranjas = ['#3b82f6', '#10b981', '#f59e0b'];
 
-    // Nota: no fuerzo colores desde JS; Chart.js usa defaults.
+    // Asegura la fecha de Argentina
+    function getHoyArgentina() {
+        return new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'America/Argentina/Buenos_Aires',
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        }).format(new Date());
+    }
+
     async function init() {
-        if (!protectPage()) return;
+        // 1. Seteamos las fechas inmediatamente (1er dia mes y Hoy)
+        const hoy = getHoyArgentina();
+        const partes = hoy.split('-');
+        document.getElementById('desde').value = `${partes[0]}-${partes[1]}-01`;
+        document.getElementById('hasta').value = hoy;
 
-        const user = getUser();
-
+        // 2. Cargar sucursales sin bloquear la página
         try {
-            // Sucursales (protegido)
-            const res = await authFetch('/api/sucursales');
-            const sucs = await res.json();
-
-            if (user.rol === 'admin') {
-                document.getElementById('sucursalSelectBox').style.display = 'block';
-                document.getElementById('miSucursalBox').style.display = 'none';
-
-                document.getElementById('sucursal').innerHTML =
-                    sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-            } else {
-                document.getElementById('sucursalSelectBox').style.display = 'none';
-                document.getElementById('miSucursalBox').style.display = 'block';
-
-                const s = sucs[0];
-                document.getElementById('miSucursalNombre').innerText =
-                    s ? `${s.NOMBRE} (Suc. ${s.CODSUC})` : `Sucursal ${user.sucursal}`;
+            const resSuc = await authFetch('/api/sucursales');
+            if (resSuc.ok) {
+                const sucs = await resSuc.json();
+                document.getElementById('sucursal').innerHTML = sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+                // 3. Ejecutar consulta automática
+                consultar();
             }
-
-            // Fecha hoy (protegido)
-            const resF = await authFetch('/api/util/fecha-hoy');
-            const { hoy } = await resF.json();
-            document.getElementById('desde').value = document.getElementById('hasta').value = hoy;
-
-        } catch (e) {
-            console.error(e);
-        }
+        } catch (e) { console.error("Error cargando sucursales"); }
     }
 
     async function consultar() {
         const btn = document.querySelector('.btn-consultar');
         const resBody = document.getElementById('res-body');
-
         btn.disabled = true;
-        btn.innerText = "PROCESANDO...";
+        btn.innerText = "BUSCANDO...";
         resBody.innerHTML = `<tr><td colspan="3" class="text-center p-5"><div class="spinner-border spinner-border-sm text-primary"></div></td></tr>`;
 
         try {
-            const user = getUser();
+            const suc = document.getElementById('sucursal').value;
             const d = document.getElementById('desde').value;
             const h = document.getElementById('hasta').value;
 
-            let url = `/api/reporte/franjas?desde=${encodeURIComponent(d)}&hasta=${encodeURIComponent(h)}`;
-            if (user.rol === 'admin') {
-                const suc = document.getElementById('sucursal').value;
-                url += `&sucursal=${encodeURIComponent(suc)}`;
-            }
-
-            const res = await authFetch(url);
+            const res = await authFetch(`/api/reporte/franjas?sucursal=${suc}&desde=${d}&hasta=${h}`);
+            if (!res.ok) throw new Error();
             const data = await res.json();
-
+            
             document.getElementById('cont-resultados').style.display = 'block';
-
-            let tT = 0, tV = 0;
-            let html = (Array.isArray(data) ? data : []).map(r => {
-                tT += r.TICKETS;
-                tV += r.TOTAL_VENTAS;
-                return `
-                    <tr>
-                        <td class="fw-semibold">${r.FRANJA}</td>
-                        <td class="text-center">${r.TICKETS}</td>
-                        <td class="text-end fw-bold">${fmt.format(r.TOTAL_VENTAS)}</td>
-                    </tr>`;
+            
+            let tT = 0, tV = 0; 
+            let html = data.map(r => { 
+                tT += r.TICKETS; tV += r.TOTAL_VENTAS; 
+                return `<tr><td class="fw-semibold">${r.FRANJA}</td><td class="text-center">${r.TICKETS}</td><td class="text-end fw-bold">${fmt.format(r.TOTAL_VENTAS)}</td></tr>`; 
             }).join('');
 
-            html += `
-                <tr class="row-total-highlight">
-                    <td>TOTAL</td>
-                    <td class="text-center">${tT}</td>
-                    <td class="text-end">${fmt.format(tV)}</td>
-                </tr>`;
-
+            html += `<tr class="row-total-highlight"><td>TOTAL RED</td><td class="text-center">${tT}</td><td class="text-end">${fmt.format(tV)}</td></tr>`;
             resBody.innerHTML = html;
 
-            if (chart1) chart1.destroy();
+            if (chart1) chart1.destroy(); 
             if (chart2) chart2.destroy();
 
-            const commonOptions = {
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
-            };
-
-            chart1 = new Chart(document.getElementById('chartBarras'), {
-                type: 'bar',
-                data: {
-                    labels: data.map(r => (r.FRANJA || '').split(' ')[0]),
-                    datasets: [{ data: data.map(r => r.TICKETS), borderRadius: 6 }]
-                },
-                options: commonOptions
+            chart1 = new Chart(document.getElementById('chartBarras'), { 
+                type: 'bar', 
+                data: { labels: data.map(r => r.FRANJA.split(' ')[0]), datasets: [{ data: data.map(r => r.TICKETS), backgroundColor: paletaFranjas, borderRadius: 6 }] }, 
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } 
             });
 
-            chart2 = new Chart(document.getElementById('chartTorta'), {
-                type: 'doughnut',
-                data: {
-                    labels: data.map(r => r.FRANJA),
-                    datasets: [{ data: data.map(r => r.TOTAL_VENTAS), borderWidth: 2, borderColor: '#ffffff' }]
-                },
-                options: {
-                    ...commonOptions,
-                    cutout: '70%',
-                    plugins: {
-                        legend: { display: true, position: 'bottom', labels: { boxWidth: 8, font: { size: 9 } } }
-                    }
-                }
+            chart2 = new Chart(document.getElementById('chartTorta'), { 
+                type: 'doughnut', 
+                data: { labels: data.map(r => r.FRANJA), datasets: [{ data: data.map(r => r.TOTAL_VENTAS), backgroundColor: paletaFranjas, borderWidth: 2, borderColor: '#ffffff' }] }, 
+                options: { maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } } 
             });
 
-        } catch (err) {
-            resBody.innerHTML = `<tr><td colspan="3" class="alert alert-danger">Error: ${err.message}</td></tr>`;
-        } finally {
-            btn.disabled = false;
+        } catch (err) { 
+            resBody.innerHTML = `<tr><td colspan="3" class="alert alert-danger">Error de datos</td></tr>`; 
+        } finally { 
+            btn.disabled = false; 
             btn.innerText = "EJECUTAR";
         }
     }

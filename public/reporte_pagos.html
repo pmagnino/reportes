@@ -13,212 +13,199 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- AUTH -->
     <script src="auth.js"></script>
 
     <style>
         :root { --navy:#1e293b; --slate-500:#64748b; }
-        body { background:#f8fafc; font-family:'Inter',sans-serif; font-size:13px; }
-
-        .header-bar {
-            background:var(--navy); color:white;
-            padding:0 20px; height:55px;
-            display:flex; align-items:center; justify-content:space-between;
-        }
-        .header-left { display:flex; align-items:center; gap:12px; text-decoration:none; color:white; }
-        .header-bar img { height:26px; background:white; padding:3px; border-radius:4px; }
-        .header-title { font-family:'Outfit'; font-size:.8rem; text-transform:uppercase; font-weight:600; }
-
-        .main-content { max-width:1000px; margin:0 auto; padding:15px; }
-
-        .card-pro {
-            background:white; border-radius:12px; border:1px solid #e2e8f0;
-            padding:15px; margin-bottom:20px;
-        }
-
-        .label-sm {
-            font-size:9px; font-weight:800; color:var(--slate-500);
-            text-transform:uppercase; margin-bottom:4px; display:block;
-        }
-
-        .form-select,.form-control {
-            font-size:13px; border-radius:8px; height:40px;
-            border:1px solid #cbd5e1;
-        }
-
+        body { background:#f8fafc; font-family:'Inter',sans-serif; font-size:13px; -webkit-font-smoothing: antialiased; }
+        .header-bar { background:var(--navy); color:white; padding:0 15px; height:55px; display:flex; align-items:center; justify-content:space-between; }
+        .header-left { display:flex; align-items:center; gap:10px; text-decoration:none; color:white; }
+        .header-bar img { height:24px; background:white; padding:3px; border-radius:4px; }
+        .header-title { font-family:'Outfit'; font-size:.75rem; text-transform:uppercase; font-weight:600; }
+        .main-content { width: 100%; max-width:1000px; margin:0 auto; padding:10px; }
+        .card-pro { background:white; border-radius:12px; border:1px solid #e2e8f0; padding:12px; margin-bottom:15px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .label-sm { font-size:9px; font-weight:800; color:var(--slate-500); text-transform:uppercase; margin-bottom:4px; display:block; }
+        .form-control, .form-select { font-size:13px; border-radius:8px; height:38px; border:1px solid #cbd5e1; }
+        .chart-wrapper { position: relative; margin: 0 auto; height: 180px; width: 100%; }
+        .table-card { background:white; border-radius:12px; border:1px solid #e2e8f0; overflow:hidden; }
+        .row-total-highlight td { background:var(--navy)!important; color:white!important; font-weight:800!important; font-size: 13px; }
+        
+        /* Bloque "mi sucursal" */
         #miSucursalBox { display:none; }
         #miSucursalBox .pill {
-            background:#f1f5f9; border:1px solid #e2e8f0;
-            border-radius:10px; height:40px;
-            display:flex; align-items:center; padding:0 12px;
-            font-weight:700; color:var(--navy);
-        }
-
-        .btn-consultar {
-            background:var(--navy); color:white;
-            font-size:11px; font-weight:700;
-            border-radius:8px; height:40px; border:none; width:100%;
-        }
-
-        .table-card {
-            background:white; border-radius:12px;
-            border:1px solid #e2e8f0; overflow:hidden;
-        }
-
-        .row-total-highlight td {
-            background:var(--navy)!important; color:white!important;
-            font-weight:800!important;
+            background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px;
+            height: 38px; display: flex; align-items: center; font-weight: 700; color: var(--navy);
         }
     </style>
 </head>
 
 <body onload="init()">
-
 <div class="header-bar shadow-sm">
     <a class="header-left" href="reporte_index.html">
         <img src="Logo.png">
         <span class="header-title">Medios de Pago</span>
     </a>
-    <button class="btn btn-sm btn-outline-light" onclick="logout()">Salir</button>
+    <button class="btn btn-sm btn-outline-light py-1" onclick="logout()" style="font-size: 10px;">Salir</button>
 </div>
 
 <div class="main-content">
-
     <div class="card-pro">
         <div class="row g-2 align-items-end">
-
-            <!-- Admin -->
-            <div class="col-12 col-md-4" id="sucursalSelectBox">
+            <div class="col-12 col-md-4" id="sucursalSelectBox" style="display:none">
                 <span class="label-sm">Sucursal</span>
-                <select id="sucursal" class="form-select"></select>
+                <select id="sucursal" class="form-select shadow-none"></select>
             </div>
-
-            <!-- Usuario -->
             <div class="col-12 col-md-4" id="miSucursalBox">
                 <span class="label-sm">Sucursal</span>
-                <div class="pill" id="miSucursalNombre"></div>
+                <div class="pill" id="miSucursalNombre">Mi sucursal</div>
             </div>
 
             <div class="col-6 col-md-3">
                 <span class="label-sm">Desde</span>
                 <input type="date" id="desde" class="form-control">
             </div>
-
             <div class="col-6 col-md-3">
                 <span class="label-sm">Hasta</span>
                 <input type="date" id="hasta" class="form-control">
             </div>
-
             <div class="col-12 col-md-2">
-                <button class="btn-consultar" onclick="consultar()">EJECUTAR</button>
+                <button class="btn btn-dark w-100 fw-bold" onclick="consultar()" style="height:38px; font-size:11px">EJECUTAR</button>
             </div>
         </div>
     </div>
 
     <div id="cont-resultados" style="display:none">
-
-        <div class="card-pro">
-            <canvas id="chartPagos" height="220"></canvas>
+        <div class="card-pro text-center">
+            <div class="chart-wrapper"><canvas id="chartPagos"></canvas></div>
         </div>
-
-        <div class="table-card">
+        <div class="table-card shadow-sm mb-4">
             <table class="table mb-0">
-                <thead>
-                    <tr>
-                        <th>Medio</th>
-                        <th class="text-center">Tks</th>
-                        <th class="text-end">Importe</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Medio</th><th class="text-center">Tks</th><th class="text-end">Importe</th></tr></thead>
                 <tbody id="res-body"></tbody>
             </table>
         </div>
-
     </div>
 </div>
 
 <script>
 let chart;
 
+function getHoyArgentina() {
+    return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Argentina/Buenos_Aires',
+        year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(new Date());
+}
+
 async function init() {
     if (!protectPage()) return;
 
+    // Seteamos fechas de inmediato
+    const hoy = getHoyArgentina();
+    document.getElementById('desde').value = hoy;
+    document.getElementById('hasta').value = hoy;
+
     const user = getUser();
 
-    const res = await authFetch('/api/sucursales');
-    const sucs = await res.json();
-
-    if (user.rol === 'admin') {
-        document.getElementById('sucursalSelectBox').style.display = 'block';
-        document.getElementById('miSucursalBox').style.display = 'none';
-        document.getElementById('sucursal').innerHTML =
-            sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
-    } else {
-        document.getElementById('sucursalSelectBox').style.display = 'none';
-        document.getElementById('miSucursalBox').style.display = 'block';
-        document.getElementById('miSucursalNombre').innerText =
-            `${sucs[0].NOMBRE} (Suc. ${sucs[0].CODSUC})`;
+    try {
+        const res = await authFetch('/api/sucursales');
+        const sucs = await res.json();
+        
+        if (user.rol === 'admin') {
+            document.getElementById('sucursalSelectBox').style.display = 'block';
+            document.getElementById('miSucursalBox').style.display = 'none';
+            document.getElementById('sucursal').innerHTML = sucs.map(s => `<option value="${s.CODSUC}">${s.NOMBRE}</option>`).join('');
+        } else {
+            document.getElementById('sucursalSelectBox').style.display = 'none';
+            document.getElementById('miSucursalBox').style.display = 'block';
+            const s = Array.isArray(sucs) && sucs.length > 0 ? sucs[0] : null;
+            document.getElementById('miSucursalNombre').innerText = s ? `${s.NOMBRE} (Suc. ${s.CODSUC})` : `Sucursal ${user.sucursal}`;
+        }
+        
+        // Ejecutamos consulta inicial
+        consultar();
+    } catch (e) {
+        console.error("Error en inicialización:", e);
     }
-
-    const resF = await authFetch('/api/util/fecha-hoy');
-    const { hoy } = await resF.json();
-    document.getElementById('desde').value =
-    document.getElementById('hasta').value = hoy;
 }
 
 async function consultar() {
-    const btn = document.querySelector('.btn-consultar');
+    const resContainer = document.getElementById('cont-resultados');
     const tbody = document.getElementById('res-body');
+    const btn = document.querySelector('button[onclick="consultar()"]');
+    
     btn.disabled = true;
+    btn.innerText = "PROCESANDO...";
 
     try {
+        const d = document.getElementById('desde').value;
+        const h = document.getElementById('hasta').value;
         const user = getUser();
-        const d = desde.value;
-        const h = hasta.value;
-
+        
+        // Si es admin saca del select, si no, la sucursal viene del token (backend)
         let url = `/api/reporte/medios-pago?desde=${d}&hasta=${h}`;
         if (user.rol === 'admin') {
-            url += `&sucursal=${sucursal.value}`;
+            const suc = document.getElementById('sucursal').value;
+            url += `&sucursal=${suc}`;
         }
 
         const res = await authFetch(url);
         const data = await res.json();
 
-        document.getElementById('cont-resultados').style.display = 'block';
-
+        resContainer.style.display = 'block';
         let labels=[], values=[], html="", tT=0, tI=0;
 
-        data.forEach(r=>{
-            tT+=r.TICKETS; tI+=r.TOTAL_NETO;
-            labels.push(r.MEDIO); values.push(r.TOTAL_NETO);
-            html+=`<tr>
-                <td>${r.MEDIO}</td>
-                <td class="text-center">${r.TICKETS}</td>
-                <td class="text-end">${r.TOTAL_NETO.toLocaleString('es-AR',{style:'currency',currency:'ARS'})}</td>
-            </tr>`;
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-muted">Sin datos en este periodo.</td></tr>`;
+            if (chart) chart.destroy();
+            return;
+        }
+
+        data.forEach(r => {
+            tT += (r.TICKETS || 0); 
+            tI += (r.TOTAL_NETO || 0);
+            labels.push(r.MEDIO); 
+            values.push(r.TOTAL_NETO);
+            html += `<tr>
+                        <td>${r.MEDIO}</td>
+                        <td class="text-center">${r.TICKETS}</td>
+                        <td class="text-end">${r.TOTAL_NETO.toLocaleString('es-AR',{style:'currency',currency:'ARS', minimumFractionDigits: 0})}</td>
+                     </tr>`;
         });
 
-        html+=`<tr class="row-total-highlight">
-            <td>TOTAL</td><td class="text-center">${tT}</td>
-            <td class="text-end">${tI.toLocaleString('es-AR',{style:'currency',currency:'ARS'})}</td>
-        </tr>`;
-
+        html += `<tr class="row-total-highlight">
+                    <td>TOTAL</td>
+                    <td class="text-center">${tT}</td>
+                    <td class="text-end">${tI.toLocaleString('es-AR',{style:'currency',currency:'ARS', minimumFractionDigits: 0})}</td>
+                 </tr>`;
         tbody.innerHTML = html;
 
+        // Renderizar Chart
         if (chart) chart.destroy();
-        chart = new Chart(chartPagos,{
-            type:'doughnut',
-            data:{labels,datasets:[{data:values}]},
-            options:{cutout:'70%',plugins:{legend:{position:'bottom'}}}
+        chart = new Chart(document.getElementById('chartPagos'), {
+            type: 'doughnut',
+            data: { 
+                labels, 
+                datasets: [{ 
+                    data: values, 
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'] 
+                }] 
+            },
+            options: { 
+                maintainAspectRatio: false, 
+                cutout: '70%', 
+                plugins: { 
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } 
+                } 
+            }
         });
-
-    } catch(e){
-        tbody.innerHTML = `<tr><td colspan="3" class="text-danger text-center">Error</td></tr>`;
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Error al cargar datos. Reintente.</td></tr>`;
     } finally {
         btn.disabled = false;
+        btn.innerText = "EJECUTAR";
     }
 }
 </script>
-
 </body>
 </html>

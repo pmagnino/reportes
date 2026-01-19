@@ -10,7 +10,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <!-- AUTH -->
     <script src="auth.js"></script>
 
     <style>
@@ -163,7 +162,7 @@
     <div class="d-flex align-items-center">
         <a href="reporte_index.html" style="text-decoration:none; color:white; display:flex; align-items:center;">
             <img src="Logo.png" alt="Mimo">
-            <span class="header-title">Consolidado Red</span>
+            <span class="header-title">Ventas Consolidadas Franquicias</span>
         </a>
     </div>
 
@@ -213,8 +212,38 @@
         }).format(new Date());
     }
 
+    // EL GUARDIÁN DE ACCESO
+    function verificarAcceso() {
+        const user = getUser();
+        if (user.rol !== 'admin') {
+            document.body.innerHTML = `
+                <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #f1f5f9; font-family: 'Inter', sans-serif; padding: 20px;">
+                    <div style="max-width: 450px; width: 100%; background: white; padding: 40px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); text-align: center;">
+                        <div style="width: 80px; height: 80px; background: #fef2f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                            <i class="bi bi-shield-lock" style="font-size: 35px; color: #dc2626;"></i>
+                        </div>
+                        <h2 style="color: #1e293b; font-size: 22px; font-weight: 800; margin-bottom: 12px; font-family: 'Outfit', sans-serif;">
+                            FORMULARIO NO DISPONIBLE
+                        </h2>
+                        <p style="color: #64748b; font-size: 15px; line-height: 1.6; margin-bottom: 32px;">
+                            Lo sentimos, su perfil de usuario (<strong>${user.sucursal || 'Sucursal'}</strong>) no tiene permisos para acceder a reportes consolidados de administración central.
+                        </p>
+                        <a href="reporte_index.html" style="display: inline-block; background: #1e293b; color: white; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-weight: 700; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            VOLVER AL PANEL PRINCIPAL
+                        </a>
+                        <div style="margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 20px;">
+                            <img src="Logo.png" alt="Mimo" style="height: 20px; opacity: 0.5;">
+                        </div>
+                    </div>
+                </div>`;
+            return false;
+        }
+        return true;
+    }
+
     function init() {
         if (!protectPage()) return;
+        if (!verificarAcceso()) return; // Bloquear si no es admin
 
         const hoy = getHoyArgentina();
         let d = new Date(hoy + 'T12:00:00');
@@ -224,6 +253,9 @@
 
         document.getElementById('desde').value = lunes;
         document.getElementById('hasta').value = hoy;
+        
+        // Ejecución automática inicial para Admin
+        consultar();
     }
 
     async function consultar() {
@@ -249,14 +281,12 @@
 
             const keys = Object.keys(data[0]);
 
-            // 1) Cabecera
             resHead.innerHTML = `<tr>${keys.map(k => {
                 let label = k === 'TOTAL_SUCURSAL' ? 'TOTAL' : k.substring(0, 5);
                 let css = k === 'SUCURSAL' ? 'sticky-suc' : (k === 'TOTAL_SUCURSAL' ? 'col-total' : '');
                 return `<th class="${css}">${label}</th>`;
             }).join('')}</tr>`;
 
-            // 2) Cuerpo
             resBody.innerHTML = data.map(row => `
                 <tr>
                     ${keys.map(k => {
@@ -270,7 +300,6 @@
                 </tr>
             `).join('');
 
-            // 3) Pie
             let footHtml = `<tr><td class="sticky-suc">RED</td>`;
             keys.forEach((k, index) => {
                 if (index === 0) return;

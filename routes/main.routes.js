@@ -76,7 +76,7 @@ router.get('/api/sucursales', authRequired, async (req, res) => {
 // REPORTES (PROTEGIDOS)
 // =============================
 
-// --- 1. COMPARATIVO (JSON EXACTO PARA reporte_comparativo.html) ---
+// --- 1. COMPARATIVO (FIX TIMEZONE: devuelve FechaYMD sin UTC) ---
 // Front llama: /api/reporte/comparativo-ventas?fechaRef=YYYY-MM-DD&sucursal=201 (solo admin)
 router.get('/api/reporte/comparativo-ventas', authRequired, async (req, res) => {
   const sucursal = getSucursalFromReq(req);
@@ -86,6 +86,7 @@ router.get('/api/reporte/comparativo-ventas', authRequired, async (req, res) => 
     if (!fechaRef) {
       return res.status(400).json({ error: 'fechaRef es obligatorio (YYYY-MM-DD)' });
     }
+
     const sucInt = parseInt(sucursal, 10);
     if (!sucInt || Number.isNaN(sucInt)) {
       return res.status(400).json({ error: 'Sucursal invalida (admin por query, usuario por token)' });
@@ -93,11 +94,7 @@ router.get('/api/reporte/comparativo-ventas', authRequired, async (req, res) => 
 
     const pool = await poolMainPromise;
 
-    // Genera semana (Lun-Dom) a partir de fechaRef (DATEFIRST 1 => lunes=1)
-    // Calcula:
-    // - Act: ventas netas y unidades del dia
-    // - Sem: mismo dia semana anterior (dia-7)
-    // - Mes: mismo dia 4 semanas atras (dia-28)  (sirve como "mes" comparable fijo)
+    // Semana Lun-Dom desde fechaRef (DATEFIRST 1 => lunes=1)
     const q = `
       SET DATEFIRST 1;
 
@@ -142,6 +139,8 @@ router.get('/api/reporte/comparativo-ventas', authRequired, async (req, res) => 
       )
       SELECT
         D.Fecha AS Fecha,
+        CONVERT(varchar(10), D.Fecha, 23) AS FechaYMD, -- ✅ YYYY-MM-DD sin timezone
+
         ISNULL(A0.Monto, 0) AS MontoAct,
         ISNULL(U0.Unidades, 0) AS UniAct,
 
@@ -175,40 +174,47 @@ router.get('/api/reporte/comparativo-ventas', authRequired, async (req, res) => 
     });
 
     const diaSemanaEs = (jsDate) => {
-      // jsDate es Date local; usamos getDay() (0=Dom..6=Sab)
-      const d = jsDate.getDay();
-      return ([
-        'DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'
-      ])[d] || '';
+      const d = jsDate.getDay(); // 0=Dom..6=Sab
+      return (['DOM', 'LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB'])[d] || '';
     };
 
     const pad2 = (n) => String(n).padStart(2, '0');
-    const ddmmaa = (jsDate) => `${pad2(jsDate.getDate())}/${pad2(jsDate.getMonth() + 1)}/${jsDate.getFullYear()}`;
+    const ddmmaaFromYMD = (ymd) => {
+      const [Y, M, D] = ymd.split('-');
+      return `${D}/${M}/${Y}`;
+    };
 
-    const payload = result.recordset.map(r => {
-      const fecha = new Date(r.Fecha); // viene como Date
-      const fechaIso = fecha.toISOString(); // sirve para el split('T')[0] del front
-      const fechaLabel = ddmmaa(fecha);
+    const addDaysLabel = (ymd, days) => {
+      const dt = new Date(`${ymd}T12:00:00`); // mediodía para evitar corrimientos
+      dt.setDate(dt.getDate() + days);
+      return `${pad2(dt.getDate())}/${pad2(dt.getMonth() + 1)}/${dt.getFullYear()}`;
+    };
 
-      const fSem = new Date(fecha); fSem.setDate(fSem.getDate() - 7);
-      const fMes = new Date(fecha); fMes.setDate(fMes.getDate() - 28);
+    const payload = (result.recordset || []).map(r => {
+      const fechaYMD = r.FechaYMD;               // ✅ clave (sin UTC)
+      const fechaForLabels = new Date(`${fechaYMD}T12:00:00`);
 
       const montoAct = Number(r.MontoAct || 0);
       const uniAct = Number(r.UniAct || 0);
 
       return {
-        FechaIso: fechaIso,
-        FechaLabel: fechaLabel,
-        DiaSemana: diaSemanaEs(fecha),
+        // ✅ usar esto en el front
+        FechaYMD: fechaYMD,
+
+        // Si tu front todavía usa FechaIso, te lo dejo compatible (pero SIN Z):
+        FechaIso: `${fechaYMD}T00:00:00`,
+
+        FechaLabel: ddmmaaFromYMD(fechaYMD),
+        DiaSemana: diaSemanaEs(fechaForLabels),
 
         MontoAct: montoAct,
         MontoActStr: moneyFmt.format(montoAct),
 
         MontoSem: Number(r.MontoSem || 0),
-        LabelSem: ddmmaa(fSem),
+        LabelSem: addDaysLabel(fechaYMD, -7),
 
         MontoMes: Number(r.MontoMes || 0),
-        LabelMes: ddmmaa(fMes),
+        LabelMes: addDaysLabel(fechaYMD, -28),
 
         UniAct: uniAct,
         UniSem: Number(r.UniSem || 0),
@@ -221,8 +227,44 @@ router.get('/api/reporte/comparativo-ventas', authRequired, async (req, res) => 
     return res.status(500).json({ error: err.message });
   }
 });
+// --- 3. MEDIOS DE PAGO ---
+router.get('/api/reporte/medios-pago', authRequired, async (req, res) => {
+  const sucursal = getSucursalFromReq(req);
+  const desde = cleanParam(req.query.desde);
+  const hasta = cleanParam(req.query.hasta);
 
+  try {
+    const pool = await poolMainPromise;
+    const result = await pool.request()
+      .input('suc', sql.Int, sucursal)
+      .input('desde', sql.VarChar, desde)
+      .input('hasta', sql.VarChar, hasta)
+      .query(`
+        SELECT Calc.MEDIO, COUNT(DISTINCT A.IdRouter) AS TICKETS,
+        CAST(SUM(CASE WHEN A.CODCMP IN ('CA', 'CB') THEN -A.TOTAL ELSE A.TOTAL END) AS MONEY) AS TOTAL_NETO
+        FROM dbo.QRMVS A
+        CROSS APPLY (
+          SELECT TOP 1 CASE
+            WHEN P.CODPAG = '001' THEN 'EFECTIVO'
+            WHEN P.CODPAG = '100' THEN 'TARJETAS'
+            WHEN P.CODPAG IN ('125','225') THEN 'MERCADO PAGO'
+            ELSE 'EFECTIVO' END AS MEDIO
+          FROM dbo.QRLineasPago P WHERE P.IdRouter = A.IdRouter
+        ) Calc
+        WHERE CAST(A.CODSUC AS VARCHAR) LIKE '%' + CAST(@suc AS VARCHAR)
+          AND A.IDCOMPROBANTE > 0
+          AND A.CODCMP IN ('FA', 'FB', 'CA', 'CB')
+          AND CAST(A.FECHA AS DATE) BETWEEN @desde AND @hasta
+          AND A.ANULADO = 0
+        GROUP BY Calc.MEDIO
+        ORDER BY TOTAL_NETO DESC
+      `);
 
+    return res.json(result.recordset);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
 // --- 2. AUDITORIA DE VENTAS ---
 router.get('/api/facturas', authRequired, async (req, res) => {
   const sucursal = getSucursalFromReq(req);
@@ -316,105 +358,6 @@ router.get('/api/facturas', authRequired, async (req, res) => {
   }
 });
 
-// --- 3. MEDIOS DE PAGO ---
-router.get('/api/reporte/medios-pago', authRequired, async (req, res) => {
-  const sucursal = getSucursalFromReq(req);
-  const desde = cleanParam(req.query.desde);
-  const hasta = cleanParam(req.query.hasta);
-
-  try {
-    const pool = await poolMainPromise;
-    const result = await pool.request()
-      .input('suc', sql.Int, sucursal)
-      .input('desde', sql.VarChar, desde)
-      .input('hasta', sql.VarChar, hasta)
-      .query(`
-        SELECT Calc.MEDIO, COUNT(DISTINCT A.IdRouter) AS TICKETS,
-        CAST(SUM(CASE WHEN A.CODCMP IN ('CA', 'CB') THEN -A.TOTAL ELSE A.TOTAL END) AS MONEY) AS TOTAL_NETO
-        FROM dbo.QRMVS A
-        CROSS APPLY (
-          SELECT TOP 1 CASE
-            WHEN P.CODPAG = '001' THEN 'EFECTIVO'
-            WHEN P.CODPAG = '100' THEN 'TARJETAS'
-            WHEN P.CODPAG IN ('125','225') THEN 'MERCADO PAGO'
-            ELSE 'EFECTIVO' END AS MEDIO
-          FROM dbo.QRLineasPago P WHERE P.IdRouter = A.IdRouter
-        ) Calc
-        WHERE CAST(A.CODSUC AS VARCHAR) LIKE '%' + CAST(@suc AS VARCHAR)
-          AND A.IDCOMPROBANTE > 0
-          AND A.CODCMP IN ('FA', 'FB', 'CA', 'CB')
-          AND CAST(A.FECHA AS DATE) BETWEEN @desde AND @hasta
-          AND A.ANULADO = 0
-        GROUP BY Calc.MEDIO
-        ORDER BY TOTAL_NETO DESC
-      `);
-
-    return res.json(result.recordset);
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-});
-// --- 4. RUBROS (PROTEGIDO) ---
-router.get('/api/reporte/rubros', authRequired, async (req, res) => {
-  const sucursal = getSucursalFromReq(req);
-  const desde = cleanParam(req.query.desde);
-  const hasta = cleanParam(req.query.hasta);
-
-  try {
-    if (!desde || !hasta) {
-      return res.status(400).json({ error: 'desde y hasta son obligatorios (YYYY-MM-DD)' });
-    }
-
-    const sucInt = parseInt(sucursal, 10);
-    if (!sucInt || Number.isNaN(sucInt)) {
-      return res.status(400).json({ error: 'Sucursal invalida (admin por query, usuario por token)' });
-    }
-
-    const pool = await poolMainPromise;
-
-    const result = await pool.request()
-      .input('suc', sql.Int, sucInt)
-      .input('desde', sql.Date, desde)
-      .input('hasta', sql.Date, hasta)
-      .query(`
-        WITH ItemsLimpios AS (
-          SELECT
-            A.IdRouter,
-            B.CODITM,
-            A.CODCMP,
-            ISNULL((
-              SELECT TOP 1 VAL.DESCRIPCION
-              FROM dbo.QRITEMSATRIB ATR
-              INNER JOIN dbo.QRATRIBUTOSVAL VAL
-                ON ATR.CODATR = VAL.CODATR
-               AND ATR.CODATRVAL = VAL.CODATRVAL
-              WHERE ATR.CODITM = B.CODITM
-                AND ATR.CODATR = 'R'
-            ), 'SIN RUBRO') AS RubroNombre,
-            B.CANTIDAD1 AS CantidadFila
-          FROM dbo.QRMVS A
-          INNER JOIN dbo.QRLINEASITEMS B ON A.IdRouter = B.IdRouter
-          WHERE A.CODSUC = @suc
-            AND CAST(A.FECHA AS DATE) BETWEEN @desde AND @hasta
-            AND A.ANULADO = 0
-            AND A.IDCOMPROBANTE > 0
-            AND A.CODCMP IN ('FA', 'FB', 'CA', 'CB')
-            AND B.CODITM NOT LIKE 'DC%'
-        )
-        SELECT
-          RubroNombre AS Rubro,
-          CAST(SUM(CASE WHEN CODCMP IN ('CA', 'CB') THEN -CantidadFila ELSE CantidadFila END) AS INT) AS TotalUnidades
-        FROM ItemsLimpios
-        GROUP BY RubroNombre
-        ORDER BY TotalUnidades DESC;
-      `);
-
-    return res.json(result.recordset);
-  } catch (err) {
-    console.error('ERROR /api/reporte/rubros:', err);
-    return res.status(500).json({ error: err.message });
-  }
-});
 
 // --- 12. DESCUENTOS (PROTEGIDO) ---
 router.get('/api/reporte/auditoria-descuentos', authRequired, async (req, res) => {
@@ -756,7 +699,7 @@ router.get('/api/reporte/stock-valorizado', authRequired, async (req, res) => {
         OUTER APPLY (
           SELECT TOP 1 PRECIO
           FROM dbo.QRLISTASPRECIOS
-          WHERE CODITM = A.CODITM AND CODLIS = 'PCI'
+          WHERE CODITM = A.CODITM AND CODLIS = 'MAY'
         ) P
         OUTER APPLY (
           SELECT TOP 1 VAL.DESCRIPCION AS RUBRO_DESC
@@ -781,7 +724,7 @@ router.get('/api/reporte/stock-valorizado', authRequired, async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
-// --- 8. LOGISTICA (IE/EE) (PROTEGIDO) ---
+// --- 8. LOGISTICA Y SEGUIMIENTO DE ARTICULOS (CORREGIDO IDCOMPROBANTE) ---
 router.get('/api/reporte/logistica', authRequired, async (req, res) => {
   const sucursal = getSucursalFromReq(req);
   const desde = cleanParam(req.query.desde);
@@ -790,12 +733,12 @@ router.get('/api/reporte/logistica', authRequired, async (req, res) => {
 
   try {
     if (!desde || !hasta) {
-      return res.status(400).json({ error: 'desde y hasta son obligatorios (YYYY-MM-DD)' });
+      return res.status(400).json({ error: 'desde y hasta son obligatorios' });
     }
 
     const sucInt = parseInt(sucursal, 10);
     if (!sucInt || Number.isNaN(sucInt)) {
-      return res.status(400).json({ error: 'Sucursal invalida (admin por query, usuario por token)' });
+      return res.status(400).json({ error: 'Sucursal invalida' });
     }
 
     const pool = await poolMainPromise;
@@ -806,25 +749,33 @@ router.get('/api/reporte/logistica', authRequired, async (req, res) => {
         A.CODCMP,
         A.PREFIJO,
         A.NUMERO,
-        H.DESCRIPCION AS CONCEPTO,
+        ISNULL(H.DESCRIPCION, 
+               CASE 
+                 WHEN A.CODCMP IN ('FA','FB') THEN 'VENTA' 
+                 WHEN A.CODCMP IN ('CA','CB') THEN 'DEVOLUCION'
+                 ELSE 'MOV. GENERAL' 
+               END) AS CONCEPTO,
         B.CODITM,
         CAST(B.CANTIDAD1 AS INT) AS CANT
       FROM dbo.QRMVS A
       INNER JOIN dbo.QRLINEASITEMS B ON A.IdRouter = B.IdRouter
-      INNER JOIN dbo.QRMVSMAT G ON G.IdRouter = A.IdRouter
-      INNER JOIN dbo.QRConceptos H ON G.CodConcepto = H.CODCPT
+      LEFT JOIN dbo.QRMVSMAT G ON G.IdRouter = A.IdRouter
+      LEFT JOIN dbo.QRConceptos H ON G.CodConcepto = H.CODCPT
       WHERE A.CODSUC = @suc
         AND CAST(A.FECHA AS DATE) BETWEEN @desde AND @hasta
-        AND A.CODCMP IN ('EE', 'IE')
-        AND A.IDCOMPROBANTE > 0
+        AND A.IDCOMPROBANTE > 0  -- <--- CORRECCIÓN: SOLO COMPROBANTES REALES
         AND A.ANULADO = 0
     `;
 
+    // Si busca un artículo específico, buscamos en todos los tipos de comprobantes
     if (articulo !== '') {
       q += ` AND B.CODITM LIKE '%' + @art + '%'`;
+    } else {
+      // Si no busca artículo, limitamos a la lista que definiste originalmente
+      q += ` AND A.CODCMP IN ('EE', 'IE','FB','FA','CB','CA','DB','DA')`;
     }
 
-    q += ` ORDER BY A.FECHA DESC;`;
+    q += ` ORDER BY A.FECHA DESC, A.NUMERO DESC;`;
 
     const result = await pool.request()
       .input('suc', sql.Int, sucInt)
@@ -835,7 +786,8 @@ router.get('/api/reporte/logistica', authRequired, async (req, res) => {
 
     const movs = {};
     (result.recordset || []).forEach(r => {
-      const k = `${r.CODCMP}-${r.PREFIJO}-${r.NUMERO}`;
+      // Usamos fecha en la clave para evitar colisiones si hay números iguales en días distintos
+      const k = `${r.CODCMP}-${r.PREFIJO}-${r.NUMERO}-${r.FECHA_STR}`;
       if (!movs[k]) {
         movs[k] = {
           tipo: r.CODCMP,

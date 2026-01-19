@@ -11,15 +11,14 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-    <!-- AUTH -->
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="auth.js"></script>
 
     <style>
         :root { --navy: #1e293b; --slate-500: #64748b; --mimo-blue: #3b82f6; }
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; color: #334155; font-size: 13px; -webkit-font-smoothing: antialiased; }
 
-        /* Navbar */
         .header-bar { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 55px; }
         .header-left { display:flex; align-items:center; gap: 12px; text-decoration:none; color:white; }
         .header-bar img { height: 26px; background: white; padding: 3px; border-radius: 4px; }
@@ -31,14 +30,12 @@
         .label-sm { font-size: 9px; font-weight: 800; color: var(--slate-500); text-transform: uppercase; margin-bottom: 4px; display: block; letter-spacing: 0.5px; }
         .form-select, .form-control { font-size: 13px; border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; }
 
-        .kpi-row-compact {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 10px;
-            margin-bottom: 20px;
-        }
+        .kpi-row-compact { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
         .kpi-card-mini { background: white; padding: 12px 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
         .kpi-val { font-size: 1rem; color: #1e293b; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+        /* Gráfico */
+        .chart-container { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 20px; height: 250px; }
 
         .date-wrapper { margin-bottom: 12px; }
         .date-card { background: white; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; border-left: 4px solid var(--navy); }
@@ -49,31 +46,16 @@
         .badge-tickets { background: #eff6ff; color: #1d4ed8; padding: 3px 10px; border-radius: 20px; font-weight: 700; font-size: 10px; border: 1px solid #dbeafe; }
 
         .btn-consultar { background: var(--navy); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; border-radius: 8px; height: 40px; border: none; width: 100%; }
-        .info-note { font-size: 11px; color: var(--slate-500); font-style: italic; border-left: 3px solid #cbd5e1; padding-left: 10px; margin-top: 20px; }
-
-        /* Admin vs User sucursal UI */
+        
         #miSucursalBox { display:none; }
-        #miSucursalBox .pill {
-            height: 40px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            padding: 0 12px;
-            background: #f1f5f9;
-            font-weight: 800;
-            color: var(--navy);
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
+        #miSucursalBox .pill { height: 40px; border: 1px solid #cbd5e1; border-radius: 8px; display: flex; align-items: center; padding: 0 12px; background: #f1f5f9; font-weight: 800; color: var(--navy); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
         @media (max-width: 576px) {
             .header-title { font-size: 0.7rem; }
             .item-grid { grid-template-columns: 1fr; padding: 15px; gap: 10px; }
             .item-grid > div:first-child { border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
-            .date-header { padding: 10px; }
             .kpi-val { font-size: 0.9rem; }
+            .chart-container { height: 200px; }
         }
     </style>
 </head>
@@ -85,26 +67,20 @@
         <img src="Logo.png" alt="Mimo">
         <span class="header-title">Auditoria de Ticket Promedio</span>
     </a>
-    <button class="btn btn-sm btn-outline-light py-1 px-3" onclick="logout()" style="font-size: 10px; font-weight: 800;">
-        SALIR
-    </button>
+    <button class="btn btn-sm btn-outline-light py-1 px-3" onclick="logout()" style="font-size: 10px; font-weight: 800;">SALIR</button>
 </div>
 
 <div class="main-content">
     <div class="card-pro">
         <div class="row g-2 align-items-end">
-            <!-- Admin -->
             <div class="col-12 col-md-4" id="sucursalSelectBox">
                 <span class="label-sm">Sucursal</span>
                 <select id="sucursal" class="form-select shadow-none"></select>
             </div>
-
-            <!-- Usuario -->
             <div class="col-12 col-md-4" id="miSucursalBox">
                 <span class="label-sm">Sucursal</span>
                 <div class="pill" id="miSucursalNombre">Mi sucursal</div>
             </div>
-
             <div class="col-6 col-md-3">
                 <span class="label-sm">Desde</span>
                 <input type="date" id="desde" class="form-control shadow-none">
@@ -120,6 +96,10 @@
     </div>
 
     <div id="cont-resultados" style="display: none;">
+        <div class="chart-container shadow-sm">
+            <canvas id="mainChart"></canvas>
+        </div>
+
         <div class="kpi-row-compact" id="kpi-container"></div>
         <div id="res-body"></div>
         <div class="info-note">
@@ -129,15 +109,24 @@
 </div>
 
 <script>
-    const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
+    const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
+    let myChart = null;
+
+    function getHoyLocal() {
+        return new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'America/Argentina/Buenos_Aires',
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        }).format(new Date());
+    }
 
     async function init() {
         if (!protectPage()) return;
+        const hoyLocal = getHoyLocal();
+        document.getElementById('desde').value = hoyLocal;
+        document.getElementById('hasta').value = hoyLocal;
 
         try {
             const user = getUser();
-
-            // Sucursales (protegido)
             const res = await authFetch('/api/sucursales');
             const data = await res.json();
 
@@ -154,21 +143,12 @@
                 document.getElementById('miSucursalNombre').innerText =
                     s ? `${s.NOMBRE} (Suc. ${s.CODSUC})` : `Sucursal ${user.sucursal}`;
             }
-
-            // Fecha server (protegido)
-            const resF = await authFetch('/api/util/fecha-hoy');
-            const { hoy } = await resF.json();
-            document.getElementById('desde').value = document.getElementById('hasta').value = hoy;
-
-        } catch (e) {
-            console.error(e);
-        }
+        } catch (e) { console.error(e); }
     }
 
     async function consultar() {
         const btn = document.querySelector('.btn-consultar');
         const resBody = document.getElementById('res-body');
-
         btn.disabled = true;
         btn.innerText = "CALCULANDO...";
         resBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border spinner-border-sm text-primary"></div></div>`;
@@ -178,7 +158,6 @@
             const d = document.getElementById('desde').value;
             const h = document.getElementById('hasta').value;
 
-            // Usuario: NO manda sucursal. Admin: si.
             let url = `/api/reporte/ticket-promedio?desde=${encodeURIComponent(d)}&hasta=${encodeURIComponent(h)}`;
             if (user.rol === 'admin') {
                 const suc = document.getElementById('sucursal').value;
@@ -213,6 +192,10 @@
                 </div>
             `;
 
+            // RENDER GRAFICO (Invertimos datos para que el tiempo corra de izquierda a derecha)
+            const chartData = [...datos].reverse();
+            renderChart(chartData);
+
             // Cards por fecha
             resBody.innerHTML = datos.map(r => {
                 const venta = Number(r.VENTA_NETA) || 0;
@@ -241,13 +224,66 @@
             }).join('');
 
         } catch (err) {
-            resBody.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+            resBody.innerHTML = `<div class="alert alert-danger">Error al cargar datos.</div>`;
         } finally {
             btn.disabled = false;
             btn.innerText = "EJECUTAR";
         }
     }
-</script>
 
+    function renderChart(items) {
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        const labels = items.map(i => i.FECHA.split('/')[0] + '/' + i.FECHA.split('/')[1]); // Solo dd/mm
+        const data = items.map(i => {
+            const v = Number(i.VENTA_NETA) || 0;
+            const t = Number(i.TICKETS) || 0;
+            return t > 0 ? (v / t) : 0;
+        });
+
+        if (myChart) myChart.destroy();
+
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Ticket Promedio',
+                    data: data,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#3b82f6',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => ' ' + fmt.format(context.raw)
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: { borderDash: [5, 5], color: '#e2e8f0' },
+                        ticks: { font: { size: 10 }, callback: (value) => '$' + value / 1000 + 'k' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 10 } }
+                    }
+                }
+            }
+        });
+    }
+</script>
 </body>
 </html>
