@@ -724,6 +724,68 @@ router.get('/api/reporte/stock-valorizado', authRequired, async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
+// --- 4. RUBROS (PROTEGIDO) ---
+router.get('/api/reporte/rubros', authRequired, async (req, res) => {
+  const sucursal = getSucursalFromReq(req);
+  const desde = cleanParam(req.query.desde);
+  const hasta = cleanParam(req.query.hasta);
+
+  try {
+    if (!desde || !hasta) {
+      return res.status(400).json({ error: 'desde y hasta son obligatorios (YYYY-MM-DD)' });
+    }
+
+    const sucInt = parseInt(sucursal, 10);
+    if (!sucInt || Number.isNaN(sucInt)) {
+      return res.status(400).json({ error: 'Sucursal invalida (admin por query, usuario por token)' });
+    }
+
+    const pool = await poolMainPromise;
+
+    const result = await pool.request()
+      .input('suc', sql.Int, sucInt)
+      .input('desde', sql.Date, desde)
+      .input('hasta', sql.Date, hasta)
+      .query(`
+        WITH ItemsLimpios AS (
+          SELECT
+            A.IdRouter,
+            B.CODITM,
+            A.CODCMP,
+            ISNULL((
+              SELECT TOP 1 VAL.DESCRIPCION
+              FROM dbo.QRITEMSATRIB ATR
+              INNER JOIN dbo.QRATRIBUTOSVAL VAL
+                ON ATR.CODATR = VAL.CODATR
+               AND ATR.CODATRVAL = VAL.CODATRVAL
+              WHERE ATR.CODITM = B.CODITM
+                AND ATR.CODATR = 'R'
+            ), 'SIN RUBRO') AS RubroNombre,
+            B.CANTIDAD1 AS CantidadFila
+          FROM dbo.QRMVS A
+          INNER JOIN dbo.QRLINEASITEMS B ON A.IdRouter = B.IdRouter
+          WHERE A.CODSUC = @suc
+            AND CAST(A.FECHA AS DATE) BETWEEN @desde AND @hasta
+            AND A.ANULADO = 0
+            AND A.IDCOMPROBANTE > 0
+            AND A.CODCMP IN ('FA', 'FB', 'CA', 'CB')
+            AND B.CODITM NOT LIKE 'DC%'
+        )
+        SELECT
+          RubroNombre AS Rubro,
+          CAST(SUM(CASE WHEN CODCMP IN ('CA', 'CB') THEN -CantidadFila ELSE CantidadFila END) AS INT) AS TotalUnidades
+        FROM ItemsLimpios
+        GROUP BY RubroNombre
+        ORDER BY TotalUnidades DESC;
+      `);
+
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error('ERROR /api/reporte/rubros:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // --- 8. LOGISTICA Y SEGUIMIENTO DE ARTICULOS (CORREGIDO IDCOMPROBANTE) ---
 router.get('/api/reporte/logistica', authRequired, async (req, res) => {
   const sucursal = getSucursalFromReq(req);

@@ -33,11 +33,33 @@
         .kpi-card-mini { background: white; padding: 12px 10px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
         .kpi-val { font-size: 1rem; color: #1e293b; font-weight: 800; font-variant-numeric: tabular-nums; }
 
-        .ticket-wrapper { margin-bottom: 15px; width: 100%; }
+        /* Tickets Estilo Logistica */
+        .ticket-wrapper { margin-bottom: 10px; }
         .ticket-card { background: white; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; }
+        
+        .ticket-header { 
+            background: #f8fafc; 
+            padding: 12px 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            cursor: pointer;
+        }
 
-        .ticket-header { background: #f8fafc; padding: 10px 15px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid #f1f5f9; }
-        .item-grid { padding: 8px 15px; display: grid; grid-template-columns: 1fr 40px 90px; align-items: center; font-size: 11px; border-bottom: 1px solid #f8fafc; }
+        .ticket-id { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--navy); font-size: 12px; display: block; }
+        .ticket-date { font-size: 10px; color: var(--slate-500); }
+
+        .items-container { display: none; background: #ffffff; padding-bottom: 5px; }
+        .item-row {
+            display: grid; 
+            grid-template-columns: 1fr auto 90px; 
+            padding: 8px 15px; 
+            border-bottom: 1px solid #f8fafc; 
+            font-size: 11px;
+            align-items: center;
+        }
+
+        .obs-text { font-size: 10px; color: #f59e0b; font-style: italic; display: block; line-height: 1.1; margin-top: 2px; }
 
         .bg-efectivo { background-color: #10b981 !important; }
         .bg-tarjeta { background-color: #3b82f6 !important; }
@@ -50,9 +72,9 @@
         #miSucursalBox .pill { height: 40px; border: 1px solid #cbd5e1; border-radius: 8px; display: flex; align-items: center; padding: 0 12px; background: #f1f5f9; font-weight: 800; color: var(--navy); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
         @media (max-width: 576px) {
-            .ticket-header { flex-direction: column; align-items: flex-start; }
-            .ticket-header div:last-child { width: 100%; justify-content: space-between; display: flex; align-items: center; }
+            .ticket-header { flex-direction: row; align-items: center; }
             .header-title { font-size: 0.7rem; }
+            .item-row { grid-template-columns: 1fr 30px 80px; }
         }
     </style>
 </head>
@@ -136,6 +158,14 @@
         } catch (e) { console.error(e); }
     }
 
+    function toggleItems(id) {
+        const el = document.getElementById(id);
+        const isVisible = el.style.display === 'block';
+        // Opcional: Cerrar los demás al abrir uno (como en logistica)
+        document.querySelectorAll('.items-container').forEach(c => c.style.display = 'none');
+        el.style.display = isVisible ? 'none' : 'block';
+    }
+
     async function consultar() {
         const btn = document.querySelector('.btn-consultar');
         const resBody = document.getElementById('res-body');
@@ -157,7 +187,6 @@
             const result = await res.json();
             document.getElementById('cont-resultados').style.display = 'block';
 
-            // KPI ACTUALIZADOS: TOTAL FACTURADO y MERCADOPAGO
             document.getElementById('kpi-container').innerHTML = `
                 <div class="kpi-card-mini" style="background: var(--navy); color: white;">
                     <span class="label-sm text-white opacity-75">Total Facturado</span>
@@ -181,28 +210,39 @@
                 </div>
             `;
 
-            resBody.innerHTML = (result.datos || []).map(f => {
+            resBody.innerHTML = (result.datos || []).map((f, idx) => {
+                const collapseId = `items-${idx}`;
                 const pago = (f.pago || '').toUpperCase();
                 let cls = 'bg-mp';
                 if (pago.includes('EFECTIVO')) cls = 'bg-efectivo';
                 else if (pago.includes('TARJETA') || pago.includes('DEBITO') || pago.includes('CREDITO')) cls = 'bg-tarjeta';
 
-                return `<div class="ticket-wrapper">
+                return `
+                <div class="ticket-wrapper">
                     <div class="ticket-card shadow-sm">
-                        <div class="ticket-header">
+                        <div class="ticket-header" onclick="toggleItems('${collapseId}')">
                             <div>
-                                <span class="fw-bold text-uppercase" style="font-size: 11px;">${f.tipo} ${f.prefijo}-${f.numero}</span>
-                                <span class="text-muted ms-1" style="font-size: 10px;">${f.fecha}</span>
+                                <span class="ticket-id">${f.tipo} ${f.prefijo}-${f.numero}</span>
+                                <span class="ticket-date">${f.fecha}</span>
                             </div>
-                            <div>
+                            <div class="text-end">
                                 <span class="badge-payment ${cls} me-2">${pago === 'MP' ? 'MERCADOPAGO' : pago}</span>
                                 <span class="fw-bold" style="color: var(--navy); font-size: 13px;">${fmt.format(f.totalTicket || 0)}</span>
+                                <i class="bi bi-chevron-expand ms-1 opacity-50"></i>
                             </div>
                         </div>
-                        <div class="py-1 bg-white">
+                        <div class="items-container" id="${collapseId}">
+                            <div class="item-row" style="background: #fdfdfd; border-bottom: 1px solid #eee;">
+                                <span class="label-sm">Articulo</span>
+                                <span class="label-sm text-center">Cant</span>
+                                <span class="label-sm text-end">Precio</span>
+                            </div>
                             ${(f.items || []).map(it => `
-                                <div class="item-grid">
-                                    <span><span class="fw-semibold">${it.cod || ''}</span></span>
+                                <div class="item-row">
+                                    <span>
+                                        <span class="fw-semibold">${it.cod || ''}</span>
+                                        ${(it.cod && it.cod.startsWith('DC')) ? `<span class="obs-text">${it.obs || ''}</span>` : ''}
+                                    </span>
                                     <span class="text-center text-muted">${it.cant || 0}</span>
                                     <span class="text-end fw-bold">${fmt.format(it.pre || 0)}</span>
                                 </div>

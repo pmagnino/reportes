@@ -2,302 +2,339 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mimo & Co | Business Intelligence</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mimo & Co | BI Portal</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@200;300;400&display=swap" rel="stylesheet">
 
-    <!-- AUTH (obligatorio para proteger) -->
     <script src="auth.js"></script>
 
     <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #475569;
-            overflow-x: hidden;
+        :root {
+            --mimo-navy: #1e293b;
+            --mimo-accent: #3b82f6;
+            --bg-body: #f8fafc;
+            --border-color: #e2e8f0;
         }
 
+        body {
+            background-color: var(--bg-body);
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Topbar */
         .topbar {
-            max-width: 1400px;
-            margin: 18px auto 0 auto;
-            padding: 0 30px;
+            background: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
-        .topbar .left {
+
+        .user-info {
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: #64748b;
-            font-size: 12px;
-        }
-        .chip {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 999px;
-            padding: 6px 10px;
-            display: inline-flex;
-            align-items: center;
             gap: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
         }
 
-        .main-container {
-            max-width: 1400px;
-            margin: 16px auto 30px auto;
-            padding: 0 30px;
-        }
-
-        .logo-header {
+        /* Header Centrado y Estilizado */
+        .page-header {
+            max-width: 900px;
+            margin: 50px auto 30px auto;
+            padding: 0 20px;
             text-align: center;
-            margin: 20px 0 30px 0;
         }
-        .logo-header img {
+
+        .page-header img {
             height: 45px;
-            margin-bottom: 8px;
+            margin-bottom: 20px;
+            opacity: 0.9;
         }
-        .logo-header h4 {
-            font-weight: 300;
-            color: #1e293b;
-            letter-spacing: 3px;
+
+        .page-header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            /* Aquí el cambio: tipografía fina y elegante */
+            font-weight: 200; 
+            color: var(--mimo-navy);
             text-transform: uppercase;
+            letter-spacing: 5px;
+            margin: 0;
+            display: block;
+        }
+
+        .page-header .subtitle {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 10px;
+            display: block;
+        }
+
+        /* Buscador */
+        .search-container {
+            max-width: 900px;
+            margin: 0 auto 30px auto;
+            padding: 0 20px;
+        }
+
+        .search-box { position: relative; }
+        .search-box i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
             font-size: 1.1rem;
         }
 
-        .section-title {
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 18px;
-            margin-top: 30px;
-            display: flex;
-            align-items: center;
-        }
-        .section-title::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: #e2e8f0;
-            margin-left: 20px;
-        }
-
-        .card-menu {
+        .search-input {
             background: white;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 15px 12px 45px;
+            width: 100%;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--mimo-accent);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Lista de Reportes */
+        .reports-list {
+            max-width: 900px;
+            margin: 0 auto 60px auto;
+            padding: 0 20px;
+        }
+
+        .category-group { margin-bottom: 35px; }
+
+        .category-label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #94a3b8;
+            margin-bottom: 15px;
+            display: block;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 5px;
+        }
+
+        .report-item {
+            background: white;
+            border: 1px solid var(--border-color);
             border-radius: 14px;
-            padding: 20px 15px;
-            transition: all 0.25s ease-in-out;
-            cursor: pointer;
-            height: 100%;
+            padding: 14px 18px;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            text-align: center;
             text-decoration: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            color: inherit;
+            margin-bottom: 10px;
+            transition: all 0.2s ease;
         }
 
-        .card-menu:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08);
-            border-color: #cbd5e1;
+        @media (min-width: 769px) {
+            .report-item:hover {
+                border-color: var(--mimo-accent);
+                transform: translateX(5px);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            }
         }
 
-        .card-menu i {
-            font-size: 1.8rem;
-            width: 55px;
-            height: 55px;
+        .report-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
-            margin-bottom: 12px;
+            margin-right: 18px;
+            font-size: 1.3rem;
+            flex-shrink: 0;
         }
 
-        /* Colores por Categoria */
-        .c-blue i { background: #eff6ff; color: #3b82f6; }
-        .c-cyan i { background: #ecfeff; color: #0891b2; }
-        .c-purple i { background: #f5f3ff; color: #8b5cf6; }
-        .c-indigo i { background: #eef2ff; color: #6366f1; }
-        .c-emerald i { background: #ecfdf5; color: #10b981; }
-        .c-orange i { background: #fff7ed; color: #f59e0b; }
-        .c-green i { background: #f0fdf4; color: #22c55e; }
-        .c-teal i { background: #f0fdfa; color: #14b8a6; }
-        .c-red i { background: #fef2f2; color: #ef4444; }
+        /* Colores de Iconos */
+        .bg-blue { background: #eff6ff; color: #3b82f6; }
+        .bg-orange { background: #fff7ed; color: #f59e0b; }
+        .bg-emerald { background: #ecfdf5; color: #10b981; }
+        .bg-purple { background: #f5f3ff; color: #8b5cf6; }
+        .bg-red { background: #fef2f2; color: #ef4444; }
+        .bg-teal { background: #f0fdfa; color: #14b8a6; }
 
-        .card-menu h5 {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 6px;
+        .report-info { flex-grow: 1; min-width: 0; }
+        .report-info h6 {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--mimo-navy);
         }
-        .card-menu p {
-            font-size: 0.75rem;
+        .report-info p {
+            margin: 0;
+            font-size: 0.8rem;
             color: #64748b;
             line-height: 1.4;
-            margin-bottom: 0;
         }
 
-        /* Efectos Hover */
-        .c-blue:hover { border-bottom: 4px solid #3b82f6; }
-        .c-orange:hover { border-bottom: 4px solid #f59e0b; }
-        .c-emerald:hover { border-bottom: 4px solid #10b981; }
-        .c-teal:hover { border-bottom: 4px solid #14b8a6; }
-        .c-red:hover { border-bottom: 4px solid #ef4444; }
+        .chevron { color: #cbd5e1; font-size: 1.1rem; margin-left: 10px; }
 
         @media (max-width: 576px) {
-            .topbar, .main-container { padding: 0 14px; }
-            .logo-header h4 { font-size: 1rem; letter-spacing: 2px; }
+            .report-info p { display: none; }
+            .page-header h1 { font-size: 1.3rem; letter-spacing: 3px; }
+            .page-header img { height: 35px; }
         }
     </style>
 </head>
 
 <body onload="init()">
 
-<!-- TOP BAR -->
-<div class="topbar">
-    <div class="left">
-        <span class="chip">
-            <i class="bi bi-person-circle"></i>
+<div class="topbar shadow-sm">
+    <img src="Logo.png" alt="Mimo" height="28">
+    <div class="d-flex align-items-center gap-2">
+        <div class="user-info d-none d-sm-flex">
+            <i class="bi bi-person-circle fs-6"></i>
             <span id="userLabel">Cargando...</span>
-        </span>
-    </div>
-
-    <div class="d-flex gap-2">
-        <a class="btn btn-sm btn-outline-secondary" href="/admin_usuarios.html" id="btnAdmin" style="display:none;">
-            <i class="bi bi-gear"></i> Admin
-        </a>
-        <button class="btn btn-sm btn-outline-danger" onclick="logout()">
-            <i class="bi bi-box-arrow-right"></i> Salir
-        </button>
+        </div>
+        <a class="btn btn-sm btn-light border fw-bold" href="/admin_usuarios.html" id="btnAdmin" style="display:none; font-size: 11px;">ADMIN</a>
+        <button class="btn btn-sm btn-dark fw-bold" onclick="logout()" style="font-size: 11px;">SALIR</button>
     </div>
 </div>
 
-<div class="main-container">
-    <div class="logo-header">
-        <img src="Logo.png" alt="Mimo & Co">
-        <h4>Panel de Control BI</h4>
+<div class="page-header">
+    <img src="Logo.png" alt="Mimo Logo">
+    <h1>Panel de Control BI</h1>
+    <span class="subtitle">Sistemas e Inteligencia de Negocios</span>
+</div>
+
+<div class="search-container">
+    <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input type="text" class="search-input" id="searchReport" placeholder="Buscar reporte..." onkeyup="filterReports()">
+    </div>
+</div>
+
+<div class="reports-list">
+    
+    <div class="category-group">
+        <span class="category-label">Ventas y Rendimiento</span>
+        
+        <a href="reporte_consolidado.html" class="report-item">
+            <div class="report-icon bg-orange"><i class="bi bi-bar-chart-steps"></i></div>
+            <div class="report-info"><h6>Consolidado Diario</h6><p>Resumen de facturación neta por día.</p></div>
+            <i class="bi bi-chevron-right chevron"></i>
+        </a>
+
+        <a href="reporte_ventas.html" class="report-item">
+            <div class="report-icon bg-blue"><i class="bi bi-graph-up-arrow"></i></div>
+            <div class="report-info"><h6>Auditoría de Ventas</h6><p>Detalle de tickets, facturas y artículos.</p></div>
+            <i class="bi bi-chevron-right chevron"></i>
+        </a>
+
+        <a href="reporte_comparativo.html" class="report-item">
+            <div class="report-icon bg-emerald"><i class="bi bi-arrow-left-right"></i></div>
+            <div class="report-info"><h6>Estadística Comparativa</h6><p>Evolución vs 4 semanas anteriores.</p></div>
+            <i class="bi bi-chevron-right chevron"></i>
+        </a>
+
+        <a href="reporte_rubros.html" class="report-item">
+            <div class="report-icon bg-teal"><i class="bi bi-pie-chart-fill"></i></div>
+            <div class="report-info"><h6>Ventas por Rubro</h6><p>Ranking de categorías más vendidas.</p></div>
+            <i class="bi bi-chevron-right chevron"></i>
+        </a>
+
+        <a href="reporte_descuentos.html" class="report-item">
+            <div class="report-icon bg-red"><i class="bi bi-percent"></i></div>
+            <div class="report-info"><h6>Estadística Descuentos</h6><p>Impacto de promociones y bonificaciones.</p></div>
+            <i class="bi bi-chevron-right chevron"></i>
+        </a>
+
+        <a href="reporte_ticket_promedio.html" class="report-item">
+            <div class="report-icon bg-purple"><i class="bi bi-receipt-cutoff"></i></div>
+            <div class="report-info"><h6>Ticket Promedio</h6><p>Valor medio por transacción y tendencia.</p></div>
+            <i class="bi bi-chevron-right chevron"></i>
+        </a>
+
+        <a href="reporte_franjas.html" class="report-item">
+            <div class="report-icon bg-blue"><i class="bi bi-clock-history"></i></div>
+            <div class="report-info"><h6>Ventas por Franja</h6><p>Análisis de tráfico y ventas por hora.</p></div>
+            <i class="bi bi-chevron-right chevron"></i>
+        </a>
+
+        <a href="reporte_pagos.html" class="report-item">
+            <div class="report-icon bg-orange"><i class="bi bi-credit-card-2-back"></i></div>
+            <div class="report-info"><h6>Estadística Pagos</h6><p>Caja, tarjetas y recaudación total.</p></div>
+            <i class="bi bi-chevron-right chevron"></i>
+        </a>
     </div>
 
-    <div class="section-title">Gestion de Ventas y Rendimiento</div>
-    <div class="row row-cols-2 row-cols-md-4 row-cols-lg-4 g-4">
-        <div class="col">
-            <a href="reporte_consolidado.html" class="card-menu c-orange">
-                <i class="bi bi-bar-chart-steps"></i>
-                <h5>Reporte Consolidado</h5>
-                <p>Ventas consolidadas por dia.</p>
-            </a>
-        </div>
-        <div class="col">
-            <a href="reporte_ventas.html" class="card-menu c-blue">
-                <i class="bi bi-graph-up-arrow"></i>
-                <h5>Reporte Ventas</h5>
-                <p>Auditoria de tickets y facturas.</p>
-            </a>
-        </div>
-        <div class="col">
-            <a href="reporte_comparativo.html" class="card-menu c-emerald">
-                <i class="bi bi-arrow-left-right"></i>
-                <h5>Estadistica Comparativa</h5>
-                <p>Evolucion vs 4 semanas anteriores.</p>
-            </a>
-        </div>
-        <div class="col">
-            <a href="reporte_rubros.html" class="card-menu c-teal">
-                <i class="bi bi-pie-chart-fill"></i>
-                <h5>Ventas por Rubro</h5>
-                <p>Ranking por categorias de articulos.</p>
-            </a>
-        </div>
-        <div class="col">
-            <a href="reporte_descuentos.html" class="card-menu c-red">
-                <i class="bi bi-percent"></i>
-                <h5>Estadistica Descuentos</h5>
-                <p>Impacto de promociones y descuentos.</p>
-            </a>
-        </div>
-        <div class="col">
-            <a href="reporte_ticket_promedio.html" class="card-menu c-indigo">
-                <i class="bi bi-receipt-cutoff"></i>
-                <h5>Ticket Promedio</h5>
-                <p>Analisis del valor de transaccion.</p>
-            </a>
-        </div>
-        <div class="col">
-            <a href="reporte_franjas.html" class="card-menu c-purple">
-                <i class="bi bi-clock-history"></i>
-                <h5>Ventas por Franja</h5>
-                <p>Mapa de calor de ventas por hora.</p>
-            </a>
-        </div>
-        <div class="col">
-            <a href="reporte_pagos.html" class="card-menu c-cyan">
-                <i class="bi bi-credit-card-2-back"></i>
-                <h5>Estadistica Pagos</h5>
-                <p>Caja, tarjetas y recaudacion.</p>
-            </a>
-        </div>
+    <div class="category-group">
+        <span class="category-label">Inventarios y Logística</span>
+
+        <a href="reporte_ranking.html" class="report-item">
+            <div class="report-icon bg-orange"><i class="bi bi-trophy"></i></div>
+            <div class="report-info"><h6>Ranking Artículos</h6><p>Productos con mayor rotación física.</p></div>
+            <i class="bi bi-chevron-right chevron"></i>
+        </a>
+
+        <a href="reporte_stock.html" class="report-item">
+            <div class="report-icon bg-emerald"><i class="bi bi-boxes"></i></div>
+            <div class="report-info"><h6>Stock Físico</h6><p>Existencias actuales por artículo y rubro.</p></div>
+            <i class="bi bi-chevron-right chevron"></i>
+        </a>
+
+        <a href="reporte_valorizado.html" class="report-item">
+            <div class="report-icon bg-red"><i class="bi bi-currency-dollar"></i></div>
+            <div class="report-info"><h6>Stock Valorizado</h6><p>Valuación de cartera a precio MAY.</p></div>
+            <i class="bi bi-chevron-right chevron"></i>
+        </a>
+
+        <a href="reporte_movimientos.html" class="report-item">
+            <div class="report-icon bg-teal"><i class="bi bi-truck-flatbed"></i></div>
+            <div class="report-info"><h6>Listado Movimientos</h6><p>Auditoría de Movimientos y Seguimiento.</p></div>
+            <i class="bi bi-chevron-right chevron"></i>
+        </a>
     </div>
 
-    <div class="section-title">Inventarios y Logistica</div>
-    <div class="row row-cols-2 row-cols-md-4 row-cols-lg-4 g-4">
-        <div class="col">
-            <a href="reporte_ranking.html" class="card-menu c-orange">
-                <i class="bi bi-trophy"></i>
-                <h5>Ranking Articulos</h5>
-                <p>Top de productos con mas rotacion.</p>
-            </a>
-        </div>
-        <div class="col">
-            <a href="reporte_stock.html" class="card-menu c-green">
-                <i class="bi bi-boxes"></i>
-                <h5>Stock Fisico</h5>
-                <p>Existencias en tiempo real por red.</p>
-            </a>
-        </div>
-        <div class="col">
-            <a href="reporte_valorizado.html" class="card-menu c-red">
-                <i class="bi bi-currency-dollar"></i>
-                <h5>Stock Valorizado</h5>
-                <p>Valuacion a Precio Publico (PCI).</p>
-            </a>
-        </div>
-        <div class="col">
-            <a href="reporte_movimientos.html" class="card-menu c-teal">
-                <i class="bi bi-truck-flatbed"></i>
-                <h5>Listado Movimientos</h5>
-                <p>Ingresos y Egresos (IE / EE).</p>
-            </a>
-        </div>
-    </div>
+</div>
 
-    <div class="mt-5 text-center">
-        <p style="font-size: 0.7rem; color: #cbd5e1; letter-spacing: 1.5px;">MIMO & CO - SISTEMAS v2.5</p>
-    </div>
+<div class="text-center pb-5">
+    <p style="font-size: 0.65rem; color: #94a3b8; letter-spacing: 1.5px; font-weight: 700;">MIMO & CO - SISTEMAS BI v3.8</p>
 </div>
 
 <script>
-function init() {
-    // Si no hay token o expiro -> redirige al login (implementado en auth.js)
-    protectPage();
-
-    const user = getUser();
-    const label = document.getElementById('userLabel');
-
-    if (user && user.usuario) {
-        label.innerText = `${user.usuario} (${user.rol || 'usuario'})`;
-    } else {
-        label.innerText = 'Sesion activa';
+function filterReports() {
+    let input = document.getElementById('searchReport').value.toLowerCase();
+    let items = document.getElementsByClassName('report-item');
+    for (let item of items) {
+        let title = item.querySelector('h6').innerText.toLowerCase();
+        let desc = item.querySelector('p').innerText.toLowerCase();
+        item.style.display = (title.includes(input) || desc.includes(input)) ? "flex" : "none";
     }
+}
 
-    // Mostrar boton Admin solo si es admin
-    if (user && user.rol === 'admin') {
-        document.getElementById('btnAdmin').style.display = 'inline-block';
+function init() {
+    protectPage();
+    const user = getUser();
+    if (user) {
+        document.getElementById('userLabel').innerText = `${user.usuario} (${user.rol})`;
+        if (user.rol === 'admin') document.getElementById('btnAdmin').style.display = 'inline-block';
     }
 }
 </script>
